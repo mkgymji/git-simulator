@@ -178,6 +178,42 @@
   });
 
   S.push({
+    id: 'revert',
+    kicker: 'Pracovní list 2 · úkol 8',
+    title: 'Historie jako graf',
+    short: 'Commit s chybou a git revert – co se stane v grafu commitů.',
+    intro: '<p>Kuchařka má tři commity. Vpravo vidíš graf: každý kroužek je jeden commit, šipka vede k předchozímu. Nejnovější commit je vpravo.</p>',
+    setup: function (api) {
+      api.person('jana', { configured: true });
+      api.mkdir('jana', ['git', 'kucharka']);
+      api.cd('jana', ['git', 'kucharka']);
+      api.run('jana', 'git init', 120);
+      api.write('jana', 'palacinky.md', PAL1); api.run('jana', 'git add .', 119); api.run('jana', 'git commit -m "Přidán recept na palačinky"', 118);
+      api.write('jana', 'palacinky.md', PAL_TIP); api.run('jana', 'git commit -am "Přidán tip na plnění"', 100);
+      api.write('jana', 'livance.md', LIV); api.run('jana', 'git add .', 80); api.run('jana', 'git commit -m "Přidány lívance"', 79);
+      api.open('jana', ['git', 'kucharka']);
+    },
+    tasks: [
+      { text: 'Otevři <b>livance.md</b>, přidej řádek <code>- 2 kg soli</code> a ulož (<kbd>Ctrl</kbd>+<kbd>S</kbd>). Commitni se zprávou <b>Přidána chyba</b>.',
+        hint: '<pre>git commit -am "Přidána chyba"</pre><code>-a</code> přidá všechny změněné soubory, takže <span class="cmd">git add</span> není potřeba.',
+        check: function (c) { var m = c.m('jana'), r = repoAt(m, H(m).concat(['git', 'kucharka'])); return !!r && commits(c, r).some(function (k) { return /chyba/i.test(k.message) && !/^(Revert|Reapply)/.test(k.message) && /2 kg soli/.test(treeFile(c, k, 'livance.md') || ''); }); } },
+      { text: 'Najdi hash commitu <b>Přidána chyba</b> a commit vrať.',
+        hint: '<pre>git log --oneline\ngit revert --no-edit HASH</pre>Místo <code>HASH</code> napiš hash z výpisu (7 znaků).',
+        question: 'Kolik kroužků je v grafu? Zmizel commit Přidána chyba?',
+        check: function (c) {
+          var m = c.m('jana'), r = repoAt(m, H(m).concat(['git', 'kucharka']));
+          if (!r) return false;
+          var cs = commits(c, r), bad = cs.filter(function (k) { return /chyba/i.test(k.message) && !/^(Revert|Reapply)/.test(k.message); });
+          return bad.some(function (b) { return cs.some(function (k) { return k.message.indexOf('This reverts commit ' + b.hash) >= 0; }); }) && !/2 kg soli/.test(headFile(c, r, 'livance.md') || '');
+        } },
+      { text: 'Porovnej graf s výpisem <span class="cmd">git log --oneline</span>.',
+        hint: '<pre>git log --oneline</pre>',
+        question: 'Kde je nejnovější commit v grafu a kde ve výpisu?',
+        check: function (c) { var e = lastOut(c, 'jana', /git\s+log/); return !!e && /Revert/.test(outText(e)); } }
+    ]
+  });
+
+  S.push({
     id: 'pl3',
     kicker: 'Pracovní list 3',
     title: 'Kuchařka na GitHubu',

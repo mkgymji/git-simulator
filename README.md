@@ -21,6 +21,7 @@ Spuštění: otevři `index.html` (stačí z disku) nebo stránku na GitHub Page
 | `#volne` | volný režim – prázdný počítač |
 | `#pl1` | PL1: nastavení Gitu, první repozitář a commity |
 | `#pl2` | PL2: diff, log, restore, revert, .gitignore |
+| `#revert` | PL2, úkol 8: commit s chybou a revert v grafu |
 | `#pl3` | PL3: repozitář na GitHubu, push, úprava na webu, pull |
 | `#odmitnuty-push` | PL4 nanečisto: odmítnutý push, pull s merge commitem |
 | `#spoluprace` | PL4: Anna a Petr, pozvánka, klonování, spolupráce |
