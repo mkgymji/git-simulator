@@ -1,0 +1,91 @@
+FORMAT 1
+SCENARIO My first repository
+LABEL    Worksheet 1
+SUMMARY  Git setup, git init, add, commit – the first version of a recipe.
+INTRO    You are **Jana Nováková** at a school computer. Follow the tasks; each one is ticked off automatically once you complete it.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Jana's computer"
+  MACHINE jana
+  REPOSITORY git/cookbook
+END
+
+TASK Find out which folder you are in and which version of Git you have.
+  HINT  pwd
+  HINT  git --version
+  CHECK command "pwd" was run
+  CHECK command "git --version" was run
+END
+
+TASK Set your name and school e-mail.
+  HINT  git config --global user.name "Jana Nováková"
+  HINT  git config --global user.email "novakovaj@jirovcovka.net"
+  CHECK config user.name is set
+  CHECK config user.email contains "@"
+END
+
+TASK Copy the remaining four setup lines. Check the result with `git config --global --list`.
+  HINT  git config --global init.defaultBranch main
+  HINT  git config --global core.editor "code --wait"
+  HINT  git config --global pull.rebase false
+  HINT  git config --global core.quotepath false
+  CHECK config init.defaultBranch is "main"
+  CHECK config core.editor contains "code --wait"
+  CHECK config pull.rebase is "false"
+  CHECK config core.quotepath is "false"
+  CHECK command "git config --global --list" was run
+END
+
+TASK Create a folder **git** and inside it **cookbook**. Open it in VS Code and turn it into a repository.
+  HINT     cd ~
+  HINT     mkdir git
+  HINT     cd git
+  HINT     mkdir cookbook
+  HINT     cd cookbook
+  HINT     code -r .
+  HINT     git init
+  HINT     git status
+  QUESTION What did git status say on its last line?
+  CHECK    repository exists
+  CHECK    vscode folder is git/cookbook
+  CHECK    command "git status" was run
+END
+
+TASK In the Explorer, create a file **pancakes.md** and write a recipe: a heading `#`, a subheading `##` and bullet points `-`. Save it (**Ctrl+S**) and run `git status`.
+  NOTE     Click the **+** icon above the file list. The recipe can look like this:
+  HINT     # Pancakes
+  HINT
+  HINT     ## Ingredients
+  HINT
+  HINT     - 250 ml milk
+  HINT     - 1 egg
+  HINT     - 120 g plain flour
+  HINT     - a pinch of salt
+  QUESTION What colour is the file name and under which heading is it?
+  CHECK    file pancakes.md contains line starting with "# "
+  CHECK    file pancakes.md contains line starting with "## "
+  CHECK    file pancakes.md contains line starting with "- "
+  CHECK    output of "git status" contains "Untracked files"
+  CHECK    output of "git status" contains "pancakes.md"
+END
+
+TASK Make your first commit.
+  HINT     git add pancakes.md
+  HINT     git status
+  HINT     git commit -m "Add pancake recipe"
+  QUESTION What colour is the file after git add? What does -m mean?
+  CHECK    file pancakes.md in HEAD exists
+END
+
+TASK Add `## Tip` with one sentence to the recipe and make a second commit with a clear message.
+  HINT  git add pancakes.md
+  HINT  git commit -m "Add filling tip"
+  CHECK commit count is at least 2
+  CHECK file pancakes.md in HEAD contains line starting with "## Tip"
+END
+
+TASK Look at the history.
+  HINT  git log --oneline
+  CHECK command "git log..." was run
+  CHECK commit count is at least 2
+END

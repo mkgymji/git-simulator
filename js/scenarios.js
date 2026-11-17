@@ -10,14 +10,17 @@
 /* =====================================================================
  *  scenarios.js – vestavěné scénáře
  *
- *  Texty scénářů jsou v scenarios/*.scenario (zabalené do scenarios-builtin.js),
- *  tady se jen přeloží jazykem scénářů. Chyba ve vestavěném scénáři se vypíše
+ *  Texty scénářů jsou v scenarios/*.scenario a anglické v scenarios/en/
+ *  (zabalené do scenarios-builtin.js). Použije se jazyk stránky, chybí-li
+ *  překlad, česká verze. Tady se scénáře jen přeloží jazykem scénářů. Chyba ve vestavěném scénáři se vypíše
  *  do konzole a scénář se vynechá.
  * ===================================================================== */
 (function (root) {
   'use strict';
-  var list = [], sources = {};
-  (root.GitBuiltinScenarios || []).forEach(function (item) {
+  var list = [], sources = {}, lang = root.GitI18n ? root.GitI18n.lang : 'cs', all = root.GitBuiltinScenarios || [];
+  var has = {};
+  all.forEach(function (item) { if ((item.lang || 'cs') === lang) has[item.id] = true; });
+  all.filter(function (item) { var l = item.lang || 'cs'; return l === lang || (l === 'cs' && !has[item.id]); }).forEach(function (item) {
     var r = root.GitScenarioLang.compileAndTry(item.text, item.id);
     if (r.errors) {
       if (root.console) root.console.error('Vestavěný scénář ' + item.file + ' má chyby:', r.errors);

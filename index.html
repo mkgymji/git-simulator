@@ -21,38 +21,53 @@
     <circle cx="44" cy="31" r="4" fill="#F05033"/><circle cx="58" cy="30" r="4" fill="#F05033"/>
   </svg>
   <div class="titles">
-    <span class="kicker">Git a GitHub – rychlý úvod</span>
-    <h1>Git simulátor</h1>
+    <span class="kicker" id="pageKicker">Git a GitHub – rychlý úvod</span>
+    <h1 id="pageTitle">Git simulátor</h1>
   </div>
   <button class="scen-btn" id="scenBtn" type="button" aria-haspopup="dialog">
     <span><small id="scenKicker">Scénář</small><b id="scenTitle">…</b></span>
     <svg class="chev" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
   </button>
   <div class="spacer"></div>
+  <a class="tbtn" id="helpLink" href="https://github.com/mkgymji/git-simulator#readme" target="_blank" rel="noopener">Návod</a>
   <button class="tbtn" id="cheatBtn" type="button">Tahák</button>
   <button class="tbtn" id="resetBtn" type="button">Začít znovu</button>
+  <div class="lang" id="langSwitch" role="group" aria-label="Jazyk">
+    <button type="button" data-lang="cs" lang="cs">CS</button><button type="button" data-lang="en" lang="en">EN</button>
+  </div>
 </header>
 
 <main class="layout">
-  <aside class="card tasks" id="tasks" aria-label="Úkoly"></aside>
-
-  <section class="col" id="workCol">
-    <div class="machines" id="machines" role="tablist" aria-label="Počítač"></div>
-    <div id="workspace" class="col"></div>
+  <section class="zone z-tasks" aria-labelledby="zh1">
+    <h2 class="zone-head" id="zh1"><span class="zn">1</span><span class="zt" id="zt1">Úkoly</span></h2>
+    <aside class="card tasks" id="tasks"></aside>
   </section>
 
-  <section class="col viz" id="vizCol"></section>
+  <section class="zone z-pc" aria-labelledby="zh2">
+    <h2 class="zone-head" id="zh2"><span class="zn">2</span><span class="zt" id="zt2">Počítač</span><small id="zs2">terminál, VS Code a prohlížeč</small></h2>
+    <div class="col" id="workCol">
+      <div class="machines" id="machines" role="tablist"></div>
+      <div id="workspace" class="col"></div>
+    </div>
+  </section>
+
+  <section class="zone z-git" aria-labelledby="zh3">
+    <h2 class="zone-head" id="zh3"><span class="zn">3</span><span class="zt" id="zt3">Co se děje v Gitu</span><small id="zs3">verze souborů, historie, GitHub</small></h2>
+    <div class="col viz" id="vizCol"></div>
+  </section>
 </main>
 
 <footer class="footer">
-  Simulátor odpovídá Gitu 2.47 (Git for Windows). Hlášky Gitu jsou skutečné, poznámky simulátoru jsou česky a šedě.
-  Po obnovení stránky začíná scénář znovu.<br>
-  © 2026 Michal Kočer · licence <a href="https://github.com/mkgymji/git-simulator/blob/main/LICENSE">GNU GPL v2</a> ·
-  obsahuje kód převzatý z <a href="https://github.com/git/git/tree/v2.47.1">Gitu 2.47.1</a> ·
+  <span id="footNote">Simulátor odpovídá Gitu 2.47 (Git for Windows). Hlášky Gitu jsou skutečné, poznámky simulátoru jsou česky a šedě.
+  Po obnovení stránky začíná scénář znovu.</span><br>
+  © 2026 Michal Kočer · <span id="footLicence">licence <a href="https://github.com/mkgymji/git-simulator/blob/main/LICENSE">GNU GPL v2</a> ·
+  obsahuje kód převzatý z <a href="https://github.com/git/git/tree/v2.47.1">Gitu 2.47.1</a></span> ·
   <button type="button" class="linkbtn" id="aboutBtn">O simulátoru a zdrojích</button> ·
-  <a href="https://github.com/mkgymji/git-simulator">zdrojový kód</a>
+  <a href="https://github.com/mkgymji/git-simulator" id="srcLink">zdrojový kód</a>
 </footer>
 
+<script src="js/i18n.js"></script>
+<script src="js/i18n-en.js"></script>
 <script src="js/text.js"></script>
 <script src="js/world.js"></script>
 <script src="js/graph.js"></script>

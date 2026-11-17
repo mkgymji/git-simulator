@@ -1,0 +1,117 @@
+FORMAT 1
+SCENARIO History and time travel
+LABEL    Worksheet 2
+SUMMARY  git diff, git log, git restore and git revert on a cookbook with two commits.
+INTRO    The **cookbook** repository already has two commits and is open in VS Code. The graph on the right shows the history.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Jana's computer"
+  MACHINE jana CONFIGURED
+  REPOSITORY git/cookbook
+  PS> mkdir git
+  PS> cd git
+  PS> mkdir cookbook
+  PS> cd cookbook
+  PS> git init
+  FILE pancakes.md
+    # Pancakes
+
+    ## Ingredients
+
+    - 250 ml milk
+    - 1 egg
+    - 120 g plain flour
+    - a pinch of salt
+  END
+  PS> git add pancakes.md
+  PS> git commit -m "Add pancake recipe"
+  FILE pancakes.md
+    # Pancakes
+
+    ## Ingredients
+
+    - 250 ml milk
+    - 1 egg
+    - 120 g plain flour
+    - a pinch of salt
+
+    ## Tip
+
+    I fill them with strawberry jam.
+  END
+  PS> git commit -am "Add filling tip"
+  VSCODE git/cookbook
+END
+
+TASK Add a method to **pancakes.md** as a numbered list (`1.`, `2.`…), save it and run `git diff` **before committing**. Then commit.
+  HINT     ## Method
+  HINT
+  HINT     1. Mix everything in a bowl.
+  HINT     2. Let the batter rest for **15 minutes**.
+  HINT     3. Fry in a hot pan.
+  HINT
+  HINT     git diff
+  HINT     git add pancakes.md
+  HINT     git commit -m "Add method"
+  QUESTION How are the added lines marked in the output?
+  CHECK    file pancakes.md in HEAD contains line starting with "1."
+  CHECK    output of "git diff" contains line starting with "+"
+END
+
+TASK Create **drop-scones.md** with headings, bullet points, a numbered list and a note in *italics* (`*text*`). Commit it with the message **Add drop scones**.
+  HINT  git add drop-scones.md
+  HINT  git commit -m "Add drop scones"
+  CHECK file drop-scones.md in HEAD exists
+  CHECK commit "drop scones" exists
+END
+
+TASK Create **README.md** with links to both recipes and commit it. Try opening a link in the preview.
+  HINT  # My cookbook
+  HINT
+  HINT  Recipes I can cook.
+  HINT
+  HINT  - [Pancakes](pancakes.md)
+  HINT  - [Drop scones](drop-scones.md)
+  CHECK file README.md in HEAD contains "](pancakes.md)"
+  CHECK file README.md in HEAD contains "](drop-scones.md)"
+END
+
+TASK Look at the history in both ways.
+  HINT     git log
+  HINT     git log --oneline
+  QUESTION Why does your neighbour have different hashes even though they did the same as you?
+  CHECK    command "git log" was run
+  CHECK    command "git log --oneline" was run
+END
+
+TASK In **pancakes.md**, delete all the ingredients and save. Look at `git diff` and rescue the recipe.
+  HINT  git diff
+  HINT  git restore pancakes.md
+  CHECK command "git restore pancakes.md" was run
+  CHECK file pancakes.md contains "milk"
+END
+
+TASK Bring back **pancakes.md** as it was in the first commit, then return to the latest version.
+  NOTE  You will find the hash of the first commit in `git log --oneline`.
+  HINT  git restore --source=HASH pancakes.md
+  HINT  git restore pancakes.md
+  CHECK command "git restore pancakes.md" was run after command "git restore --source..."
+END
+
+TASK Add the line `- 2 kg salt` to **drop-scones.md**, commit it as **Add mistake** and then revert the commit.
+  HINT     git commit -am "Add mistake"
+  HINT     git log --oneline
+  HINT     git revert --no-edit HASH
+  QUESTION Did the commit “Add mistake” disappear from the history? Look at the graph.
+  CHECK    commit "mistake" is reverted
+  CHECK    file drop-scones.md in HEAD does not contain "2 kg salt"
+END
+
+TASK Create a file **notes-for-me.md**, then **.gitignore** with the line `notes-for-me.md`. Compare `git status` before and after. Finally commit **.gitignore**.
+  HINT     git status
+  HINT     git add .gitignore
+  HINT     git commit -m "Add .gitignore"
+  QUESTION What is the difference between git restore and git revert?
+  CHECK    file .gitignore in HEAD contains "notes-for-me.md"
+  CHECK    file notes-for-me.md in HEAD does not exist
+END

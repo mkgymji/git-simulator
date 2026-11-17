@@ -1,0 +1,118 @@
+FORMAT 1
+SCENARIO Cookbook on GitHub
+LABEL    Worksheet 3
+SUMMARY  An empty repository on GitHub, git push, an edit on the web and git pull.
+INTRO    The cookbook has five commits. On GitHub you are signed in as **jana-novakova**. The **GitHub** tab at the top is the browser.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Jana's computer"
+  MACHINE jana CONFIGURED
+  SHOW GITHUB
+  REPOSITORY git/cookbook
+  PS> mkdir git
+  PS> cd git
+  PS> mkdir cookbook
+  PS> cd cookbook
+  PS> git init
+  FILE pancakes.md
+    # Pancakes
+
+    ## Ingredients
+
+    - 250 ml milk
+    - 1 egg
+    - 120 g plain flour
+    - a pinch of salt
+  END
+  PS> git add .
+  PS> git commit -m "Add pancake recipe"
+  FILE pancakes.md
+    # Pancakes
+
+    ## Ingredients
+
+    - 250 ml milk
+    - 1 egg
+    - 120 g plain flour
+    - a pinch of salt
+
+    ## Tip
+
+    I fill them with strawberry jam.
+  END
+  PS> git commit -am "Add filling tip"
+  FILE drop-scones.md
+    # Drop scones
+
+    ## Ingredients
+
+    - 300 ml milk
+    - 2 eggs
+    - 250 g self-raising flour
+    - 1 teaspoon baking powder
+
+    ## Method
+
+    1. Mix the ingredients.
+    2. Fry small rounds in a pan.
+
+    *Best eaten warm.*
+  END
+  PS> git add .
+  PS> git commit -m "Add drop scones"
+  FILE README.md
+    # My cookbook
+
+    Recipes I can cook.
+
+    - [Pancakes](pancakes.md)
+    - [Drop scones](drop-scones.md)
+  END
+  PS> git add .
+  PS> git commit -m "Add cookbook contents"
+  FILE .gitignore
+    notes-for-me.md
+  END
+  PS> git add .
+  PS> git commit -m "Add .gitignore"
+  VSCODE git/cookbook
+END
+
+TASK On GitHub, create a repository **cookbook**: **Private** and **tick nothing**.
+  NOTE     **GitHub** tab → **New** button → name `cookbook` → Private → Create repository.
+  QUESTION Why do we not tick Add a README file this time?
+  CHECK    github jana-novakova/cookbook exists
+END
+
+TASK Link the repository to GitHub and send it there. When signing in, choose **Sign in with your browser**.
+  HINT  git remote add origin https://github.com/jana-novakova/cookbook.git
+  HINT  git branch -M main
+  HINT  git push -u origin main
+  CHECK github jana-novakova/cookbook has branch main
+END
+
+TASK On GitHub, open **pancakes.md**, click the pencil and add a table at the end. Confirm with **Commit changes**.
+  HINT  ## Servings
+  HINT
+  HINT  | Servings | Milk   | Flour |
+  HINT  |----------|--------|-------|
+  HINT  | 2        | 250 ml | 120 g |
+  HINT  | 4        | 500 ml | 240 g |
+  CHECK file pancakes.md on github jana-novakova/cookbook contains "|"
+END
+
+TASK Go back to VS Code and type `git status`. Then download the change.
+  HINT     git status
+  HINT     git pull
+  QUESTION Does Git on your computer know about the change on GitHub? Why?
+  CHECK    command "git pull..." was run
+  CHECK    file pancakes.md contains "|"
+END
+
+TASK Add a tip to **drop-scones.md**, commit it and send it to GitHub.
+  HINT  git add .
+  HINT  git commit -m "Add drop scones tip"
+  HINT  git push
+  CHECK github jana-novakova/cookbook main equals HEAD
+  CHECK commit count is at least 7
+END

@@ -16,6 +16,7 @@
  * ===================================================================== */
 (function (root) {
   'use strict';
+  var tr = root.GitI18n ? root.GitI18n.tr : function (s) { var a = arguments; return s.replace(/\{(\d+)\}/g, function (m, i) { return a[+i + 1]; }); };
   var FORMAT = 1;
   var GS = root.GitSim, GW = root.GitWorld;
 
@@ -234,12 +235,12 @@
     skip();
     var first = i < lines.length ? kw(lines[i]) : null;
     if (!first || first.k !== 'FORMAT') {
-      err(i < lines.length ? i : 0, 'Scénář musí začínat řádkem FORMAT 1.');
+      err(i < lines.length ? i : 0, tr('Scénář musí začínat řádkem FORMAT 1.'));
       return { errors: errors };
     }
-    if (!/^\d+$/.test(first.rest)) { err(i, 'Za FORMAT patří číslo verze, např. FORMAT 1.'); return { errors: errors }; }
-    if (+first.rest > FORMAT) { err(i, 'Scénář je zapsaný ve verzi FORMAT ' + first.rest + ', tento simulátor umí jen FORMAT ' + FORMAT + '. Aktualizuj simulátor.'); return { errors: errors }; }
-    if (+first.rest < 1) { err(i, 'Neznámá verze FORMAT ' + first.rest + '.'); return { errors: errors }; }
+    if (!/^\d+$/.test(first.rest)) { err(i, tr('Za FORMAT patří číslo verze, např. FORMAT 1.')); return { errors: errors }; }
+    if (+first.rest > FORMAT) { err(i, tr('Scénář je zapsaný ve verzi FORMAT {0}, tento simulátor umí jen FORMAT {1}. Aktualizuj simulátor.', first.rest, FORMAT)); return { errors: errors }; }
+    if (+first.rest < 1) { err(i, tr('Neznámá verze FORMAT {0}.', first.rest)); return { errors: errors }; }
     sc.format = +first.rest;
     i++;
 
@@ -250,22 +251,22 @@
       if (i >= lines.length) break;
       var h = kw(lines[i]);
       if (!h || order[h.k] === undefined) break;
-      if (order[h.k] < last || (order[h.k] === last && h.k !== 'INTRO')) err(i, 'Hlavička má pevné pořadí: SCENARIO, LABEL, SUMMARY, INTRO (každé jednou, INTRO víckrát).');
+      if (order[h.k] < last || (order[h.k] === last && h.k !== 'INTRO')) err(i, tr('Hlavička má pevné pořadí: SCENARIO, LABEL, SUMMARY, INTRO (každé jednou, INTRO víckrát).'));
       last = Math.max(last, order[h.k]);
-      if (!h.rest) err(i, h.k + ' potřebuje text.');
+      if (!h.rest) err(i, tr('{0} potřebuje text.', h.k));
       if (h.k === 'SCENARIO') sc.title = h.rest;
       else if (h.k === 'LABEL') sc.label = h.rest;
       else if (h.k === 'SUMMARY') sc.summary = h.rest;
       else sc.intro.push(h.rest);
       i++;
     }
-    if (!sc.title) err(i < lines.length ? i : lines.length - 1, 'Chybí řádek SCENARIO s názvem scénáře (hned za FORMAT).');
+    if (!sc.title) err(i < lines.length ? i : lines.length - 1, tr('Chybí řádek SCENARIO s názvem scénáře (hned za FORMAT).'));
 
     // SETUP … END
     skip();
     var s0 = i < lines.length ? kw(lines[i]) : null;
     if (!s0 || s0.k !== 'SETUP') {
-      err(i < lines.length ? i : lines.length - 1, 'Po hlavičce musí následovat blok SETUP … END.');
+      err(i < lines.length ? i : lines.length - 1, tr('Po hlavičce musí následovat blok SETUP … END.'));
       return { errors: errors };
     }
     i++;
@@ -274,41 +275,41 @@
       var raw = lines[i];
       if (isBlank(raw) || isComment(raw)) { i++; continue; }
       var t = kw(raw);
-      if (!t) { err(i, 'Neznámý řádek v SETUP. Řádek musí začínat klíčovým slovem (MACHINE, PS>, FILE…).'); i++; continue; }
+      if (!t) { err(i, tr('Neznámý řádek v SETUP. Řádek musí začínat klíčovým slovem (MACHINE, PS>, FILE…).')); i++; continue; }
       if (t.k === 'END') { setupEnd = true; i++; break; }
-      if (t.k === 'TASK') { err(i, 'Blok SETUP není ukončený řádkem END.'); break; }
+      if (t.k === 'TASK') { err(i, tr('Blok SETUP není ukončený řádkem END.')); break; }
       var ln = i;
       if (t.k === 'PERSON') {
-        if (acted) err(ln, 'PERSON a MACHINE patří na začátek SETUP, před příkazy.');
+        if (acted) err(ln, tr('PERSON a MACHINE patří na začátek SETUP, před příkazy.'));
         var pm = /^([a-z][a-z0-9-]*)\s*(.*)$/.exec(t.rest);
-        if (!pm) { err(ln, 'PERSON: chybí id postavy (malá písmena bez diakritiky), např. PERSON jana NAME "Jana Nováková".'); i++; continue; }
+        if (!pm) { err(ln, tr('PERSON: chybí id postavy (malá písmena bez diakritiky), např. PERSON jana NAME "Jana Nováková".')); i++; continue; }
         var attrs = {}, rest = pm[2], am, are = /(NAME|EMAIL|LOGIN|LABEL)\s+"([^"]*)"/g, consumed = rest.replace(are, function (m, a, v) { attrs[a] = v; return ''; });
-        if (/\S/.test(consumed)) err(ln, 'PERSON: nerozumím části „' + consumed.trim() + '“. Povolené: NAME "…" EMAIL "…" LOGIN "…" LABEL "…".');
-        if (!attrs.NAME) err(ln, 'PERSON ' + pm[1] + ': chybí NAME "Jméno Příjmení".');
+        if (/\S/.test(consumed)) err(ln, tr('PERSON: nerozumím části „{0}“. Povolené: NAME "…" EMAIL "…" LOGIN "…" LABEL "…".', consumed.trim()));
+        if (!attrs.NAME) err(ln, tr('PERSON {0}: chybí NAME "Jméno Příjmení".', pm[1]));
         var login = attrs.LOGIN || pm[1];
-        if (!/^[A-Za-z0-9-]+$/.test(login)) err(ln, 'PERSON ' + pm[1] + ': LOGIN smí obsahovat jen písmena bez diakritiky, číslice a pomlčku.');
+        if (!/^[A-Za-z0-9-]+$/.test(login)) err(ln, tr('PERSON {0}: LOGIN smí obsahovat jen písmena bez diakritiky, číslice a pomlčku.', pm[1]));
         known[pm[1]] = { id: pm[1], name: attrs.NAME || pm[1], email: attrs.EMAIL || (pm[1] + '@example.com'), login: login, label: attrs.LABEL || '' };
       } else if (t.k === 'MACHINE') {
-        if (acted) err(ln, 'PERSON a MACHINE patří na začátek SETUP, před příkazy.');
+        if (acted) err(ln, tr('PERSON a MACHINE patří na začátek SETUP, před příkazy.'));
         var mp = t.rest.split(/\s+/), mid = mp[0], flags = mp.slice(1);
-        if (!known[mid]) err(ln, 'MACHINE ' + mid + ': taková postava není. Nadefinuj ji řádkem PERSON, nebo použij alice / bob.');
-        else if (sc.machines.some(function (x) { return x.id === mid; })) err(ln, 'MACHINE ' + mid + ' je tu podruhé.');
+        if (!known[mid]) err(ln, tr('MACHINE {0}: taková postava není. Nadefinuj ji řádkem PERSON, nebo použij alice / bob.', mid));
+        else if (sc.machines.some(function (x) { return x.id === mid; })) err(ln, tr('MACHINE {0} je tu podruhé.', mid));
         else {
-          flags.forEach(function (f) { if (f !== 'CONFIGURED' && f !== 'HIDDEN') err(ln, 'MACHINE: neznámá volba ' + f + ' (povolené CONFIGURED, HIDDEN).'); });
+          flags.forEach(function (f) { if (f !== 'CONFIGURED' && f !== 'HIDDEN') err(ln, tr('MACHINE: neznámá volba {0} (povolené CONFIGURED, HIDDEN).', f)); });
           sc.machines.push({ id: mid, configured: flags.indexOf('CONFIGURED') >= 0, hidden: flags.indexOf('HIDDEN') >= 0 });
           if (!current) current = mid;
         }
       } else {
         acted = true;
-        if (!sc.machines.length && t.k !== 'SHOW' && t.k !== 'REPOSITORY' && t.k !== 'GITHUB') err(ln, 'Nejdřív nadefinuj počítač řádkem MACHINE.');
+        if (!sc.machines.length && t.k !== 'SHOW' && t.k !== 'REPOSITORY' && t.k !== 'GITHUB') err(ln, tr('Nejdřív nadefinuj počítač řádkem MACHINE.'));
         if (t.k === 'AS') {
-          if (!sc.machines.some(function (x) { return x.id === t.rest; })) err(ln, 'AS ' + t.rest + ': takový počítač není (chybí MACHINE ' + t.rest + ').');
+          if (!sc.machines.some(function (x) { return x.id === t.rest; })) err(ln, tr('AS {0}: takový počítač není (chybí MACHINE {1}).', t.rest, t.rest));
           else { current = t.rest; sc.steps.push({ op: 'as', id: t.rest, line: ln }); }
         } else if (t.k === 'PS>') {
-          if (!t.rest) err(ln, 'PS> potřebuje příkaz.');
+          if (!t.rest) err(ln, tr('PS> potřebuje příkaz.'));
           else sc.steps.push({ op: 'run', id: current, cmd: t.rest, line: ln });
         } else if (t.k === 'FILE') {
-          if (!t.rest || /[\\\/:*?"<>|]/.test(t.rest)) err(ln, 'FILE potřebuje název souboru bez lomítek, např. FILE recept.md');
+          if (!t.rest || /[\\\/:*?"<>|]/.test(t.rest)) err(ln, tr('FILE potřebuje název souboru bez lomítek, např. FILE recept.md'));
           var content = [], closed = false;
           i++;
           while (i < lines.length) {
@@ -316,7 +317,7 @@
             content.push(lines[i]);
             i++;
           }
-          if (!closed) { err(ln, 'FILE ' + t.rest + ' není ukončený řádkem END.'); break; }
+          if (!closed) { err(ln, tr('FILE {0} není ukončený řádkem END.', t.rest)); break; }
           var ind = null;
           content.forEach(function (l) { if (/\S/.test(l)) { var n = /^[ \t]*/.exec(l)[0].length; ind = ind === null ? n : Math.min(ind, n); } });
           var body = content.map(function (l) { return l.slice(ind || 0).replace(/\s+$/, ''); });
@@ -324,39 +325,39 @@
           sc.steps.push({ op: 'file', id: current, name: t.rest, content: body.length ? body.join('\n') + '\n' : '', line: ln });
         } else if (t.k === 'GITHUB') {
           var gm = /^(\S+?)\/(\S+)\s*(.*)$/.exec(t.rest);
-          if (!gm) { err(ln, 'GITHUB potřebuje vlastníka a název: GITHUB alice/kucharka'); i++; continue; }
+          if (!gm) { err(ln, tr('GITHUB potřebuje vlastníka a název: GITHUB alice/kucharka')); i++; continue; }
           var gopts = { public: false, readme: false, collaborators: [] }, gw = gm[3].split(/\s+/).filter(Boolean), gi;
           for (gi = 0; gi < gw.length; gi++) {
             if (gw[gi] === 'PUBLIC') gopts.public = true;
             else if (gw[gi] === 'PRIVATE') gopts.public = false;
             else if (gw[gi] === 'README') gopts.readme = true;
             else if (gw[gi] === 'COLLABORATOR' && gw[gi + 1]) gopts.collaborators.push(gw[++gi]);
-            else err(ln, 'GITHUB: neznámá volba ' + gw[gi] + ' (povolené PUBLIC, PRIVATE, README, COLLABORATOR login).');
+            else err(ln, tr('GITHUB: neznámá volba {0} (povolené PUBLIC, PRIVATE, README, COLLABORATOR login).', gw[gi]));
           }
           sc.steps.push({ op: 'github', owner: gm[1], name: gm[2], opts: gopts, line: ln });
         } else if (t.k === 'SHOW') {
-          if (t.rest !== 'GITHUB') err(ln, 'Známe jen SHOW GITHUB.');
+          if (t.rest !== 'GITHUB') err(ln, tr('Známe jen SHOW GITHUB.'));
           ghShow = true;
         } else if (t.k === 'REPOSITORY') {
-          if (sc.repoPath !== null) err(ln, 'REPOSITORY může být jen jednou.');
-          if (!t.rest) err(ln, 'REPOSITORY potřebuje cestu od domovské složky, např. REPOSITORY git/kucharka');
+          if (sc.repoPath !== null) err(ln, tr('REPOSITORY může být jen jednou.'));
+          if (!t.rest) err(ln, tr('REPOSITORY potřebuje cestu od domovské složky, např. REPOSITORY git/kucharka'));
           sc.repoPath = t.rest.replace(/^~?[\\\/]*/, '').replace(/[\\\/]+$/, '').split(/[\\\/]+/).filter(Boolean);
         } else if (t.k === 'VSCODE') {
-          if (!t.rest) err(ln, 'VSCODE potřebuje složku od domovské složky, např. VSCODE git/kucharka');
+          if (!t.rest) err(ln, tr('VSCODE potřebuje složku od domovské složky, např. VSCODE git/kucharka'));
           else sc.steps.push({ op: 'vscode', id: current, path: t.rest.replace(/^~?[\\\/]*/, '').replace(/[\\\/]+$/, '').split(/[\\\/]+/).filter(Boolean), line: ln });
-        } else err(ln, 'Neznámé klíčové slovo ' + t.k + ' v SETUP. Povolené: PERSON, MACHINE, AS, PS>, FILE, GITHUB, SHOW GITHUB, REPOSITORY, VSCODE.');
+        } else err(ln, tr('Neznámé klíčové slovo {0} v SETUP. Povolené: PERSON, MACHINE, AS, PS>, FILE, GITHUB, SHOW GITHUB, REPOSITORY, VSCODE.', t.k));
       }
       i++;
     }
-    if (!setupEnd && !errors.length) err(lines.length - 1, 'Blok SETUP není ukončený řádkem END.');
-    if (!sc.machines.length) err(0, 'Scénář potřebuje aspoň jeden počítač (MACHINE v SETUP).');
-    if (!sc.machines.some(function (x) { return !x.hidden; }) && sc.machines.length) err(0, 'Aspoň jeden počítač musí být viditelný (bez HIDDEN).');
+    if (!setupEnd && !errors.length) err(lines.length - 1, tr('Blok SETUP není ukončený řádkem END.'));
+    if (!sc.machines.length) err(0, tr('Scénář potřebuje aspoň jeden počítač (MACHINE v SETUP).'));
+    if (!sc.machines.some(function (x) { return !x.hidden; }) && sc.machines.length) err(0, tr('Aspoň jeden počítač musí být viditelný (bez HIDDEN).'));
     sc.github = ghShow;
     // vlastník GitHub repozitáře musí být známý účet
     sc.steps.forEach(function (s) {
       if (s.op !== 'github') return;
       var ok = sc.machines.some(function (x) { return known[x.id] && known[x.id].login === s.owner; });
-      if (!ok) err(s.line, 'GITHUB ' + s.owner + '/' + s.name + ': účet ' + s.owner + ' nepatří žádnému počítači ze scénáře.');
+      if (!ok) err(s.line, tr('GITHUB {0}/{1}: účet {2} nepatří žádnému počítači ze scénáře.', s.owner, s.name, s.owner));
     });
 
     // TASK … END
@@ -366,46 +367,46 @@
       skip();
       if (i >= lines.length) break;
       var tk = kw(lines[i]);
-      if (!tk || tk.k !== 'TASK') { err(i, 'Za SETUP mohou být jen bloky TASK … END.'); i++; continue; }
-      if (!tk.rest) err(i, 'TASK potřebuje text úkolu.');
+      if (!tk || tk.k !== 'TASK') { err(i, tr('Za SETUP mohou být jen bloky TASK … END.')); i++; continue; }
+      if (!tk.rest) err(i, tr('TASK potřebuje text úkolu.'));
       var task = { text: tk.rest, hints: [], question: null, checks: [], line: i }, phase = 0, tclosed = false;
       i++;
       while (i < lines.length) {
         var tl = lines[i];
         if (isBlank(tl) || isComment(tl)) { i++; continue; }
         var tt = kw(tl);
-        if (!tt) { err(i, 'Neznámý řádek v TASK (povolené HINT, NOTE, QUESTION, CHECK, END).'); i++; continue; }
+        if (!tt) { err(i, tr('Neznámý řádek v TASK (povolené HINT, NOTE, QUESTION, CHECK, END).')); i++; continue; }
         if (tt.k === 'END') { tclosed = true; i++; break; }
         if (tt.k === 'TASK') break;
         if (tt.k === 'HINT' || tt.k === 'NOTE') {
-          if (phase > 0) err(i, tt.k + ' patří před QUESTION a CHECK.');
+          if (phase > 0) err(i, tr('{0} patří před QUESTION a CHECK.', tt.k));
           task.hints.push({ code: tt.k === 'HINT', text: tt.rest });
         } else if (tt.k === 'QUESTION') {
-          if (phase > 1) err(i, 'QUESTION patří před CHECK.');
-          if (task.question !== null) err(i, 'TASK může mít jen jednu QUESTION.');
+          if (phase > 1) err(i, tr('QUESTION patří před CHECK.'));
+          if (task.question !== null) err(i, tr('TASK může mít jen jednu QUESTION.'));
           task.question = tt.rest; phase = 1;
         } else if (tt.k === 'CHECK') {
           phase = 2;
           var body2 = tt.rest, who = null, pref = /^([a-z][a-z0-9-]*):\s*(.*)$/.exec(body2);
           if (pref) {
-            if (machineIds.indexOf(pref[1]) < 0) err(i, 'CHECK ' + pref[1] + ': – takový počítač ve scénáři není.');
+            if (machineIds.indexOf(pref[1]) < 0) err(i, tr('CHECK {0}: – takový počítač ve scénáři není.', pref[1]));
             who = pref[1]; body2 = pref[2];
           }
           var rule = null, mm = null, r;
           for (r = 0; r < RULES.length; r++) { mm = RULES[r].re.exec(body2.trim()); if (mm) { rule = RULES[r]; break; } }
           if (!rule) {
             var near = CHECK_STARTS.filter(function (s) { return body2.trim().indexOf(s.split(' ')[0]) === 0; });
-            err(i, 'Neznám podmínku „' + body2.trim() + '“.' + (near.length ? ' Podmínky začínající „' + near[0].split(' ')[0] + '“ jsou popsané v docs/SCENARE.md.' : ' Podmínka musí začínat jedním z: ' + CHECK_STARTS.join(', ') + '.'));
+            err(i, tr('Neznám podmínku „{0}“.', body2.trim()) + (near.length ? tr(' Podmínky začínající „{0}“ jsou popsané v docs/SCENARE.md.', near[0].split(' ')[0]) : tr(' Podmínka musí začínat jedním z: {0}.', CHECK_STARTS.join(', '))));
           } else {
             var needsRepo = typeof rule.needsRepo === 'function' ? rule.needsRepo(mm) : !!rule.needsRepo;
-            if (needsRepo && !sc.repoPath) err(i, 'Tahle podmínka se týká repozitáře – doplň do SETUP řádek REPOSITORY cesta/k/repozitari.');
+            if (needsRepo && !sc.repoPath) err(i, tr('Tahle podmínka se týká repozitáře – doplň do SETUP řádek REPOSITORY cesta/k/repozitari.'));
             task.checks.push({ fn: rule.make(mm, ctx), who: who });
           }
-        } else err(i, 'Neznámé klíčové slovo ' + tt.k + ' v TASK. Povolené: HINT, NOTE, QUESTION, CHECK, END.');
+        } else err(i, tr('Neznámé klíčové slovo {0} v TASK. Povolené: HINT, NOTE, QUESTION, CHECK, END.', tt.k));
         i++;
       }
-      if (!tclosed) err(task.line, 'TASK není ukončený řádkem END.');
-      if (!task.checks.length) err(task.line, 'TASK potřebuje aspoň jednu podmínku CHECK.');
+      if (!tclosed) err(task.line, tr('TASK není ukončený řádkem END.'));
+      if (!task.checks.length) err(task.line, tr('TASK potřebuje aspoň jednu podmínku CHECK.'));
       sc.tasks.push(task);
     }
     if (errors.length) return { errors: errors.sort(function (x, y) { return x.line - y.line; }) };
@@ -418,7 +419,7 @@
     for (i = 0; i < (lines || []).length; i++) {
       t = lines[i].s.map(function (x) { return x[0]; }).join('');
       if (/^(fatal|error): /.test(t) || /is not a git command/.test(t) || /is not recognized as the name/.test(t) ||
-          /^\S+ : Cannot find path/.test(t) || /already exists\.$/.test(t) || (lines[i].k === 'note' && /^Simulátor: /.test(t))) return t;
+          /^\S+ : Cannot find path/.test(t) || /already exists\.$/.test(t) || (lines[i].k === 'note' && /^Simul[aá]tor: /.test(t))) return t;
     }
     return null;
   }
@@ -438,7 +439,7 @@
     }
     return {
       id: idHint || slug(sc.title),
-      kicker: sc.label || 'Scénář',
+      kicker: sc.label || tr('Scénář'),
       title: sc.title,
       short: sc.summary,
       intro: sc.intro.map(function (p) { return '<p>' + inline(p) + '</p>'; }).join(''),
@@ -456,12 +457,12 @@
           if (s.op === 'as') cur = s.id;
           else if (s.op === 'run') {
             var res = api.run(s.id, s.cmd, ago), bad = failure(res && res.lines);
-            if (bad) self.setupProblems.push({ line: s.line + 1, msg: 'Příkaz „' + s.cmd + '“ v SETUP skončil chybou: ' + bad });
+            if (bad) self.setupProblems.push({ line: s.line + 1, msg: tr('Příkaz „{0}“ v SETUP skončil chybou: {1}', s.cmd, bad) });
             n++;
           }
           else if (s.op === 'file') api.write(s.id, s.name, s.content);
           else if (s.op === 'github') {
-            if (!api.remote(s.owner, s.name, s.opts, ago)) self.setupProblems.push({ line: s.line + 1, msg: 'Repozitář ' + s.owner + '/' + s.name + ' na GitHubu už existuje.' });
+            if (!api.remote(s.owner, s.name, s.opts, ago)) self.setupProblems.push({ line: s.line + 1, msg: tr('Repozitář {0}/{1} na GitHubu už existuje.', s.owner, s.name) });
             n++;
           }
           else if (s.op === 'vscode') api.open(s.id, s.path);
@@ -483,7 +484,7 @@
     var r = compile(text, idHint);
     if (r.errors) return r;
     try { root.GitSession.create(r.scenario); }
-    catch (e) { return { errors: [{ line: 1, msg: 'Přípravu scénáře nejde provést: ' + e.message }] }; }
+    catch (e) { return { errors: [{ line: 1, msg: tr('Přípravu scénáře nejde provést: {0}', e.message) }] }; }
     if (r.scenario.setupProblems.length) return { errors: r.scenario.setupProblems.slice() };
     return r;
   }

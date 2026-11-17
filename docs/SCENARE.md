@@ -1,5 +1,7 @@
 # Jazyk scénářů (FORMAT 1)
 
+*English: [SCENARIOS.md](SCENARIOS.md)*
+
 Scénář je obyčejný textový soubor s příponou `.scenario` (kódování UTF-8). Napíšeš ho v libovolném
 editoru, v simulátoru ho nahraješ tlačítkem **Vybrat scénář → Nahrát scénář** a simulátor z něj
 sestaví počítače, repozitáře a úkoly. Scénář je **jen data**: nic se v něm neprogramuje, takže je
@@ -199,9 +201,15 @@ Příkaz se porovnává **celý** (vícenásobné mezery nevadí): `command "git
   Odkaz jde dát i do QR kódu. Server se souborem musí dovolit stažení z jiné stránky
   (`raw.githubusercontent.com` to dovoluje).
 
+## Jazyk
+
+Klíčová slova jsou vždy anglicky, texty pro studenty (`SCENARIO`, `TASK`, `NOTE`…) piš v jazyce,
+ve kterém má scénář být. Chybové hlášky simulátor píše v jazyce stránky (přepínač **CS / EN**).
+
 ## Pro správce simulátoru: vestavěné scénáře
 
-Vestavěné scénáře jsou soubory `scenarios/*.scenario`; jejich pořadí v nabídce určuje `scenarios/PORADI`.
+Vestavěné scénáře jsou soubory `scenarios/*.scenario`, anglické verze se stejným názvem jsou
+v `scenarios/en/`. Pořadí v nabídce určuje `scenarios/PORADI`.
 Aby simulátor fungoval i otevřený z disku, zabalí je build do `js/scenarios-builtin.js`:
 
 ```sh
@@ -209,5 +217,6 @@ python3 tools/build_scenarios.py          # po každé změně scénáře
 python3 tools/build_scenarios.py --check  # ověří, že je soubor aktuální (je i v tests/run_all.sh)
 ```
 
-Nové klíčové slovo nebo podmínku je potřeba doplnit do `js/scenario-lang.js` a do tohoto popisu.
+Nové klíčové slovo nebo podmínku je potřeba doplnit do `js/scenario-lang.js`, do tohoto popisu
+i do anglického `SCENARIOS.md`.
 Při nekompatibilní změně jazyka se zvýší `FORMAT`.

@@ -1,0 +1,84 @@
+FORMAT 1
+SCENARIO History as a graph
+LABEL    Worksheet 2 · task 8
+SUMMARY  A commit with a mistake and git revert – what happens in the commit graph.
+INTRO    The cookbook has three commits. On the right you see the graph: each circle is one commit, the arrow points to the previous one. The newest commit is on the right.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Jana's computer"
+  MACHINE jana CONFIGURED
+  REPOSITORY git/cookbook
+  PS> mkdir git
+  PS> cd git
+  PS> mkdir cookbook
+  PS> cd cookbook
+  PS> git init
+  FILE pancakes.md
+    # Pancakes
+
+    ## Ingredients
+
+    - 250 ml milk
+    - 1 egg
+    - 120 g plain flour
+    - a pinch of salt
+  END
+  PS> git add .
+  PS> git commit -m "Add pancake recipe"
+  FILE pancakes.md
+    # Pancakes
+
+    ## Ingredients
+
+    - 250 ml milk
+    - 1 egg
+    - 120 g plain flour
+    - a pinch of salt
+
+    ## Tip
+
+    I fill them with strawberry jam.
+  END
+  PS> git commit -am "Add filling tip"
+  FILE drop-scones.md
+    # Drop scones
+
+    ## Ingredients
+
+    - 300 ml milk
+    - 2 eggs
+    - 250 g self-raising flour
+    - 1 teaspoon baking powder
+
+    ## Method
+
+    1. Mix the ingredients.
+    2. Fry small rounds in a pan.
+
+    *Best eaten warm.*
+  END
+  PS> git add .
+  PS> git commit -m "Add drop scones"
+  VSCODE git/cookbook
+END
+
+TASK Open **drop-scones.md**, add the line `- 2 kg salt` and save (**Ctrl+S**). Commit it with the message **Add mistake**.
+  HINT  git commit -am "Add mistake"
+  NOTE  `-a` stages all changed files, so you do not need `git add`.
+  CHECK file drop-scones.md in commit "mistake" contains "2 kg salt"
+END
+
+TASK Find the hash of the commit **Add mistake** and revert the commit.
+  HINT     git log --oneline
+  HINT     git revert --no-edit HASH
+  NOTE     Replace `HASH` with the hash from the output (7 characters).
+  QUESTION How many circles are in the graph? Did the commit Add mistake disappear?
+  CHECK    commit "mistake" is reverted
+  CHECK    file drop-scones.md in HEAD does not contain "2 kg salt"
+END
+
+TASK Compare the graph with the output of `git log --oneline`.
+  HINT     git log --oneline
+  QUESTION Where is the newest commit in the graph, and where in the output?
+  CHECK    output of "git log..." contains "Revert"
+END

@@ -1,0 +1,61 @@
+FORMAT 1
+SCENARIO Rejected push
+LABEL    Worksheet 4 · dry run
+SUMMARY  Someone pushed to GitHub in the meantime. What git push does and how to fix it.
+INTRO    You are **Petr**. You and your classmate Anna share the repository **shared-cookbook** and you have cloned it. Anna has just pushed her recipe – you do not know about it yet.
+INTRO    On the right you see the history on your computer and GitHub below it.
+
+SETUP
+  PERSON anna NAME "Anna Svobodová" EMAIL "svobodovaa@jirovcovka.net" LOGIN "anna-svobodova" LABEL "Anna's computer"
+  PERSON petr NAME "Petr Dvořák" EMAIL "dvorakp@jirovcovka.net" LOGIN "petr-dvorak" LABEL "Petr's computer"
+  MACHINE anna CONFIGURED HIDDEN
+  MACHINE petr CONFIGURED
+  REPOSITORY git/shared-cookbook
+  GITHUB anna-svobodova/shared-cookbook README COLLABORATOR petr-dvorak
+  AS petr
+  PS> mkdir git
+  PS> cd git
+  PS> git clone https://github.com/anna-svobodova/shared-cookbook.git
+  PS> cd shared-cookbook
+  AS anna
+  PS> mkdir git
+  PS> cd git
+  PS> git clone https://github.com/anna-svobodova/shared-cookbook.git
+  PS> cd shared-cookbook
+  FILE potato-soup.md
+    # Potato soup
+
+    - 4 potatoes
+    - 1 onion
+    - marjoram
+  END
+  PS> git add .
+  PS> git commit -m "Add potato soup"
+  PS> git push
+  AS petr
+  VSCODE git/shared-cookbook
+END
+
+TASK Create a file **buns.md** with a recipe and commit it.
+  HINT  git add buns.md
+  HINT  git commit -m "Add buns"
+  CHECK file buns.md in HEAD exists
+END
+
+TASK Try to push.
+  HINT     git push
+  QUESTION What happened? Read the hint lines.
+  CHECK    output of "git push..." contains "[rejected]"
+END
+
+TASK Download Anna's commit. **MERGE_MSG** opens – do not change anything, just close it.
+  HINT     git pull
+  QUESTION Which new commit appeared in the graph and how many parents does it have?
+  CHECK    HEAD is a merge
+END
+
+TASK Push again.
+  HINT  git push
+  CHECK github anna-svobodova/shared-cookbook main equals HEAD
+  CHECK HEAD is a merge
+END

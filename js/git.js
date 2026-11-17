@@ -27,6 +27,7 @@
  * ===================================================================== */
 (function (root) {
   'use strict';
+  var tr = root.GitI18n ? root.GitI18n.tr : function (s) { var a = arguments; return s.replace(/\{(\d+)\}/g, function (m, i) { return a[+i + 1]; }); };
   var T = root.GitText, GW = root.GitWorld;
   var sortedKeys = GW.sortedKeys;
   var VERSION = '2.47.1.windows.1';
@@ -691,9 +692,9 @@
   }
 
   function unsupportedMerge(out) {
-    out.note('Simulátor: v tomhle slučování se potkává přejmenovaný soubor s další změnou téhož souboru');
-    out.note('(smazání, jiné přejmenování nebo nový soubor se stejným jménem). Takový případ simulátor');
-    out.note('neumí, a proto nic nezměnil. Ve skutečném Gitu by vznikl konflikt.');
+    out.note(tr('Simulátor: v tomhle slučování se potkává přejmenovaný soubor s další změnou téhož souboru'));
+    out.note(tr('(smazání, jiné přejmenování nebo nový soubor se stejným jménem). Takový případ simulátor'));
+    out.note(tr('neumí, a proto nic nezměnil. Ve skutečném Gitu by vznikl konflikt.'));
   }
 
   // ------------------------------------------------------------------
@@ -1012,15 +1013,15 @@
   C.version = function (ctx) { ctx.out.p('git version ' + VERSION); };
 
   C.help = function (ctx) {
-    ctx.out.note('Simulátor umí příkazy z kurzu: init, status, add, commit, diff, log, restore, revert,');
-    ctx.out.note('branch, switch, merge, remote, push, pull, clone, config. Tahák najdeš pod tlačítkem Nápověda.');
+    ctx.out.note(tr('Simulátor umí příkazy z kurzu: init, status, add, commit, diff, log, restore, revert,'));
+    ctx.out.note(tr('branch, switch, merge, remote, push, pull, clone, config. Tahák najdeš pod tlačítkem Nápověda.'));
   };
 
   C.init = function (ctx, args) {
     var m = ctx.m, dir = ctx.dir, out = ctx.out;
     var extra = args.filter(function (a) { return a.charAt(0) !== '-'; });
     if (extra.length) {
-      out.note('Simulátor: git init spouštěj bez názvu složky – nejdřív do složky přejdi (cd) a pak napiš git init.');
+      out.note(tr('Simulátor: git init spouštěj bez názvu složky – nejdřív do složky přejdi (cd) a pak napiš git init.'));
       return;
     }
     if (dir.repo) {
@@ -1028,8 +1029,8 @@
       return;
     }
     if (Object.keys(dir.dirs).length) {
-      out.note('Simulátor: tahle složka obsahuje další složky (' + Object.keys(dir.dirs).join(', ') + ').');
-      out.note('Repozitář zakládej až ve složce projektu, např. cd ' + Object.keys(dir.dirs)[0] + ' a potom git init.');
+      out.note(tr('Simulátor: tahle složka obsahuje další složky ({0}).', Object.keys(dir.dirs).join(', ')));
+      out.note(tr('Repozitář zakládej až ve složce projektu, např. cd {0} a potom git init.', Object.keys(dir.dirs)[0]));
       return;
     }
     var def = m.getConfig('init.defaultbranch');
@@ -1091,7 +1092,7 @@
 
   C.status = function (ctx, args) {
     var bad = args.filter(function (a) { return a.charAt(0) === '-'; });
-    if (bad.length) { ctx.out.note('Simulátor: git status používáme bez přepínačů.'); }
+    if (bad.length) { ctx.out.note(tr('Simulátor: git status používáme bez přepínačů.')); }
     printStatus(ctx, ctx.out, false);
   };
 
@@ -1213,7 +1214,7 @@
       else if (a === '--no-edit') noEdit = true;
       else if (a === '--allow-empty') allowEmpty = true;
       else if (a.charAt(0) === '-') { out.p("error: unknown option `" + a.replace(/^-+/, '') + "'"); out.note('Simulátor: git commit zná -m "zpráva", -a, --amend a --no-edit.'); return; }
-      else { out.p("error: pathspec '" + a + "' did not match any file(s) known to git"); out.note('Zprávu commitu piš do uvozovek: git commit -m "Zpráva o více slovech"'); return; }
+      else { out.p("error: pathspec '" + a + "' did not match any file(s) known to git"); out.note(tr('Zprávu commitu piš do uvozovek: git commit -m "Zpráva o více slovech"')); return; }
     }
     var head = repo.headHash();
     // -a zapíše i soubory v konfliktu (jako git add -u) a tím je vyřeší
@@ -1299,7 +1300,7 @@
       else if (/^-\d+$/.test(a)) max = parseInt(a.slice(1), 10);
       else if (a === '-n' && i + 1 < args.length) max = parseInt(args[++i], 10);
       else if (/^-n\d+$/.test(a)) max = parseInt(a.slice(2), 10);
-      else if (a.charAt(0) === '-') { out.p('fatal: unrecognized argument: ' + a); out.note('Simulátor: git log zná --oneline, --graph, --all a -N (počet).'); return; }
+      else if (a.charAt(0) === '-') { out.p('fatal: unrecognized argument: ' + a); out.note(tr('Simulátor: git log zná --oneline, --graph, --all a -N (počet).')); return; }
       else revs.push(a);
     }
     var tips = [];
@@ -1354,7 +1355,7 @@
     for (i = 0; i < args.length; i++) {
       if (args[i] === '--staged' || args[i] === '--cached') staged = true;
       else if (args[i] === '--') dashdash = true;
-      else if (args[i].charAt(0) === '-' && !dashdash) { out.p('error: invalid option: ' + args[i]); out.note('Simulátor: git diff zná --staged a název souboru.'); return; }
+      else if (args[i].charAt(0) === '-' && !dashdash) { out.p('error: invalid option: ' + args[i]); out.note(tr('Simulátor: git diff zná --staged a název souboru.')); return; }
       else if (dashdash) paths.push(args[i]);
       else rest.push(args[i]);
     }
@@ -1490,7 +1491,7 @@
       return C.commit(ctx, noEdit ? ['--no-edit'] : []);
     }
     if (!revs.length) { out.p('usage: git revert [--[no-]edit] [-n] [-m <parent-number>] [-s] [-S[<keyid>]] <commit>...'); return; }
-    if (revs.length > 1) { out.note('Simulátor: vracej commity po jednom.'); return; }
+    if (revs.length > 1) { out.note(tr('Simulátor: vracej commity po jednom.')); return; }
     var target = repo.headHash() ? resolveRev(ctx, revs[0]) : null;
     if (!target) { out.p("fatal: bad revision '" + revs[0] + "'"); return; }
     var c = w.commits[target], head = repo.headHash();
@@ -1654,7 +1655,7 @@
     var w = ctx.w, repo = ctx.repo, out = ctx.out, create = false, names = [], i;
     for (i = 0; i < args.length; i++) {
       if (args[i] === '-c' || args[i] === '--create') create = true;
-      else if (args[i] === '-') { out.note('Simulátor: napiš název větve, na kterou chceš přepnout.'); return; }
+      else if (args[i] === '-') { out.note(tr('Simulátor: napiš název větve, na kterou chceš přepnout.')); return; }
       else if (args[i].charAt(0) === '-') { out.p("error: unknown option `" + args[i].replace(/^-+/, '') + "'"); out.note('Simulátor: git switch zná název větve a -c (vytvořit).'); return; }
       else names.push(args[i]);
     }
@@ -1676,7 +1677,7 @@
       var start = names.length > 1 ? resolveRev(ctx, names[1]) : repo.headHash();
       if (names.length > 1 && !start) { out.p("fatal: invalid reference: " + names[1]); return; }
       if (start && names.length > 1 && start !== repo.headHash()) {
-        out.note('Simulátor: novou větev zakládej z místa, kde právě jsi (git switch -c nazev).');
+        out.note(tr('Simulátor: novou větev zakládej z místa, kde právě jsi (git switch -c nazev).'));
         return;
       }
       if (start) repo.branches[name] = start;
@@ -1736,9 +1737,9 @@
   }
 
   C.checkout = function (ctx) {
-    ctx.out.note('Simulátor: v kurzu místo git checkout používáme novější příkazy:');
-    ctx.out.note('  git switch nazev-vetve   (přepnutí větve)');
-    ctx.out.note('  git restore soubor       (zahození změn v souboru)');
+    ctx.out.note(tr('Simulátor: v kurzu místo git checkout používáme novější příkazy:'));
+    ctx.out.note(tr('  git switch nazev-vetve   (přepnutí větve)'));
+    ctx.out.note(tr('  git restore soubor       (zahození změn v souboru)'));
   };
 
   C.merge = function (ctx, args) {
@@ -1755,7 +1756,7 @@
         if (!repo.merge) { out.p('fatal: There is no merge in progress (MERGE_HEAD missing).'); return; }
         return C.commit(ctx, []);
       } else if (args[i] === '-m' && i + 1 < args.length) { msg = args[++i]; noEdit = true; }
-      else if (args[i] === '--no-ff' || args[i] === '--ff-only' || args[i] === '--squash') { out.note('Simulátor: git merge používáme bez přepínačů (jen název větve).'); return; }
+      else if (args[i] === '--no-ff' || args[i] === '--ff-only' || args[i] === '--squash') { out.note(tr('Simulátor: git merge používáme bez přepínačů (jen název větve).')); return; }
       else if (args[i].charAt(0) === '-') { out.p("error: unknown option `" + args[i].replace(/^-+/, '') + "'"); return; }
       else names.push(args[i]);
     }
@@ -1777,7 +1778,7 @@
       return;
     }
     if (!names.length) { out.p('fatal: No remote for the current branch.'); return; }
-    if (names.length > 1) { out.note('Simulátor: slučuj vždy jen jednu větev.'); return; }
+    if (names.length > 1) { out.note(tr('Simulátor: slučuj vždy jen jednu větev.')); return; }
     var name = names[0], theirs = resolveRev(ctx, name);
     if (!theirs) { out.p('merge: ' + name + ' - not something we can merge'); return; }
     if (!repo.headHash()) {
@@ -1850,7 +1851,7 @@
     for (i = 0; i < args.length; i++) {
       if (args[i] === '-u' || args[i] === '--set-upstream') setUp = true;
       else if (args[i] === '-f' || args[i] === '--force' || args[i] === '--force-with-lease') {
-        out.note('Simulátor: vynucený push (--force) v kurzu nepoužíváme – přepsal by práci ostatních.');
+        out.note(tr('Simulátor: vynucený push (--force) v kurzu nepoužíváme – přepsal by práci ostatních.'));
         return;
       } else if (args[i].charAt(0) === '-') { out.p("error: unknown option `" + args[i].replace(/^-+/, '') + "'"); return; }
       else rest.push(args[i]);
@@ -1996,7 +1997,7 @@
     var w = ctx.w, repo = ctx.repo, out = ctx.out, rest = [], i, noRebase = false;
     for (i = 0; i < args.length; i++) {
       if (args[i] === '--no-rebase' || args[i] === '--no-edit' || args[i] === '--ff') noRebase = noRebase || args[i] === '--no-rebase';
-      else if (args[i] === '--rebase' || args[i] === '-r') { out.note('Simulátor: git pull --rebase v kurzu nepoužíváme.'); return; }
+      else if (args[i] === '--rebase' || args[i] === '-r') { out.note(tr('Simulátor: git pull --rebase v kurzu nepoužíváme.')); return; }
       else if (args[i].charAt(0) === '-') { out.p("error: unknown option `" + args[i].replace(/^-+/, '') + "'"); return; }
       else rest.push(args[i]);
     }
@@ -2095,7 +2096,7 @@
         return;
       }
       if (rebase === 'true' && !noRebase) {
-        out.note('Simulátor: máš nastaveno pull.rebase true, ale rebase v kurzu nepoužíváme.');
+        out.note(tr('Simulátor: máš nastaveno pull.rebase true, ale rebase v kurzu nepoužíváme.'));
         out.note('Nastav: git config --global pull.rebase false');
         return;
       }
@@ -2113,7 +2114,7 @@
     var url = rest[0], parsed = GW.parseUrl(url);
     var name = rest[1] || (parsed ? parsed.name : url.replace(/\/+$/, '').replace(/\.git$/, '').split(/[\/\\:]/).pop());
     if (ctx.repo) {
-      out.note('Simulátor: jsi uvnitř repozitáře ' + m.cwd[m.cwd.length - 1] + '. Klonuj o složku výš (cd ..), jinak by vznikl repozitář v repozitáři.');
+      out.note(tr('Simulátor: jsi uvnitř repozitáře {0}. Klonuj o složku výš (cd ..), jinak by vznikl repozitář v repozitáři.', m.cwd[m.cwd.length - 1]));
       return;
     }
     var parent = ctx.dir, existing = parent.dirs[name];
@@ -2214,18 +2215,18 @@
   }
 
   var NOT_TAUGHT = {
-    rebase: 'git rebase v kurzu nepoužíváme (přepisuje historii).',
-    reset: 'git reset v kurzu nepoužíváme. Změny v souboru zahodíš přes git restore, commit vrátíš přes git revert.',
-    stash: 'git stash v kurzu nepoužíváme.',
-    tag: 'git tag v kurzu nepoužíváme.',
-    show: 'git show simulátor neumí. Historii ukáže git log, změny git diff.',
-    mv: 'git mv simulátor neumí.',
-    'cherry-pick': 'git cherry-pick v kurzu nepoužíváme.',
-    reflog: 'git reflog simulátor neumí.',
-    blame: 'git blame simulátor neumí.',
-    clean: 'git clean simulátor neumí.',
-    stage: 'Místo git stage piš git add.',
-    gui: 'Grafické nástroje simulátor nemá.'
+    rebase: tr('git rebase v kurzu nepoužíváme (přepisuje historii).'),
+    reset: tr('git reset v kurzu nepoužíváme. Změny v souboru zahodíš přes git restore, commit vrátíš přes git revert.'),
+    stash: tr('git stash v kurzu nepoužíváme.'),
+    tag: tr('git tag v kurzu nepoužíváme.'),
+    show: tr('git show simulátor neumí. Historii ukáže git log, změny git diff.'),
+    mv: tr('git mv simulátor neumí.'),
+    'cherry-pick': tr('git cherry-pick v kurzu nepoužíváme.'),
+    reflog: tr('git reflog simulátor neumí.'),
+    blame: tr('git blame simulátor neumí.'),
+    clean: tr('git clean simulátor neumí.'),
+    stage: tr('Místo git stage piš git add.'),
+    gui: tr('Grafické nástroje simulátor nemá.')
   };
 
   // ------------------------------------------------------------------
@@ -2235,15 +2236,15 @@
     var out = new Out(), dir = machine.dir();
     var ctx = { m: machine, w: machine.world, dir: dir, repo: dir ? dir.repo : null, out: out };
     if (!argv.length) {
-      out.note('Napiš příkaz Gitu, např. git status. Přehled příkazů je pod tlačítkem Nápověda.');
+      out.note(tr('Napiš příkaz Gitu, např. git status. Přehled příkazů je pod tlačítkem Nápověda.'));
       return { lines: out.lines };
     }
     var cmd = argv[0], args = argv.slice(1);
     if (cmd === '--version' || cmd === '-v') cmd = 'version';
     if (cmd === '--help' || cmd === '-h') cmd = 'help';
     if (!C[cmd]) {
-      if (NOT_TAUGHT[cmd]) out.note('Simulátor: ' + NOT_TAUGHT[cmd]);
-      else if (MAIN_CMDS.indexOf(cmd) >= 0) out.note('Simulátor: příkaz git ' + cmd + ' neumí (v kurzu ho nepotřebujeme).');
+      if (NOT_TAUGHT[cmd]) out.note(tr('Simulátor: {0}', NOT_TAUGHT[cmd]));
+      else if (MAIN_CMDS.indexOf(cmd) >= 0) out.note(tr('Simulátor: příkaz git {0} neumí (v kurzu ho nepotřebujeme).', cmd));
       else if (cmd.charAt(0) === '-') { out.p('unknown option: ' + cmd); out.p('usage: git [-v | --version] [-h | --help] <command> [<args>]'); }
       else unknownCommand(out, cmd);
       return { lines: out.lines };

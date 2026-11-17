@@ -1,0 +1,72 @@
+FORMAT 1
+SCENARIO Branches and merging
+LABEL    Bonus
+SUMMARY  git switch -c, work on a branch, git merge and a merge commit with two parents.
+INTRO    You want to try new recipes in the cookbook without breaking the main version. That is what **branches** are for.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Jana's computer"
+  MACHINE jana CONFIGURED
+  REPOSITORY git/cookbook
+  PS> mkdir git
+  PS> cd git
+  PS> mkdir cookbook
+  PS> cd cookbook
+  PS> git init
+  FILE pancakes.md
+    # Pancakes
+
+    ## Ingredients
+
+    - 250 ml milk
+    - 1 egg
+    - 120 g plain flour
+    - a pinch of salt
+
+    ## Tip
+
+    I fill them with strawberry jam.
+  END
+  PS> git add .
+  PS> git commit -m "Add pancake recipe"
+  FILE README.md
+    # My cookbook
+
+    My favourite recipes.
+  END
+  PS> git add .
+  PS> git commit -m "Add README"
+  VSCODE git/cookbook
+END
+
+TASK Create a branch **new-recipes** and switch to it.
+  HINT  git switch -c new-recipes
+  HINT  git branch
+  CHECK branch new-recipes exists
+END
+
+TASK On the branch, create **drop-scones.md** and commit it.
+  HINT  git add drop-scones.md
+  HINT  git commit -m "Add drop scones"
+  CHECK file drop-scones.md in branch new-recipes exists
+END
+
+TASK Switch back to **main**. What happened to the file **drop-scones.md**?
+  HINT  git switch main
+  CHECK on branch main
+  CHECK command "git switch main" was run
+END
+
+TASK On **main**, edit the README and commit. The history splits in two – look at the graph.
+  HINT  git commit -am "Update README"
+  HINT  git log --oneline --graph --all
+  CHECK branches main and new-recipes have diverged
+END
+
+TASK Merge the branch **new-recipes** into **main**. Leave the message in MERGE_MSG as it is.
+  HINT     git merge new-recipes
+  HINT     git log --oneline --graph
+  QUESTION How many parents does the merge commit have?
+  CHECK    on branch main
+  CHECK    HEAD is a merge
+END

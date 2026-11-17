@@ -1,0 +1,77 @@
+FORMAT 1
+SCENARIO Conflict
+LABEL    Bonus
+SUMMARY  Two branches changed the same line of the README. Git does not know which one is right – you decide.
+INTRO    The same line in the README changed on the branch **main** and on the branch **edit**. Merging them causes a **conflict**.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Jana's computer"
+  MACHINE jana CONFIGURED
+  REPOSITORY git/cookbook
+  PS> mkdir git
+  PS> cd git
+  PS> mkdir cookbook
+  PS> cd cookbook
+  PS> git init
+  FILE README.md
+    # My cookbook
+
+    Recipes I can cook.
+  END
+  FILE pancakes.md
+    # Pancakes
+
+    ## Ingredients
+
+    - 250 ml milk
+    - 1 egg
+    - 120 g plain flour
+    - a pinch of salt
+
+    ## Tip
+
+    I fill them with strawberry jam.
+  END
+  PS> git add .
+  PS> git commit -m "Start the cookbook"
+  PS> git switch -c edit
+  FILE README.md
+    # My cookbook
+
+    Recipes that even I can cook.
+  END
+  PS> git commit -am "Edit description"
+  PS> git switch main
+  FILE README.md
+    # My cookbook
+
+    My favourite recipes.
+  END
+  PS> git commit -am "Different description"
+  VSCODE git/cookbook
+END
+
+TASK Merge the branch **edit** into **main**.
+  HINT     git merge edit
+  QUESTION What did Git print? Which files have a conflict (git status)?
+  CHECK    output of "git merge..." contains "CONFLICT"
+END
+
+TASK Open **README.md**. Between `<<<<<<<` and `=======` is your version, below it the other one. Keep what you want and **delete all the markers**. Save.
+  NOTE  For example:
+  HINT  # My cookbook
+  HINT
+  HINT  My favourite recipes.
+  HINT  Recipes that even I can cook.
+  CHECK file README.md has no conflict markers
+  CHECK output of "git merge..." contains "CONFLICT"
+END
+
+TASK Mark the conflict as resolved and finish the merge with a commit.
+  HINT  git add README.md
+  HINT  git commit -m "Resolve conflict in README"
+  HINT  git log --oneline --graph
+  CHECK no merge is in progress
+  CHECK HEAD is a merge
+  CHECK file README.md in HEAD has no conflict markers
+END

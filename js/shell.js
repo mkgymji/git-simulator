@@ -16,6 +16,7 @@
  * ===================================================================== */
 (function (root) {
   'use strict';
+  var tr = root.GitI18n ? root.GitI18n.tr : function (s) { var a = arguments; return s.replace(/\{(\d+)\}/g, function (m, i) { return a[+i + 1]; }); };
   var GitSim = root.GitSim;
 
   // rozdělení příkazové řádky: mezery oddělují, "..." a '...' drží pohromadě
@@ -83,25 +84,25 @@
   function sortNames(a) { return a.slice().sort(function (x, y) { return x.toLowerCase() < y.toLowerCase() ? -1 : x.toLowerCase() > y.toLowerCase() ? 1 : 0; }); }
 
   var HELP = [
-    'Simulátor umí tyto příkazy terminálu:',
+    tr('Simulátor umí tyto příkazy terminálu:'),
     '  pwd            kde jsem',
-    '  ls             co je ve složce (také dir)',
-    '  cd nazev       jdi do složky (cd .. o složku výš, cd ~ domů)',
-    '  mkdir nazev    nová složka',
-    '  code -r .      otevři složku ve VS Code',
-    '  code soubor    otevři soubor v editoru',
-    '  cat soubor     vypiš obsah souboru (také type)',
-    '  rm soubor      smaž soubor',
-    '  cls            vyčisti terminál (také clear)',
-    '  git ...        příkazy Gitu (přehled: tlačítko Tahák)',
-    'Šipka nahoru vrátí předchozí příkaz, Tab doplní název.'
+    tr('  ls             co je ve složce (také dir)'),
+    tr('  cd nazev       jdi do složky (cd .. o složku výš, cd ~ domů)'),
+    tr('  mkdir nazev    nová složka'),
+    tr('  code -r .      otevři složku ve VS Code'),
+    tr('  code soubor    otevři soubor v editoru'),
+    tr('  cat soubor     vypiš obsah souboru (také type)'),
+    tr('  rm soubor      smaž soubor'),
+    tr('  cls            vyčisti terminál (také clear)'),
+    tr('  git ...        příkazy Gitu (přehled: tlačítko Tahák)'),
+    tr('Šipka nahoru vrátí předchozí příkaz, Tab doplní název.')
   ];
 
   function run(m, line) {
     var out = new Out(), now = m.world.now();
     var tk = tokenize(line);
     if (tk.error) {
-      out.note('Simulátor: v příkazu chybí uzavírací uvozovka. Zprávu piš takto: git commit -m "Zpráva"');
+      out.note(tr('Simulátor: v příkazu chybí uzavírací uvozovka. Zprávu piš takto: git commit -m "Zpráva"'));
       return { lines: out.lines };
     }
     var args = tk.args;
@@ -129,10 +130,10 @@
         var asFile = m.dirAt(target.slice(0, -1));
         if (asFile && (target[target.length - 1] in asFile.files)) {
           psError(out, line, 'cd : Cannot find path \'' + full + '\' because it does not exist.', 'ObjectNotFound: (' + full + ':String) [Set-Location], ItemNotFoundException', 'PathNotFound,Microsoft.PowerShell.Commands.SetLocationCommand');
-          out.note('Simulátor: ' + rest[0] + ' je soubor, ne složka. Do souboru se přejít nedá.');
+          out.note(tr('Simulátor: {0} je soubor, ne složka. Do souboru se přejít nedá.', rest[0]));
         } else {
           psError(out, line, 'cd : Cannot find path \'' + full + '\' because it does not exist.', 'ObjectNotFound: (' + full + ':String) [Set-Location], ItemNotFoundException', 'PathNotFound,Microsoft.PowerShell.Commands.SetLocationCommand');
-          out.note('Simulátor: taková složka tu není. Co ve složce je, ukáže příkaz ls.');
+          out.note(tr('Simulátor: taková složka tu není. Co ve složce je, ukáže příkaz ls.'));
         }
         return { lines: out.lines };
       }
@@ -167,9 +168,9 @@
         var isDir = rest.some(function (a, i) { return a.toLowerCase() === '-itemtype' && /^dir/i.test(rest[i + 1] || ''); });
         names = names.filter(function (a) { return !/^(directory|file|dir)$/i.test(a); });
         if (!isDir) {
-          if (!names.length) { out.note('Simulátor: napiš název souboru, např. New-Item recept.md'); return { lines: out.lines }; }
+          if (!names.length) { out.note(tr('Simulátor: napiš název souboru, např. New-Item recept.md')); return { lines: out.lines }; }
           var fp = m.resolve(names[0]), fd = m.dirAt(fp.slice(0, -1)), fn = fp[fp.length - 1];
-          if (!fd) { out.note('Simulátor: taková složka neexistuje.'); return { lines: out.lines }; }
+          if (!fd) { out.note(tr('Simulátor: taková složka neexistuje.')); return { lines: out.lines }; }
           if (fn in fd.files) {
             psError(out, line, 'New-Item : The file \'' + m.winPath(fp) + '\' already exists.', 'WriteError: (' + m.winPath(fp) + ':String) [New-Item], IOException', 'NewItemIOError,Microsoft.PowerShell.Commands.NewItemCommand');
             return { lines: out.lines };
@@ -180,14 +181,14 @@
           return { lines: out.lines };
         }
       }
-      if (!names.length) { out.note('Simulátor: napiš název nové složky, např. mkdir git'); return { lines: out.lines }; }
+      if (!names.length) { out.note(tr('Simulátor: napiš název nové složky, např. mkdir git')); return { lines: out.lines }; }
       var p = m.resolve(names[0]), parent = m.dirAt(p.slice(0, -1)), name = p[p.length - 1];
-      if (!parent) { out.note('Simulátor: nadřazená složka neexistuje.'); return { lines: out.lines }; }
+      if (!parent) { out.note(tr('Simulátor: nadřazená složka neexistuje.')); return { lines: out.lines }; }
       if (parent.dirs[name] || (name in parent.files)) {
         psError(out, line, 'mkdir : An item with the specified name ' + m.winPath(p) + ' already exists.', 'ResourceExists: (' + m.winPath(p) + ':String) [New-Item], IOException', 'DirectoryExist,Microsoft.PowerShell.Commands.NewItemCommand');
         return { lines: out.lines };
       }
-      if (/[\\\/:*?"<>|]/.test(name)) { out.note('Simulátor: takový název složky Windows nedovolí.'); return { lines: out.lines }; }
+      if (/[\\\/:*?"<>|]/.test(name)) { out.note(tr('Simulátor: takový název složky Windows nedovolí.')); return { lines: out.lines }; }
       m.mkdirp(p);
       m.times[p.join('/')] = now;
       listing(m, p.slice(0, -1), [{ dir: true, name: name, time: now }]).forEach(function (l) { out.p(l); });
@@ -199,16 +200,16 @@
       if (!targets.length) return { lines: [], open: { folder: m.cwd.slice() } };
       var tp = m.resolve(targets[0]);
       if (m.dirAt(tp)) {
-        if (targets[0] === '.' && rest.indexOf('-r') < 0) out.note('Simulátor: ve škole používáme code -r . (otevře složku ve stejném okně).');
+        if (targets[0] === '.' && rest.indexOf('-r') < 0) out.note(tr('Simulátor: ve škole používáme code -r . (otevře složku ve stejném okně).'));
         return { lines: out.lines, open: { folder: tp } };
       }
       var td = m.dirAt(tp.slice(0, -1));
-      if (!td) { out.note('Simulátor: taková složka neexistuje.'); return { lines: out.lines }; }
+      if (!td) { out.note(tr('Simulátor: taková složka neexistuje.')); return { lines: out.lines }; }
       return { lines: out.lines, open: { file: tp } };
     }
 
     if (low === 'cat' || low === 'type' || low === 'get-content' || low === 'gc') {
-      if (!rest.length) { out.note('Simulátor: napiš název souboru, např. cat palacinky.md'); return { lines: out.lines }; }
+      if (!rest.length) { out.note(tr('Simulátor: napiš název souboru, např. cat palacinky.md')); return { lines: out.lines }; }
       var cp = m.resolve(rest[0]), cd2 = m.dirAt(cp.slice(0, -1)), cn = cp[cp.length - 1];
       if (!cd2 || !(cn in cd2.files)) {
         var cf = m.winPath(cp);
@@ -222,11 +223,11 @@
 
     if (low === 'rm' || low === 'del' || low === 'remove-item' || low === 'ri' || low === 'erase') {
       var rn = rest.filter(function (a) { return a.charAt(0) !== '-'; });
-      if (!rn.length) { out.note('Simulátor: napiš, co smazat, např. rm poznamky.md'); return { lines: out.lines }; }
+      if (!rn.length) { out.note(tr('Simulátor: napiš, co smazat, např. rm poznamky.md')); return { lines: out.lines }; }
       var rp = m.resolve(rn[0]), rd = m.dirAt(rp.slice(0, -1)), rname = rp[rp.length - 1];
       if (rd && (rname in rd.files)) { delete rd.files[rname]; return { lines: [] }; }
       if (rd && rd.dirs[rname]) {
-        out.note('Simulátor: mazání celých složek simulátor nedělá, aby sis omylem nesmazal repozitář.');
+        out.note(tr('Simulátor: mazání celých složek simulátor nedělá, aby sis omylem nesmazal repozitář.'));
         return { lines: out.lines };
       }
       var rf = m.winPath(rp);
@@ -239,17 +240,17 @@
       return { lines: out.lines };
     }
 
-    if (low === 'exit') { out.note('Simulátor: terminál zůstane otevřený. Vyčistit ho můžeš příkazem cls.'); return { lines: out.lines }; }
+    if (low === 'exit') { out.note(tr('Simulátor: terminál zůstane otevřený. Vyčistit ho můžeš příkazem cls.')); return { lines: out.lines }; }
 
     if (low === 'vim' || low === 'vi' || low === 'nano' || low === 'notepad') {
-      out.note('Simulátor: soubory upravuj v editoru (příkaz code soubor nebo klik na soubor v Průzkumníku).');
+      out.note(tr('Simulátor: soubory upravuj v editoru (příkaz code soubor nebo klik na soubor v Průzkumníku).'));
       return { lines: out.lines };
     }
 
     psError(out, line, cmd + ' : The term \'' + cmd + '\' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.',
       'ObjectNotFound: (' + cmd + ':String) [], CommandNotFoundException', 'CommandNotFoundException');
-    if (/^git/i.test(cmd)) out.note('Simulátor: za git patří mezera, např. git status');
-    else out.note('Simulátor: takový příkaz neznám. Přehled příkazů ukáže help.');
+    if (/^git/i.test(cmd)) out.note(tr('Simulátor: za git patří mezera, např. git status'));
+    else out.note(tr('Simulátor: takový příkaz neznám. Přehled příkazů ukáže help.'));
     return { lines: out.lines };
   }
 

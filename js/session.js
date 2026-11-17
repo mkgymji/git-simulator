@@ -18,6 +18,7 @@
  * ===================================================================== */
 (function (root) {
   'use strict';
+  var tr = root.GitI18n ? root.GitI18n.tr : function (s) { var a = arguments; return s.replace(/\{(\d+)\}/g, function (m, i) { return a[+i + 1]; }); };
   var GW = root.GitWorld, SH = root.GitShell;
 
   // výchozí postavy, když scénář nedefinuje vlastní
@@ -56,7 +57,7 @@
       // def: {id, name, email, login, label}; opts: {configured, hidden}
       person: function (def, opts) {
         opts = opts || {};
-        var p = { id: def.id, name: def.name, email: def.email, login: def.login, label: def.label || ('Počítač (' + def.name + ')') };
+        var p = { id: def.id, name: def.name, email: def.email, login: def.login, label: def.label || (tr('Počítač ({0})', def.name)) };
         if (!world.accounts[p.login]) world.addAccount(p.login, p.name, p.email);
         var m = world.addMachine(p.id, { login: p.login, home: p.id, label: p.label });
         if (opts.configured) CONFIG_LINES(p).forEach(function (kv) { GW.configSet(m.config, kv[0], kv[1]); });
@@ -92,7 +93,7 @@
     a.people.forEach(function (id) {
       var t = a.term[id];
       t.lines.push({ s: [['Windows PowerShell', '']] });
-      t.lines.push({ s: [['Simulátor: napiš příkaz a stiskni Enter. Přehled příkazů ukáže help.', 'n']], k: 'note' });
+      t.lines.push({ s: [[tr('Simulátor: napiš příkaz a stiskni Enter. Přehled příkazů ukáže help.'), 'n']], k: 'note' });
       t.lines.push({ s: [] });
     });
     return a;

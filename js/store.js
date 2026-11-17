@@ -14,6 +14,9 @@
  *  prohlížeč IndexedDB nedovolí (soukromé okno, soubor z disku…), scénáře
  *  se drží jen do zavření stránky a GitStore.persistent je false.
  *  Záznam: {id, title, label, text, source, added}
+ *
+ *  Splněné scénáře (fajfka v nabídce) si pamatuje localStorage, také jen
+ *  v tomto prohlížeči: {id scénáře: čas splnění}.
  * ===================================================================== */
 (function (root) {
   'use strict';
@@ -71,6 +74,19 @@
     return tx('readwrite', function (st) { if (st) st.delete(id); return true; });
   };
   api.idFor = idFor;
+
+  var DONE = 'git-simulator-done';
+  function doneMap() {
+    try { return JSON.parse(root.localStorage.getItem(DONE) || '{}') || {}; } catch (e) { return {}; }
+  }
+  api.isDone = function (id) { return !!doneMap()[id]; };
+  api.markDone = function (id) {
+    var d = doneMap();
+    d[id] = Date.now();
+    try { root.localStorage.setItem(DONE, JSON.stringify(d)); } catch (e) { /* úložiště zakázané */ }
+  };
+  api.doneCount = function () { return Object.keys(doneMap()).length; };
+  api.clearDone = function () { try { root.localStorage.removeItem(DONE); } catch (e) { /* nic */ } };
 
   root.GitStore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

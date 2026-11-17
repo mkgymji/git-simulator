@@ -1,0 +1,13 @@
+FORMAT 1
+# Free mode: an empty computer with no tasks.
+SCENARIO Empty computer
+LABEL    Free mode
+SUMMARY  Try anything: the terminal, Git and GitHub. Nothing is prepared here.
+INTRO    An empty school computer with Git and VS Code. Git is not set up yet. You have a GitHub account **jana-novakova**.
+INTRO    Not sure where to start? Type `help` or open the **Cheat sheet**.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Jana's computer"
+  MACHINE jana
+  SHOW GITHUB
+END

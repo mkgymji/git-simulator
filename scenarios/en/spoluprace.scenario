@@ -1,0 +1,70 @@
+FORMAT 1
+SCENARIO A shared cookbook in pairs
+LABEL    Worksheet 4
+SUMMARY  Anna and Petr: a shared repository, an invitation, cloning, a rejected push and pull.
+INTRO    You play both: **Anna** (owns the repository) and **Petr** (collaborator). Switch between their computers and GitHub with the tabs at the top.
+
+SETUP
+  PERSON anna NAME "Anna Svobodová" EMAIL "svobodovaa@jirovcovka.net" LOGIN "anna-svobodova" LABEL "Anna's computer"
+  PERSON petr NAME "Petr Dvořák" EMAIL "dvorakp@jirovcovka.net" LOGIN "petr-dvorak" LABEL "Petr's computer"
+  MACHINE anna CONFIGURED
+  MACHINE petr CONFIGURED
+  SHOW GITHUB
+  REPOSITORY git/shared-cookbook
+  AS anna
+  PS> mkdir git
+  PS> cd git
+  AS petr
+  PS> mkdir git
+  PS> cd git
+END
+
+TASK **Anna** creates a repository **shared-cookbook** on GitHub: Private, and she **ticks** Add a README file.
+  NOTE  Switch to **GitHub (Anna)** → New → name, Private, tick **Add a README file** → Create repository.
+  CHECK github anna-svobodova/shared-cookbook has branch main
+END
+
+TASK **Anna** invites Petr: Settings → Collaborators → Add people → **petr-dvorak**. **Petr** accepts the invitation.
+  NOTE  Petr sees the invitation at the top of GitHub (tab **GitHub (Petr)**).
+  CHECK github anna-svobodova/shared-cookbook has collaborator petr-dvorak
+END
+
+TASK Both clone the repository into the **git** folder and open it in VS Code.
+  HINT  git clone https://github.com/anna-svobodova/shared-cookbook.git
+  HINT  cd shared-cookbook
+  HINT  code -r .
+  CHECK anna: repository exists
+  CHECK petr: repository exists
+END
+
+TASK Each of them creates a **different** recipe and commits it. **Anna** pushes first, **then** Petr.
+  HINT     git add .
+  HINT     git commit -m "Add potato soup"
+  HINT     git push
+  QUESTION What happened when Petr pushed?
+  CHECK    petr: output of "git push..." contains "[rejected]"
+END
+
+TASK **Petr** fixes it as the hint suggests: he pulls and pushes again. **Anna** then pulls Petr's recipe.
+  NOTE  Petr:
+  HINT  git pull
+  HINT  git push
+  NOTE  Anna:
+  HINT  git pull
+  CHECK anna: github anna-svobodova/shared-cookbook main equals HEAD
+  CHECK petr: github anna-svobodova/shared-cookbook main equals HEAD
+  CHECK github anna-svobodova/shared-cookbook main is a merge
+END
+
+TASK **Anna** adds links to both recipes and a quote (`>`) to the README, commits and pushes. **Petr** pulls.
+  HINT     # shared-cookbook
+  HINT
+  HINT     > A cookbook we write together.
+  HINT
+  HINT     - [Potato soup](potato-soup.md)
+  HINT     - [Buns](buns.md)
+  QUESTION Which two commands start and end your work on a shared project?
+  CHECK    file README.md on github anna-svobodova/shared-cookbook contains line starting with ">"
+  CHECK    file README.md on github anna-svobodova/shared-cookbook contains "]("
+  CHECK    petr: github anna-svobodova/shared-cookbook main equals HEAD
+END
