@@ -146,7 +146,7 @@
 
   function renderIDE() {
     var id = app.active, ide = app.ide[id], mm = m();
-    var card = el('div', { class: 'card' });
+    var card = el('div', { class: 'card vscode' });
     card.appendChild(el('div', { class: 'card-head' }, '<span class="grow">Visual Studio Code</span><span class="sub">' +
       (ide.folder ? esc(mm.winPath(ide.folder)) : tr('žádná otevřená složka')) + '</span>'));
     var wrap = el('div', { class: 'ide' });
