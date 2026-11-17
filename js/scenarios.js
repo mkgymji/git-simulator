@@ -263,7 +263,7 @@
     kicker: 'Pracovní list 4 · nanečisto',
     title: 'Odmítnutý push',
     short: 'Někdo mezitím pushnul na GitHub. Co udělá git push a jak to vyřešit.',
-    intro: '<p>Jsi <b>Petr</b>. Se spolužačkou Annou máte společný repozitář <b>spolecna-kucharka</b> a máš ho naklonovaný. Anna právě pushnula svůj recept – ty o tom zatím nevíš.</p><p>Vlevo je tvůj počítač, vpravo GitHub.</p>',
+    intro: '<p>Jsi <b>Petr</b>. Se spolužačkou Annou máte společný repozitář <b>spolecna-kucharka</b> a máš ho naklonovaný. Anna právě pushnula svůj recept – ty o tom zatím nevíš.</p><p>Vpravo vidíš historii svého počítače a pod ní GitHub.</p>',
     setup: function (api) {
       api.person('anna', { configured: true, hidden: true });
       api.person('petr', { configured: true });

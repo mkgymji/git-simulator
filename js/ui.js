@@ -1015,8 +1015,10 @@
         '<text class="m" x="' + a.x + '" y="' + (a.y + R + 14) + '">' + esc(short) + '</text></g>';
     });
     // štítky větví nad commity
+    var below = 0;
     Object.keys(labels).forEach(function (h) {
-      var a = pos[h], list = labels[h].slice(), y = a.y - R - 14;
+      // štítky u hlavní linie nad commitem, u vedlejších větví pod popiskem (nepřekrývají čáry)
+      var a = pos[h], list = labels[h].slice(), under = lane[h] > 0, y = under ? a.y + R + 32 : a.y - R - 14;
       list.sort(function (x, y2) { var o = { head: 0, 'head-remote': 0, branch: 1, remote: 2 }; return o[x.kind] - o[y2.kind]; });
       list.forEach(function (r) {
         var items = [];
@@ -1031,19 +1033,20 @@
           svg += '<g class="g-label ' + it.c + '"><rect x="' + x + '" y="' + (y - 9) + '" width="' + widths[k] + '" height="18"/><text x="' + (x + widths[k] / 2) + '" y="' + y + '">' + esc(it.t) + '</text></g>';
           x += widths[k] + 4;
         });
-        y -= 22;
+        y += under ? 22 : -22;
       });
+      if (under) below = Math.max(below, list.length * 22 + 6);
     });
     svg += '</svg>';
     var need = 0;
-    Object.keys(labels).forEach(function (h) { need = Math.max(need, labels[h].length); });
+    Object.keys(labels).forEach(function (h) { if (lane[h] === 0) need = Math.max(need, labels[h].length); });
     var wrap = el('div', { class: 'graph-wrap' });
     wrap.innerHTML = svg;
     var s = wrap.querySelector('svg');
-    if (need > 1) {
-      var extra = (need - 1) * 22;
-      s.setAttribute('height', height + extra);
-      s.setAttribute('viewBox', '0 ' + (-extra) + ' ' + width + ' ' + (height + extra));
+    var extra = need > 1 ? (need - 1) * 22 : 0;
+    if (extra || below) {
+      s.setAttribute('height', height + extra + below);
+      s.setAttribute('viewBox', '0 ' + (-extra) + ' ' + width + ' ' + (height + extra + below));
     }
     setTimeout(function () { wrap.scrollLeft = wrap.scrollWidth; }, 0);
     return wrap;
