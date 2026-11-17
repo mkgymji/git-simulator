@@ -729,5 +729,15 @@ GitI18n.add('en', {
   "Kopírovat":
     "Copy",
   "Adresa je zkopírovaná. V terminálu ji vložíš Ctrl+V.":
-    "The address has been copied. Paste it in the terminal with Ctrl+V."
+    "The address has been copied. Paste it in the terminal with Ctrl+V.",
+  "Vrátí stav na začátek tohoto úkolu. Splněné úkoly zůstanou.":
+    "Returns everything to the start of this task. Completed tasks stay completed.",
+  "Začít úkol znovu":
+    "Restart this task",
+  "Začít úkol {0} znovu?":
+    "Restart task {0}?",
+  "Vrátí se stav ze začátku tohoto úkolu: soubory, repozitáře, GitHub i terminál. Splněné úkoly zůstanou splněné.":
+    "Everything returns to how it was at the start of this task: files, repositories, GitHub and the terminal. Completed tasks stay completed.",
+  "Úkol {0} začíná znovu.":
+    "Task {0} starts again."
 });

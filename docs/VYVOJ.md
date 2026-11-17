@@ -31,7 +31,8 @@ python3 tests/fuzz_repo.py 25 7   # náhodná práce s repozitářem, semínko 7
 - `tests/scenario_lang_test.js` – jazyk scénářů (chyby s čísly řádků, podmínky, příprava);
 - `tests/scenario_en_test.js` – vestavěné scénáře jdou vyřešit (řešení v `tests/solutions.js`, se
   zprávami commitů jinými než v nápovědě), každý blok `AUTO` proběhne a anglická verze se řeší stejnými
-  kroky jako česká a odškrtává úkoly ve stejném okamžiku;
+  kroky jako česká a odškrtává úkoly ve stejném okamžiku; uprostřed každého úkolu ho test vrátí
+  na začátek („Začít úkol znovu“), porovná stav se začátkem úkolu a řešení dokončí;
 - `tools/i18n_check.py` – každý text rozhraní má anglický překlad.
 
 ## Překlady

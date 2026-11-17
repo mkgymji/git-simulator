@@ -111,6 +111,7 @@
         html += '<li class="' + cls + '" data-i="' + i + '"><span class="mark">' + CHECK + '</span><div class="ttext"><p>' + t.text + '</p></div>';
         if (t.question && (app.done[i] || i === current)) html += tr('<div class="q">Odpověz si: {0}</div>', esc(t.question));
         if (app.autoNotes && app.autoNotes[i]) html += '<div class="auto-note"><b>' + tr('Doplnil simulátor:') + '</b> ' + app.autoNotes[i].join(' ') + '</div>';
+        if (i === current && SS.canRestart(app, i)) html += '<button class="restart-btn" type="button" data-restart="' + i + '" title="' + tr('Vrátí stav na začátek tohoto úkolu. Splněné úkoly zůstanou.') + '">' + tr('Začít úkol znovu') + '</button>';
         if (t.hint && !app.done[i]) {
           var open = app.openHints && app.openHints[i];
           html += '<button class="hint-btn" type="button" data-hint="' + i + '">' + (open ? tr('Skrýt nápovědu') : tr('Nápověda')) + '</button>';
@@ -124,6 +125,9 @@
       html += tr('<div class="intro"><p>V tomhle režimu nejsou úkoly. Graf a tři oblasti vpravo ukazují, co se děje.</p></div>');
     }
     box.innerHTML = html;
+    box.querySelectorAll('[data-restart]').forEach(function (b) {
+      b.addEventListener('click', function () { restartTaskDialog(+b.getAttribute('data-restart')); });
+    });
     box.querySelectorAll('[data-hint]').forEach(function (b) {
       b.addEventListener('click', function () {
         app.openHints = app.openHints || {};
@@ -1265,6 +1269,28 @@
     var ov = overlay(d);
     x.addEventListener('click', function () { ov.close(); });
     setTimeout(function () { x.focus(); }, 0);
+  }
+
+  function restartTaskDialog(i) {
+    var d = el('div', { class: 'dialog', role: 'dialog', 'aria-modal': 'true', style: 'max-width:440px' });
+    d.innerHTML = '<div class="dhead">' + tr('Začít úkol {0} znovu?', i + 1) + '</div><div class="dbody">' +
+      tr('Vrátí se stav ze začátku tohoto úkolu: soubory, repozitáře, GitHub i terminál. Splněné úkoly zůstanou splněné.') + '</div>';
+    var f = el('div', { class: 'dfoot' });
+    var cn = el('button', { class: 'dbtn', type: 'button' }, tr('Zrušit'));
+    var ok = el('button', { class: 'dbtn primary', type: 'button' }, tr('Začít úkol znovu'));
+    f.appendChild(cn); f.appendChild(ok); d.appendChild(f);
+    var ov = overlay(d);
+    cn.addEventListener('click', function () { ov.close(); });
+    ok.addEventListener('click', function () {
+      ov.close();
+      if (!SS.restartTask(app, i)) return;
+      app.seen = null;
+      renderAll();
+      app.seen = app.seen || {};
+      toast(tr('Úkol {0} začíná znovu.', i + 1));
+      setTimeout(focusTerm, 0);
+    });
+    setTimeout(function () { ok.focus(); }, 0);
   }
 
   function resetDialog() {

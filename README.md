@@ -13,7 +13,9 @@ nic se nemůže rozbít a vidíš, co se v Gitu děje.
 Stránka má tři barevně oddělené zóny:
 
 1. **Úkoly** (zelená) – zadání scénáře. Úkol se odškrtne sám, jakmile ho splníš. Pod úkolem je
-   **Nápověda** s příkazy a u některých otázka *Odpověz si*.
+   **Nápověda** s příkazy a u některých otázka *Odpověz si*. Když se v úkolu zamotáš, odkaz
+   **Začít úkol znovu** vrátí stav na jeho začátek (splněné úkoly zůstanou). Co za tebe doplnil
+   simulátor, je označené fialově.
 2. **Počítač** (modrá) – to, co máš na školním počítači:
    - **VS Code** se seznamem souborů vlevo a editorem vpravo. Soubory `.md` mají náhled
      (*Napíšeš* / *Uvidíš*). Ukládá se **Ctrl+S**.
@@ -53,7 +55,7 @@ nemá úkoly, a proto ani fajfku.
 Adresu scénáře stačí připsat za adresu simulátoru, např.
 `https://mkgymji.github.io/git-simulator/#vetve` (tak vedou i QR kódy v materiálech kurzu).
 
-Po obnovení stránky (F5) začíná scénář znovu.
+Po obnovení stránky (F5) nebo tlačítkem **Začít znovu** začíná celý scénář znovu.
 
 ## Vlastní scénáře (pro učitele)
 

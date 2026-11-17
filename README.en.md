@@ -15,6 +15,8 @@ The page has three colour-coded zones:
 
 1. **Tasks** (green) – the scenario's tasks. A task is ticked off automatically as soon as you
    complete it. Each task has a **Hint** with commands, and some have an *Answer for yourself* question.
+   If you get stuck in a task, **Restart this task** returns everything to its start (completed tasks
+   stay completed). What the simulator fills in for you is marked in violet.
 2. **Computer** (blue) – what you have on a school computer:
    - **VS Code** with the file list on the left and the editor on the right. `.md` files have a
      preview (*You write* / *You see*). Save with **Ctrl+S**.
@@ -54,7 +56,7 @@ no tasks, so it never gets a checkmark.
 Add the scenario address to the simulator address, e.g.
 `https://mkgymji.github.io/git-simulator/#vetve`.
 
-Reloading the page (F5) restarts the scenario.
+Reloading the page (F5) or the **Start over** button restarts the whole scenario.
 
 ## Your own scenarios (for teachers)
 

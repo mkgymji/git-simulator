@@ -9,6 +9,9 @@
 //   js/rename.js js/git.js js/shell.js js/session.js js/scenario-lang.js tests/solutions.js \
 //   tests/scenario_en_test.js -- <složka scenarios>
 var DIR = arguments[0] || 'scenarios';
+// pevné hodiny: porovnávají se různé běhy a hashe commitů závisí na čase
+var FIXED_NOW = Date.now();
+Date.now = function () { return FIXED_NOW; };
 var S = GitSession, L = GitScenarioLang, SOL = GitSolutions;
 var failures = 0, checks = 0;
 function fail(msg) { failures++; print('ROZDÍL: ' + msg); }
@@ -49,4 +52,44 @@ Object.keys(SOL.cs).forEach(function (id) {
   });
   print(id + ': ' + se.length + ' kroků, úkoly ' + Object.keys(b.done).length + '/' + te.length);
 });
+// --- Začít úkol znovu: uprostřed každého úkolu ho vrátit na začátek, pak dokončit stejnými kroky ---
+function stamp(a) {
+  var w = a.world, out = { done: a.done, active: a.active, machines: {}, remotes: {} };
+  w.machineOrder.forEach(function (id) {
+    var m = w.machines[id];
+    out.machines[id] = { cwd: m.cwd.join('/'), config: m.config.map(function (e) { return e.key + '=' + e.value; }).join(';'), log: a.log[id].length,
+      term: a.term[id].lines.length, root: JSON.stringify(m.root, function (k, v) { return k === 'times' ? undefined : v; }) };
+  });
+  for (var k in w.remotes) out.remotes[k] = JSON.stringify(w.remotes[k].branches) + w.remotes[k].collaborators;
+  return JSON.stringify(out);
+}
+[['cs', ''], ['en', 'en/']].forEach(function (lg) {
+  Object.keys(SOL.cs).forEach(function (id) {
+    var sc = L.compile(readFile(DIR + '/' + lg[1] + id + '.scenario'), id).scenario, steps = SOL[lg[0]][id];
+    if (!sc.tasks.length) return;
+    // kdy se který úkol stal aktuálním (index prvního kroku, který se v něm dělá) a stav v tu chvíli
+    var ref = S.create(sc), startAt = {}, startStamp = {};
+    S.evaluate(ref);
+    startAt[S.currentTask(ref)] = 0; startStamp[S.currentTask(ref)] = stamp(ref);
+    steps.forEach(function (st, k) {
+      SOL.step(ref, st); S.evaluate(ref);
+      var c = S.currentTask(ref);
+      if (c >= 0 && startAt[c] === undefined) { startAt[c] = k + 1; startStamp[c] = stamp(ref); }
+    });
+    Object.keys(startAt).forEach(function (cs) {
+      var c = +cs, from = startAt[c], to = c + 1 < sc.tasks.length && startAt[c + 1] !== undefined ? startAt[c + 1] : steps.length;
+      if (to - from < 1) return;
+      var a = S.create(sc), k;
+      S.evaluate(a);
+      for (k = 0; k < from + Math.ceil((to - from) / 2); k++) { SOL.step(a, steps[k]); S.evaluate(a); }
+      checks++;
+      if (!S.canRestart(a, c)) { fail(lg[0] + ' ' + id + ': úkol ' + (c + 1) + ' nejde začít znovu'); return; }
+      S.restartTask(a, c);
+      if (stamp(a) !== startStamp[c]) { fail(lg[0] + ' ' + id + ': po „začít úkol ' + (c + 1) + ' znovu“ jiný stav než na jeho začátku'); return; }
+      for (k = from; k < steps.length; k++) { SOL.step(a, steps[k]); S.evaluate(a); }
+      if (!sc.tasks.every(function (t, j) { return a.done[j]; })) fail(lg[0] + ' ' + id + ': po restartu úkolu ' + (c + 1) + ' řešení nedoběhlo ' + JSON.stringify(a.done));
+    });
+  });
+});
+
 print('EN KONTROL: ' + checks + ', ROZDÍLŮ: ' + failures);

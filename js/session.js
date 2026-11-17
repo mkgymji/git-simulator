@@ -53,7 +53,7 @@
     var a = {
       scen: scen, world: world, people: [], hidden: {}, persons: {}, github: false,
       active: null, view: {}, term: {}, ide: {}, log: {}, done: {}, gh: {}, seen: null, cardState: {}, finished: false,
-      autoFired: {}, autoNotes: {}
+      autoFired: {}, autoNotes: {}, snapshots: {}
     };
     function at(minutesAgo, fn) {
       if (minutesAgo !== undefined && minutesAgo !== null) world.now = function () { return Math.floor(realNow() - minutesAgo * 60); };
@@ -176,7 +176,50 @@
       a.finished = true;
       finishedNow = true;
     }
+    checkpoint(a);
     return { newly: newly, finishedNow: finishedNow, auto: events };
+  }
+
+  // ------------------------------------------------------------------
+  //  Začít úkol znovu: na začátku každého úkolu (když se stane aktuálním)
+  //  se uloží celý stav a jde se k němu vrátit. Nejde o UNDO příkazů –
+  //  vrací se jen začátek rozpracovaného úkolu.
+  // ------------------------------------------------------------------
+  var NOT_SAVED = { scen: true, snapshots: true };
+  function deepClone(x, seen) {
+    if (x === null || typeof x !== 'object') return x;          // funkce a hodnoty beze změny
+    if (seen.has(x)) return seen.get(x);
+    var y = Array.isArray(x) ? [] : Object.create(Object.getPrototypeOf(x));
+    seen.set(x, y);
+    for (var k in x) if (Object.prototype.hasOwnProperty.call(x, k)) y[k] = deepClone(x[k], seen);
+    return y;
+  }
+  function copyState(from, to) {
+    var seen = new Map(), k;
+    for (k in from) if (!NOT_SAVED[k]) to[k] = deepClone(from[k], seen);
+    return to;
+  }
+  // první nesplněný úkol (-1 = všechno splněné nebo žádné úkoly)
+  function currentTask(a) {
+    for (var i = 0; i < a.scen.tasks.length; i++) if (!a.done[i]) return i;
+    return -1;
+  }
+  function checkpoint(a) {
+    var i = currentTask(a);
+    if (i < 0 || a.snapshots[i]) return;
+    // čekající Git (editor, přihlášení) se uložit nedá – uloží se až po něm
+    for (var id in a.term) if (a.term[id].wait) return;
+    a.snapshots[i] = copyState(a, {});
+  }
+  function canRestart(a, i) { return !!a.snapshots[i]; }
+  // vrátí stav na začátek úkolu i; uložené začátky pozdějších úkolů zahodí
+  function restartTask(a, i) {
+    var snap = a.snapshots[i], k;
+    if (!snap) return false;
+    for (k in a) if (!NOT_SAVED[k]) delete a[k];
+    copyState(snap, a);
+    for (k in a.snapshots) if (+k > i) delete a.snapshots[k];
+    return true;
   }
 
   // záznam příkazu (pro kontroly "command … was run" a "output of …")
@@ -217,6 +260,7 @@
 
   root.GitSession = {
     create: create, evaluate: evaluate, checkCtx: checkCtx, logEntry: logEntry, applyOpen: applyOpen,
-    exec: exec, runAuto: runAuto, DEFAULT_PEOPLE: DEFAULT_PEOPLE
+    exec: exec, runAuto: runAuto, DEFAULT_PEOPLE: DEFAULT_PEOPLE,
+    currentTask: currentTask, canRestart: canRestart, restartTask: restartTask
   };
 })(typeof window !== 'undefined' ? window : globalThis);
