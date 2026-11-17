@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 //
 // Testy jazyka scénářů: chybové hlášky (text a číslo řádku) a vybrané podmínky.
-// Spuštění: jsc js/text.js js/world.js js/graph.js js/rename.js js/git.js js/shell.js \
+// Spuštění: jsc js/i18n.js js/text.js js/world.js js/graph.js js/rename.js js/git.js js/shell.js \
 //   js/session.js js/scenario-lang.js tests/scenario_lang_test.js
 var L = GitScenarioLang, S = GitSession, bad = 0, n = 0;
 
@@ -37,7 +37,7 @@ hasErr(HEAD + SETUP + 'TASK Úkol\n  CHECK file a.md is nice\nEND\n', 11, 'Nezn�
 hasErr(HEAD + 'SETUP\n  MACHINE alice\nEND\nTASK Úkol\n  CHECK branch x exists\nEND\n', 7, 'doplň do SETUP řádek REPOSITORY', 'podmínka bez REPOSITORY');
 hasErr(HEAD + SETUP + 'TASK Úkol\n  CHECK bob: repository exists\nEND\n', 11, 'takový počítač ve scénáři není', 'neznámý počítač v CHECK');
 hasErr(HEAD + SETUP + 'TASK Úkol\n  HINT a\nEND\n', 10, 'aspoň jednu podmínku CHECK', 'TASK bez CHECK');
-hasErr(HEAD + SETUP + 'TASK Úkol\n  CHECK repository exists\n  HINT git init\nEND\n', 12, 'patří před QUESTION a CHECK', 'HINT po CHECK');
+hasErr(HEAD + SETUP + 'TASK Úkol\n  CHECK repository exists\n  HINT git init\nEND\n', 12, 'patří před QUESTION, CHECK a AUTO', 'HINT po CHECK');
 hasErr(HEAD + SETUP + 'TASK Úkol\n  CHECK repository exists\n', 10, 'TASK není ukončený', 'neukončený TASK');
 hasErr(HEAD + SETUP + 'TASK Úkol\n  QUESTION a\n  QUESTION b\n  CHECK repository exists\nEND\n', 12, 'jen jednu QUESTION', 'dvě QUESTION');
 ok(errs(HEAD + 'SETUP\n  MACHINE alice HIDDEN\nEND\n').some(function (e) { return e.msg.indexOf('viditelný') >= 0; }), 'všechny počítače skryté');
@@ -91,6 +91,42 @@ ok(tr.errors && tr.errors.length === 2 && tr.errors[0].line === 7 && tr.errors[0
 var tr2 = L.compileAndTry(HEAD + 'SETUP\n  MACHINE alice\n  PS> git commit -m "x"\nEND\n', 'z');
 ok(tr2.errors && tr2.errors[0].line === 5 && /not a git repository/.test(tr2.errors[0].msg), 'git mimo repozitář v SETUP: ' + JSON.stringify(tr2.errors));
 // vestavěné scénáře: příprava bez chyb
+// --- AUTO: chyby ---
+hasErr(HEAD + SETUP + 'TASK T\n  CHECK repository exists\n  AUTO\n    PS> git status\n', 12, 'AUTO není ukončený', 'neukončený AUTO');
+hasErr(HEAD + SETUP + 'TASK T\n  CHECK repository exists\n  AUTO IF x\n    NOTE a\n  END\nEND\n', 12, 'Za AUTO může být jen WHEN', 'AUTO bez WHEN');
+hasErr(HEAD + SETUP + 'TASK T\n  CHECK repository exists\n  AUTO WHEN file a.md is nice\n    NOTE a\n  END\nEND\n', 12, 'Neznám podmínku', 'AUTO WHEN neznámá podmínka');
+hasErr(HEAD + SETUP + 'TASK T\n  CHECK repository exists\n  AUTO\n    JUMP\n  END\nEND\n', 13, 'Neznámé klíčové slovo JUMP v AUTO', 'neznámé slovo v AUTO');
+hasErr(HEAD + SETUP + 'TASK T\n  CHECK repository exists\n  AUTO\n  END\nEND\n', 12, 'AUTO je prázdný', 'prázdný AUTO');
+hasErr(HEAD + SETUP + 'TASK T\n  CHECK repository exists\n  AUTO\n    APPEND a.md\n      x\n', 13, 'APPEND a.md není ukončený', 'neukončený APPEND');
+hasErr(HEAD + SETUP + 'TASK T\n  CHECK repository exists\n  AUTO\n    NOTE a\n  END\n  HINT b\nEND\n', 15, 'patří před QUESTION, CHECK a AUTO', 'HINT po AUTO');
+
+// --- AUTO: běh ---
+var ra = L.compile(HEAD + SETUP +
+  'TASK Nadpis\n  CHECK file a.md contains "# A"\n' +
+  '  AUTO WHEN file a.md contains line starting with "# "\n    NOTE Doplněno `x`.\n    APPEND a.md\n\n      - jedna\n      # dva\n    END\n  END\n' +
+  '  AUTO\n    PS> git config --global user.email "a@b.cz"\n  END\nEND\n' +
+  'TASK Commit\n  CHECK commit adding "- jedna" exists\n  CHECK file a.md in any commit contains "# dva"\nEND\n' +
+  'TASK Revert\n  CHECK commit adding "- jedna" is reverted\nEND\n', 'a');
+ok(!ra.errors, 'AUTO scénář bez chyb: ' + JSON.stringify(ra.errors));
+if (!ra.errors) {
+  var aa = S.create(ra.scenario), am = aa.world.machines.alice, ad = am.dir();
+  var e0 = S.evaluate(aa);
+  ok(e0.auto.length === 0 && !aa.done[0], 'AUTO na začátku neproběhne');
+  ad.files['a.md'] = '# A\n';
+  var e1 = S.evaluate(aa);
+  ok(ad.files['a.md'] === '# A\n\n- jedna\n# dva\n', 'APPEND doplní text (i řádek s #): ' + JSON.stringify(ad.files['a.md']));
+  ok(aa.done[0] === true, 'úkol splněný po AUTO WHEN');
+  ok(am.config.some(function (c) { return c.key === 'user.email' && c.value === 'a@b.cz'; }), 'AUTO bez WHEN proběhne po splnění úkolu');
+  ok(e1.auto.length === 2 && e1.auto[0].items[0].html === 'Doplněno <code>x</code>.', 'události AUTO: ' + JSON.stringify(e1.auto.map(function (x) { return x.items.length; })));
+  ok(aa.autoNotes[0] && aa.autoNotes[0].length === 1, 'poznámka AUTO u úkolu');
+  var e2 = S.evaluate(aa);
+  ok(e2.auto.length === 0 && ad.files['a.md'].split('- jedna').length === 2, 'AUTO proběhne jen jednou');
+  S.exec(aa, 'alice', 'git add a.md'); S.exec(aa, 'alice', 'git commit -m "cokoliv"'); S.evaluate(aa);
+  ok(aa.done[1] === true, 'commit adding / in any commit nezávisí na zprávě');
+  S.exec(aa, 'alice', 'git revert --no-edit HEAD'); S.evaluate(aa);
+  ok(aa.done[2] === true, 'commit adding … is reverted');
+}
+
 (typeof GitBuiltinScenarios !== 'undefined' ? GitBuiltinScenarios : []).forEach(function (it) {
   var rr = L.compileAndTry(it.text, it.id);
   ok(!rr.errors, 'vestavěný scénář ' + it.file + ' bez chyb: ' + JSON.stringify(rr.errors));

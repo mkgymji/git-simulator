@@ -36,7 +36,7 @@ SETUP
   VSCODE git/spolecna-kucharka
 END
 
-TASK Vytvoř soubor **buchty.md** s receptem a commitni ho.
+TASK Vytvoř soubor **buchty.md** (stačí nadpis `# Buchty`) a commitni ho.
   HINT  git add buchty.md
   HINT  git commit -m "Přidány buchty"
   CHECK file buchty.md in HEAD exists

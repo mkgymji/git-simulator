@@ -310,6 +310,8 @@ kbd {
 .c-bc { font-weight: 700; color: #6FE3CC; } .c-bu { font-weight: 700; color: #8CC8FF; } .c-bm { font-weight: 700; color: #E5B5F5; }
 .c-R { background: #B42318; color: #fff; }
 .c-n { color: var(--t-seda); font-style: italic; }
+.c-prompt { color: var(--t-prompt); }
+.c-auto { color: var(--t-purpur); }
 .ln.note { white-space: pre-wrap; }
 .ln.progress { color: var(--t-seda); }
 
@@ -546,3 +548,10 @@ a.tbtn { text-decoration: none; display: inline-flex; align-items: center; }
   box-shadow: 0 4px 16px rgba(0, 90, 160, .25);
 }
 .card.vscode > .card-head { background: #E8F3FB; border-bottom-color: #9CCBEA; color: #005A9E; }
+
+/* co simulátor doplnil za studenta (AUTO) */
+.tasks .auto-note { grid-column: 2;
+  margin: 6px 0 2px; padding: 6px 8px; border-left: 3px solid var(--fialova); background: #F6F1FE;
+  border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.45; color: #3B2A63;
+}
+.tasks .auto-note code { font-size: 12px; }

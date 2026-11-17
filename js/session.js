@@ -14,7 +14,12 @@
  *  příkazů a vyhodnocuje úkoly. Používá ho rozhraní (ui.js) i testy.
  *
  *  Scénář: {id, kicker, title, short, intro (HTML), setup(api), tasks: [...]}
- *  Úkol:   {text, hint, question, check(c) -> bool}
+ *  Úkol:   {text, hint, question, check(c) -> bool, autos: [{when(c)|null, machine, steps}]}
+ *
+ *  AUTO: kroky, které simulátor udělá za studenta (nastavení, doplnění textu
+ *  souboru…), když platí podmínka WHEN, nebo bez ní po splnění úkolu. Každý
+ *  blok proběhne jednou; evaluate() vrací, co se stalo (auto), aby to rozhraní
+ *  ukázalo v terminálu.
  * ===================================================================== */
 (function (root) {
   'use strict';
@@ -47,7 +52,8 @@
     var realNow = world.now;
     var a = {
       scen: scen, world: world, people: [], hidden: {}, persons: {}, github: false,
-      active: null, view: {}, term: {}, ide: {}, log: {}, done: {}, gh: {}, seen: null, cardState: {}, finished: false
+      active: null, view: {}, term: {}, ide: {}, log: {}, done: {}, gh: {}, seen: null, cardState: {}, finished: false,
+      autoFired: {}, autoNotes: {}
     };
     function at(minutesAgo, fn) {
       if (minutesAgo !== undefined && minutesAgo !== null) world.now = function () { return Math.floor(realNow() - minutesAgo * 60); };
@@ -109,20 +115,68 @@
     };
   }
 
-  // vyhodnotí úkoly; splněný úkol zůstává splněný. Vrací {newly, finishedNow}
+  // složka pro FILE/APPEND v AUTO: repozitář scénáře (REPOSITORY), když na počítači je, jinak aktuální složka
+  function autoFolder(a, m) {
+    if (a.scen.repoPath) {
+      var p = m.home.concat(a.scen.repoPath), d = m.dirAt(p);
+      if (d) return { dir: d, path: p };
+    }
+    return { dir: m.dir(), path: m.cwd.slice() };
+  }
+
+  // provede blok AUTO (jen jednou). Vrací {task, items: [{id, note, html} | {id, cmd, prompt, lines} | {id, file, folder, content}]}
+  function fireAuto(a, i, k, auto) {
+    var key = i + '.' + k;
+    if (a.autoFired[key]) return null;
+    a.autoFired[key] = true;
+    var cur = auto.machine, ev = { task: i, items: [] };
+    auto.steps.forEach(function (st) {
+      if (st.op === 'as') { cur = st.id; return; }
+      var m = a.world.machines[cur];
+      if (!m) return;
+      if (st.op === 'note') {
+        ev.items.push({ id: cur, note: st.text, html: st.html });
+        (a.autoNotes[i] = a.autoNotes[i] || []).push(st.html);
+      } else if (st.op === 'run') {
+        var prompt = m.prompt(), r = runAuto(m, st.cmd);
+        if (r.open) applyOpen(a, cur, r.open);
+        ev.items.push({ id: cur, cmd: st.cmd, prompt: prompt, lines: r.lines });
+      } else if (st.op === 'file' || st.op === 'append') {
+        var f = autoFolder(a, m), old = f.dir.files[st.name];
+        f.dir.files[st.name] = st.op === 'file' || !old ? st.content : (/\n$/.test(old) ? old : old + '\n') + st.content;
+        m.times = m.times || {};
+        m.times[f.path.concat([st.name]).join('/')] = a.world.now();
+        ev.items.push({ id: cur, file: st.name, folder: f.path, content: f.dir.files[st.name] });
+      }
+    });
+    return ev;
+  }
+
+  // vyhodnotí úkoly; splněný úkol zůstává splněný. Vrací {newly, finishedNow, auto: [události AUTO]}
   function evaluate(a) {
-    var c = checkCtx(a), tasks = a.scen.tasks, i, newly = false, finishedNow = false;
-    for (i = 0; i < tasks.length; i++) {
-      if (a.done[i]) continue;
-      var ok = false;
-      try { ok = !!tasks[i].check(c); } catch (e) { ok = false; }
-      if (ok) { a.done[i] = true; newly = true; }
+    var c = checkCtx(a), tasks = a.scen.tasks, i, newly = false, finishedNow = false, events = [], pass, changed;
+    function safe(fn) { try { return !!fn(c); } catch (e) { return false; } }
+    // AUTO mění svět, takže se vyhodnocuje znovu, dokud se něco děje
+    for (pass = 0; pass < 5; pass++) {
+      changed = false;
+      for (i = 0; i < tasks.length; i++) {
+        if (a.done[i]) continue;
+        var autos = tasks[i].autos || [];
+        autos.forEach(function (au, k) {
+          if (au.when && !a.autoFired[i + '.' + k] && safe(au.when)) { var ev = fireAuto(a, i, k, au); if (ev) { events.push(ev); changed = true; } }
+        });
+        if (safe(tasks[i].check)) {
+          a.done[i] = true; newly = true; changed = true;
+          autos.forEach(function (au, k) { if (!au.when) { var ev = fireAuto(a, i, k, au); if (ev) events.push(ev); } });
+        }
+      }
+      if (!changed) break;
     }
     if (tasks.length && !a.finished && tasks.every(function (t, k) { return a.done[k]; })) {
       a.finished = true;
       finishedNow = true;
     }
-    return { newly: newly, finishedNow: finishedNow };
+    return { newly: newly, finishedNow: finishedNow, auto: events };
   }
 
   // záznam příkazu (pro kontroly "command … was run" a "output of …")

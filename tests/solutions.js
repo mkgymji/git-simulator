@@ -3,7 +3,7 @@
 //
 // Řešení vestavěných scénářů pro testy: české (scenarios/) a anglické (scenarios/en/).
 // Anglické řešení je krok za krokem stejné jako české, jen s anglickými názvy a texty.
-// Kroky: 'příkaz' | {as: id} | {write: [název, obsah]} | {open: true} | {gh: 'create'|'invite'|'accept'|'edit', ...}
+// Kroky: 'příkaz' | {as: id} | {write: [název, obsah]} | {append: [název, text]} | {open: true} | {gh: 'create'|'invite'|'accept'|'edit', ...}
 var GitSolutions = (function () {
 // 'příkaz' | {as: id} | {write: [název, obsah]} | {gh: 'create'|'invite'|'accept'|'edit', ...}
 function step(a, st) {
@@ -12,6 +12,7 @@ function step(a, st) {
   if (st.as) { a.active = st.as; return; }
   var w = a.world, m = w.machines[a.active];
   if (st.write) { m.dir().files[st.write[0]] = st.write[1]; return; }
+  if (st.append) { var dd = m.dir(); dd.files[st.append[0]] = (dd.files[st.append[0]] || '') + st.append[1]; return; }
   if (st.open) { a.ide[a.active].folder = m.cwd.slice(); return; }
   if (st.gh === 'create') { var r = w.createRemote(m.login, st.name, { private: true, readme: !!st.readme }); r.invites = []; return; }
   if (st.gh === 'invite') { w.remotes[st.repo].invites.push(st.who); return; }
@@ -22,20 +23,18 @@ function step(a, st) {
 var PAL_CS = '# Palačinky\n\n## Suroviny\n\n- 250 ml mléka\n- 1 vejce\n';
 var CS = {
   volne: ['git status', 'git init'],
-  pl1: ['git status', 'pwd', 'git --version', 'git config --global user.name "Jana Nováková"', 'git config --global user.email "novakovaj@jirovcovka.net"',
-    'git config --global init.defaultBranch main', 'git config --global core.editor "code --wait"', 'git config --global pull.rebase false',
-    'git config --global core.quotepath false', 'git config --global --list', 'cd ~', 'mkdir git', 'cd git', 'mkdir kucharka', 'cd kucharka', 'git init',
-    'git status', 'code -r .', 'git status', { write: ['palacinky.md', '# Palačinky\n'] }, 'git status', { write: ['palacinky.md', PAL_CS] }, 'git status',
-    'git add palacinky.md', 'git commit -m "Přidán recept na palačinky"', { write: ['palacinky.md', PAL_CS + '\n## Tip\n\nMarmeláda.\n'] },
-    'git commit -am "Přidán tip"', 'git log', 'git log --oneline'],
-  pl2: [{ write: ['palacinky.md', '# Palačinky\n\n## Postup\n\n1. Smíchej.\n'] }, 'git diff --staged', 'git diff', 'git commit -am "Přidán postup"',
-    { write: ['livance.md', '# Lívance\n'] }, 'git add livance.md', 'git commit -m "Přidány lívance"',
-    { write: ['README.md', '- [Palačinky](palacinky.md)\n- [Lívance](livance.md)\n'] }, 'git add .', 'git commit -m "Obsah"',
+  pl1: ['git status', 'pwd', 'git --version', 'git config --global user.name "Jana Nováková"', 'git config --global --list',
+    'cd ~', 'mkdir git', 'cd git', 'mkdir kucharka', 'cd kucharka', 'git init', 'git status', 'code -r .', 'git status',
+    { write: ['palacinky.md', '# Palačinky\n'] }, 'git status', { write: ['palacinky.md', '# Palačinky\n\n## Suroviny\n'] }, 'git status',
+    'git add palacinky.md', 'git commit -m "recept"', { append: ['palacinky.md', '\n## Tip\n'] }, 'git commit -am "tip"', 'git log', 'git log --oneline'],
+  pl2: [{ append: ['palacinky.md', '\n## Postup\n\n1. Smíchej.\n'] }, 'git diff --staged', 'git diff', 'git commit -am "postup"',
+    { write: ['livance.md', '# Lívance\n'] }, { append: ['livance.md', '*Teplé.*\n'] }, 'git add livance.md', 'git commit -m "md added"',
+    { write: ['README.md', '# K\n\n- [Palačinky](palacinky.md)\n'] }, 'git add .', 'git commit -m "Obsah"',
     'git log --oneline', 'git log', { write: ['palacinky.md', 'nic\n'] }, 'git restore palacinky.md', { write: ['palacinky.md', 'mléka\n'] }, 'git restore palacinky.md',
     'git restore palacinky.md', 'git restore --source=HEAD~3 palacinky.md', 'git restore palacinky.md',
-    { write: ['livance.md', '# Lívance\n- 2 kg soli\n'] }, 'git commit -am "Přidána chyba"', 'git revert --no-edit HEAD',
+    { append: ['livance.md', '- 2 kg soli\n'] }, 'git commit -am "oops"', 'git revert --no-edit HEAD',
     { write: ['poznamky-pro-me.md', 'x\n'] }, { write: ['.gitignore', 'poznamky-pro-me.md\n'] }, 'git add .gitignore', 'git commit -m "Přidán .gitignore"'],
-  revert: ['git log --oneline', { write: ['livance.md', '# Lívance\n- 2 kg soli\n'] }, 'git commit -am "Přidána chyba"', 'git log --oneline', 'git revert --no-edit HEAD', 'git log --oneline'],
+  revert: ['git log --oneline', { append: ['livance.md', '- 2 kg soli\n'] }, 'git commit -am "oops"', 'git log --oneline', 'git revert --no-edit HEAD', 'git log --oneline'],
   pl3: ['git status', { gh: 'create', name: 'kucharka' }, 'git remote add origin https://github.com/jana-novakova/kucharka.git', 'git branch -M main',
     'git push -u origin main', { gh: 'edit', repo: 'jana-novakova/kucharka', file: 'palacinky.md', content: PAL_CS + '\n| a | b |\n|---|---|\n| 1 | 2 |\n' },
     'git status', 'git pull', { write: ['livance.md', 'tip\n'] }, 'git add .', 'git commit -m "Tip"', 'git push'],
@@ -58,20 +57,18 @@ var CS = {
 var PAL_EN = '# Pancakes\n\n## Ingredients\n\n- 250 ml milk\n- 1 egg\n';
 var EN = {
   volne: ['git status', 'git init'],
-  pl1: ['git status', 'pwd', 'git --version', 'git config --global user.name "Jana Nováková"', 'git config --global user.email "novakovaj@jirovcovka.net"',
-    'git config --global init.defaultBranch main', 'git config --global core.editor "code --wait"', 'git config --global pull.rebase false',
-    'git config --global core.quotepath false', 'git config --global --list', 'cd ~', 'mkdir git', 'cd git', 'mkdir cookbook', 'cd cookbook', 'git init',
-    'git status', 'code -r .', 'git status', { write: ['pancakes.md', '# Pancakes\n'] }, 'git status', { write: ['pancakes.md', PAL_EN] }, 'git status',
-    'git add pancakes.md', 'git commit -m "Add pancake recipe"', { write: ['pancakes.md', PAL_EN + '\n## Tip\n\nJam.\n'] },
-    'git commit -am "Add tip"', 'git log', 'git log --oneline'],
-  pl2: [{ write: ['pancakes.md', '# Pancakes\n\n## Method\n\n1. Mix.\n'] }, 'git diff --staged', 'git diff', 'git commit -am "Add method"',
-    { write: ['drop-scones.md', '# Drop scones\n'] }, 'git add drop-scones.md', 'git commit -m "Add drop scones"',
-    { write: ['README.md', '- [Pancakes](pancakes.md)\n- [Drop scones](drop-scones.md)\n'] }, 'git add .', 'git commit -m "Contents"',
+  pl1: ['git status', 'pwd', 'git --version', 'git config --global user.name "Jana Nováková"', 'git config --global --list',
+    'cd ~', 'mkdir git', 'cd git', 'mkdir cookbook', 'cd cookbook', 'git init', 'git status', 'code -r .', 'git status',
+    { write: ['pancakes.md', '# Pancakes\n'] }, 'git status', { write: ['pancakes.md', '# Pancakes\n\n## Ingredients\n'] }, 'git status',
+    'git add pancakes.md', 'git commit -m "recipe"', { append: ['pancakes.md', '\n## Tip\n'] }, 'git commit -am "tip"', 'git log', 'git log --oneline'],
+  pl2: [{ append: ['pancakes.md', '\n## Method\n\n1. Mix.\n'] }, 'git diff --staged', 'git diff', 'git commit -am "method"',
+    { write: ['drop-scones.md', '# Drop scones\n'] }, { append: ['drop-scones.md', '*Warm.*\n'] }, 'git add drop-scones.md', 'git commit -m "md added"',
+    { write: ['README.md', '# C\n\n- [Pancakes](pancakes.md)\n'] }, 'git add .', 'git commit -m "Contents"',
     'git log --oneline', 'git log', { write: ['pancakes.md', 'nothing\n'] }, 'git restore pancakes.md', { write: ['pancakes.md', 'milk\n'] }, 'git restore pancakes.md',
     'git restore pancakes.md', 'git restore --source=HEAD~3 pancakes.md', 'git restore pancakes.md',
-    { write: ['drop-scones.md', '# Drop scones\n- 2 kg salt\n'] }, 'git commit -am "Add mistake"', 'git revert --no-edit HEAD',
+    { append: ['drop-scones.md', '- 2 kg salt\n'] }, 'git commit -am "oops"', 'git revert --no-edit HEAD',
     { write: ['notes-for-me.md', 'x\n'] }, { write: ['.gitignore', 'notes-for-me.md\n'] }, 'git add .gitignore', 'git commit -m "Add .gitignore"'],
-  revert: ['git log --oneline', { write: ['drop-scones.md', '# Drop scones\n- 2 kg salt\n'] }, 'git commit -am "Add mistake"', 'git log --oneline', 'git revert --no-edit HEAD', 'git log --oneline'],
+  revert: ['git log --oneline', { append: ['drop-scones.md', '- 2 kg salt\n'] }, 'git commit -am "oops"', 'git log --oneline', 'git revert --no-edit HEAD', 'git log --oneline'],
   pl3: ['git status', { gh: 'create', name: 'cookbook' }, 'git remote add origin https://github.com/jana-novakova/cookbook.git', 'git branch -M main',
     'git push -u origin main', { gh: 'edit', repo: 'jana-novakova/cookbook', file: 'pancakes.md', content: PAL_EN + '\n| a | b |\n|---|---|\n| 1 | 2 |\n' },
     'git status', 'git pull', { write: ['drop-scones.md', 'tip\n'] }, 'git add .', 'git commit -m "Tip"', 'git push'],

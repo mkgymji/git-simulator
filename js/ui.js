@@ -47,8 +47,28 @@
   // ------------------------------------------------------------------
   function evaluate() {
     var r = SS.evaluate(app);
+    r.auto.forEach(showAuto);
     if (r.finishedNow) { confetti(); STORE.markDone(app.scen.id); showDone(); }
     return r.newly;
+  }
+
+  // co udělal simulátor za studenta (AUTO): do terminálu daného počítače, soubor i do otevřeného editoru
+  function showAuto(ev) {
+    var hasNote = ev.items.some(function (it) { return it.note !== undefined; });
+    ev.items.forEach(function (it) {
+      var t = app.term[it.id];
+      if (!t) return;
+      if (it.note !== undefined) {
+        t.lines.push({ s: [[tr('Doplnil simulátor: {0}', it.note.replace(/[`*]/g, '')), 'n']], k: 'note' });
+      } else if (it.cmd !== undefined) {
+        t.lines.push({ s: [[it.prompt + ' ', 'prompt'], [it.cmd, 'auto'], ['   ' + tr('← simulátor'), 'n']] });
+        t.lines = t.lines.concat(it.lines || []);
+      } else if (it.file !== undefined) {
+        var ide = app.ide[it.id];
+        if (ide && ide.file === it.file && ide.folder && ide.folder.join('/') === it.folder.join('/') && !ide.dirty) ide.buffer = it.content;
+        if (!hasNote) t.lines.push({ s: [[tr('Simulátor: do souboru {0} doplnil text – podívej se do editoru.', it.file), 'n']], k: 'note' });
+      }
+    });
   }
 
   // ------------------------------------------------------------------
@@ -69,6 +89,7 @@
         var cls = 'task' + (app.done[i] ? ' done' : '') + (i === current ? ' current' : '');
         html += '<li class="' + cls + '" data-i="' + i + '"><span class="mark">' + CHECK + '</span><div class="ttext"><p>' + t.text + '</p></div>';
         if (t.question && (app.done[i] || i === current)) html += tr('<div class="q">Odpověz si: {0}</div>', esc(t.question));
+        if (app.autoNotes && app.autoNotes[i]) html += '<div class="auto-note"><b>' + tr('Doplnil simulátor:') + '</b> ' + app.autoNotes[i].join(' ') + '</div>';
         if (t.hint && !app.done[i]) {
           var open = app.openHints && app.openHints[i];
           html += '<button class="hint-btn" type="button" data-hint="' + i + '">' + (open ? tr('Skrýt nápovědu') : tr('Nápověda')) + '</button>';

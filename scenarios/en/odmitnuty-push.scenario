@@ -36,7 +36,7 @@ SETUP
   VSCODE git/shared-cookbook
 END
 
-TASK Create a file **buns.md** with a recipe and commit it.
+TASK Create a file **buns.md** (just the heading `# Buns` is enough) and commit it.
   HINT  git add buns.md
   HINT  git commit -m "Add buns"
   CHECK file buns.md in HEAD exists

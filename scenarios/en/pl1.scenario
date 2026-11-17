@@ -3,6 +3,7 @@ SCENARIO My first repository
 LABEL    Worksheet 1
 SUMMARY  Git setup, git init, add, commit – the first version of a recipe.
 INTRO    You are **Jana Nováková** at a school computer. Follow the tasks; each one is ticked off automatically once you complete it.
+INTRO    It is about the steps, not about typing: where there would be a lot to type, the simulator fills in part of it and tells you (in violet).
 
 SETUP
   PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Jana's computer"
@@ -17,23 +18,20 @@ TASK Find out which folder you are in and which version of Git you have.
   CHECK command "git --version" was run
 END
 
-TASK Set your name and school e-mail.
-  HINT  git config --global user.name "Jana Nováková"
-  HINT  git config --global user.email "novakovaj@jirovcovka.net"
-  CHECK config user.name is set
-  CHECK config user.email contains "@"
-END
-
-TASK Copy the remaining four setup lines. Check the result with `git config --global --list`.
-  HINT  git config --global init.defaultBranch main
-  HINT  git config --global core.editor "code --wait"
-  HINT  git config --global pull.rebase false
-  HINT  git config --global core.quotepath false
-  CHECK config init.defaultBranch is "main"
-  CHECK config core.editor contains "code --wait"
-  CHECK config pull.rebase is "false"
-  CHECK config core.quotepath is "false"
-  CHECK command "git config --global --list" was run
+TASK Set your name. The simulator fills in the rest of the setup. Then list the whole setup.
+  HINT     git config --global user.name "Jana Nováková"
+  HINT     git config --global --list
+  QUESTION Which lines did the simulator fill in? Why will you type them yourself at school?
+  CHECK    config user.name is set
+  CHECK    command "git config --global --list" was run after command "git config --global user.name..."
+  AUTO WHEN config user.name is set
+    NOTE five more setup lines – your school e-mail (the same as on GitHub), the default branch `main`, VS Code as the editor, `git pull` with merging, and accented characters in file names. At school you will type them yourself.
+    PS> git config --global user.email "novakovaj@jirovcovka.net"
+    PS> git config --global init.defaultBranch main
+    PS> git config --global core.editor "code --wait"
+    PS> git config --global pull.rebase false
+    PS> git config --global core.quotepath false
+  END
 END
 
 TASK Create a folder **git** and inside it **cookbook**. Open it in VS Code and turn it into a repository.
@@ -51,25 +49,30 @@ TASK Create a folder **git** and inside it **cookbook**. Open it in VS Code and 
   CHECK    command "git status" was run
 END
 
-TASK In the Explorer, create a file **pancakes.md** and write a recipe: a heading `#`, a subheading `##` and bullet points `-`. Save it (**Ctrl+S**) and run `git status`.
-  NOTE     Click the **+** icon above the file list. The recipe can look like this:
+TASK In the Explorer, create a file **pancakes.md** with a heading `#` and a subheading `##`. Save it (**Ctrl+S**) and look at the preview. The simulator fills in the ingredients. Then run `git status`.
+  NOTE     Click the **+** icon above the file list and type:
   HINT     # Pancakes
   HINT
   HINT     ## Ingredients
-  HINT
-  HINT     - 250 ml milk
-  HINT     - 1 egg
-  HINT     - 120 g plain flour
-  HINT     - a pinch of salt
   QUESTION What colour is the file name and under which heading is it?
   CHECK    file pancakes.md contains line starting with "# "
   CHECK    file pancakes.md contains line starting with "## "
-  CHECK    file pancakes.md contains line starting with "- "
   CHECK    output of "git status" contains "Untracked files"
   CHECK    output of "git status" contains "pancakes.md"
+  AUTO WHEN file pancakes.md contains line starting with "## "
+    NOTE the ingredients as bullet points (lines starting with `- `). See how they look in the preview.
+    APPEND pancakes.md
+
+      - 250 ml milk
+      - 1 egg
+      - 120 g plain flour
+      - a pinch of salt
+    END
+  END
 END
 
 TASK Make your first commit.
+  NOTE     You can write the commit message your own way, as long as it is clear.
   HINT     git add pancakes.md
   HINT     git status
   HINT     git commit -m "Add pancake recipe"
@@ -77,11 +80,20 @@ TASK Make your first commit.
   CHECK    file pancakes.md in HEAD exists
 END
 
-TASK Add `## Tip` with one sentence to the recipe and make a second commit with a clear message.
+TASK Add a subheading `## Tip` at the end of the recipe and save – the simulator adds a sentence below it. Then make a second commit.
+  HINT  ## Tip
+  HINT
   HINT  git add pancakes.md
   HINT  git commit -m "Add filling tip"
   CHECK commit count is at least 2
   CHECK file pancakes.md in HEAD contains line starting with "## Tip"
+  AUTO WHEN file pancakes.md contains line starting with "## Tip"
+    NOTE one sentence under the tip. Words between asterisks are shown in *italics* in the preview.
+    APPEND pancakes.md
+
+      I fill them with *strawberry jam*.
+    END
+  END
 END
 
 TASK Look at the history.

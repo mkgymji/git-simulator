@@ -91,13 +91,10 @@ TASK Link the repository to GitHub and send it there. When signing in, choose **
   CHECK github jana-novakova/cookbook has branch main
 END
 
-TASK On GitHub, open **pancakes.md**, click the pencil and add a table at the end. Confirm with **Commit changes**.
-  HINT  ## Servings
-  HINT
-  HINT  | Servings | Milk   | Flour |
-  HINT  |----------|--------|-------|
-  HINT  | 2        | 250 ml | 120 g |
-  HINT  | 4        | 500 ml | 240 g |
+TASK On GitHub, open **pancakes.md**, click the pencil and add a small table at the end. Confirm with **Commit changes**.
+  HINT  | Servings | Milk   |
+  HINT  |----------|--------|
+  HINT  | 4        | 500 ml |
   CHECK file pancakes.md on github jana-novakova/cookbook contains "|"
 END
 
@@ -109,7 +106,7 @@ TASK Go back to VS Code and type `git status`. Then download the change.
   CHECK    file pancakes.md contains "|"
 END
 
-TASK Add a tip to **drop-scones.md**, commit it and send it to GitHub.
+TASK Add one sentence with a tip to **drop-scones.md**, commit it and send it to GitHub.
   HINT  git add .
   HINT  git commit -m "Add drop scones tip"
   HINT  git push

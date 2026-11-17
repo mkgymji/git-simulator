@@ -37,7 +37,7 @@ TASK Both clone the repository into the **git** folder and open it in VS Code.
   CHECK petr: repository exists
 END
 
-TASK Each of them creates a **different** recipe and commits it. **Anna** pushes first, **then** Petr.
+TASK Each of them creates a **different** recipe (just a heading is enough) and commits it. **Anna** pushes first, **then** Petr.
   HINT     git add .
   HINT     git commit -m "Add potato soup"
   HINT     git push
@@ -56,12 +56,9 @@ TASK **Petr** fixes it as the hint suggests: he pulls and pushes again. **Anna**
   CHECK github anna-svobodova/shared-cookbook main is a merge
 END
 
-TASK **Anna** adds links to both recipes and a quote (`>`) to the README, commits and pushes. **Petr** pulls.
-  HINT     # shared-cookbook
-  HINT
+TASK **Anna** adds a quote (`>`) and a link to one recipe to the README, commits and pushes. **Petr** pulls.
   HINT     > A cookbook we write together.
   HINT
-  HINT     - [Potato soup](potato-soup.md)
   HINT     - [Buns](buns.md)
   QUESTION Which two commands start and end your work on a shared project?
   CHECK    file README.md on github anna-svobodova/shared-cookbook contains line starting with ">"

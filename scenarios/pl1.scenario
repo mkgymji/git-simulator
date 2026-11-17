@@ -3,6 +3,7 @@ SCENARIO Můj první repozitář
 LABEL    Pracovní list 1
 SUMMARY  Nastavení Gitu, git init, add, commit – první verze receptu.
 INTRO    Jsi **Jana Nováková** na školním počítači. Postupuj podle úkolů; každý se odškrtne sám, až ho splníš.
+INTRO    Jde o kroky, ne o psaní: kde by se hodně psalo, část doplní simulátor a řekne ti to (fialově).
 
 SETUP
   PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Počítač Jany"
@@ -17,23 +18,20 @@ TASK Zjisti, ve které složce jsi a jakou verzi Gitu máš.
   CHECK command "git --version" was run
 END
 
-TASK Nastav své jméno a školní e-mail.
-  HINT  git config --global user.name "Jana Nováková"
-  HINT  git config --global user.email "novakovaj@jirovcovka.net"
-  CHECK config user.name is set
-  CHECK config user.email contains "@"
-END
-
-TASK Opiš zbylé čtyři řádky nastavení. Výsledek zkontroluj příkazem `git config --global --list`.
-  HINT  git config --global init.defaultBranch main
-  HINT  git config --global core.editor "code --wait"
-  HINT  git config --global pull.rebase false
-  HINT  git config --global core.quotepath false
-  CHECK config init.defaultBranch is "main"
-  CHECK config core.editor contains "code --wait"
-  CHECK config pull.rebase is "false"
-  CHECK config core.quotepath is "false"
-  CHECK command "git config --global --list" was run
+TASK Nastav své jméno. Zbytek nastavení doplní simulátor. Pak si celé nastavení vypiš.
+  HINT     git config --global user.name "Jana Nováková"
+  HINT     git config --global --list
+  QUESTION Které řádky doplnil simulátor? Proč je ve škole napíšeš i ty?
+  CHECK    config user.name is set
+  CHECK    command "git config --global --list" was run after command "git config --global user.name..."
+  AUTO WHEN config user.name is set
+    NOTE dalších pět řádků nastavení – školní e-mail (stejný jako na GitHubu), výchozí větev `main`, editor VS Code, `git pull` se slučováním a české znaky v názvech souborů. Ve škole je napíšeš sám.
+    PS> git config --global user.email "novakovaj@jirovcovka.net"
+    PS> git config --global init.defaultBranch main
+    PS> git config --global core.editor "code --wait"
+    PS> git config --global pull.rebase false
+    PS> git config --global core.quotepath false
+  END
 END
 
 TASK Vytvoř složku **git** a v ní **kucharka**. Otevři ji ve VS Code a udělej z ní repozitář.
@@ -51,25 +49,30 @@ TASK Vytvoř složku **git** a v ní **kucharka**. Otevři ji ve VS Code a uděl
   CHECK    command "git status" was run
 END
 
-TASK V Průzkumníku vytvoř soubor **palacinky.md** a napiš recept: nadpis `#`, podnadpis `##` a odrážky `-`. Ulož (**Ctrl+S**) a spusť `git status`.
-  NOTE     Klikni na ikonu **+** nad seznamem souborů. Recept může vypadat takhle:
+TASK V Průzkumníku vytvoř soubor **palacinky.md** s nadpisem `#` a podnadpisem `##`. Ulož (**Ctrl+S**) a podívej se na náhled. Suroviny doplní simulátor. Pak spusť `git status`.
+  NOTE     Klikni na ikonu **+** nad seznamem souborů a napiš:
   HINT     # Palačinky
   HINT
   HINT     ## Suroviny
-  HINT
-  HINT     - 250 ml mléka
-  HINT     - 1 vejce
-  HINT     - 120 g hladké mouky
-  HINT     - špetka soli
   QUESTION Jakou barvou je název souboru a pod jakým nadpisem je?
   CHECK    file palacinky.md contains line starting with "# "
   CHECK    file palacinky.md contains line starting with "## "
-  CHECK    file palacinky.md contains line starting with "- "
   CHECK    output of "git status" contains "Untracked files"
   CHECK    output of "git status" contains "palacinky.md"
+  AUTO WHEN file palacinky.md contains line starting with "## "
+    NOTE suroviny jako odrážky (řádky začínající `- `). Podívej se, jak vypadají v náhledu.
+    APPEND palacinky.md
+
+      - 250 ml mléka
+      - 1 vejce
+      - 120 g hladké mouky
+      - špetka soli
+    END
+  END
 END
 
 TASK Udělej první commit.
+  NOTE     Zprávu commitu můžeš napsat po svém, hlavně ať je srozumitelná.
   HINT     git add palacinky.md
   HINT     git status
   HINT     git commit -m "Přidán recept na palačinky"
@@ -77,11 +80,20 @@ TASK Udělej první commit.
   CHECK    file palacinky.md in HEAD exists
 END
 
-TASK Přidej do receptu `## Tip` s jednou větou a udělej druhý commit se srozumitelnou zprávou.
+TASK Přidej na konec receptu podnadpis `## Tip` a ulož – větu pod něj doplní simulátor. Pak udělej druhý commit.
+  HINT  ## Tip
+  HINT
   HINT  git add palacinky.md
   HINT  git commit -m "Přidán tip na plnění"
   CHECK commit count is at least 2
   CHECK file palacinky.md in HEAD contains line starting with "## Tip"
+  AUTO WHEN file palacinky.md contains line starting with "## Tip"
+    NOTE jednu větu pod tip. Slova mezi hvězdičkami budou v náhledu *kurzívou*.
+    APPEND palacinky.md
+
+      Plním je *jahodovou marmeládou*.
+    END
+  END
 END
 
 TASK Prohlédni si historii.

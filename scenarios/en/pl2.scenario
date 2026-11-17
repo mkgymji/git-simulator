@@ -43,12 +43,10 @@ SETUP
   VSCODE git/cookbook
 END
 
-TASK Add a method to **pancakes.md** as a numbered list (`1.`, `2.`…), save it and run `git diff` **before committing**. Then commit.
+TASK At the end of **pancakes.md**, add a subheading `## Method` and the first step as a numbered list. Save – the simulator adds the next steps. Run `git diff` **before committing**, then commit.
   HINT     ## Method
   HINT
   HINT     1. Mix everything in a bowl.
-  HINT     2. Let the batter rest for **15 minutes**.
-  HINT     3. Fry in a hot pan.
   HINT
   HINT     git diff
   HINT     git add pancakes.md
@@ -56,24 +54,54 @@ TASK Add a method to **pancakes.md** as a numbered list (`1.`, `2.`…), save it
   QUESTION How are the added lines marked in the output?
   CHECK    file pancakes.md in HEAD contains line starting with "1."
   CHECK    output of "git diff" contains line starting with "+"
+  AUTO WHEN file pancakes.md contains line starting with "1."
+    NOTE two more steps of the method. A numbered list: each line starts with a number and a dot, `**bold**` highlights text.
+    APPEND pancakes.md
+      2. Let the batter rest for **15 minutes**.
+      3. Fry in a hot pan.
+    END
+  END
 END
 
-TASK Create **drop-scones.md** with headings, bullet points, a numbered list and a note in *italics* (`*text*`). Commit it with the message **Add drop scones**.
+TASK Create **drop-scones.md** with just the heading `# Drop scones` and save – the simulator adds the ingredients and method. Then add a note in *italics* at the end and commit.
+  HINT  # Drop scones
+  HINT
+  HINT  *Best eaten warm.*
+  HINT
   HINT  git add drop-scones.md
   HINT  git commit -m "Add drop scones"
-  CHECK file drop-scones.md in HEAD exists
-  CHECK commit "drop scones" exists
+  CHECK file drop-scones.md in HEAD contains line starting with "*"
+  AUTO WHEN file drop-scones.md contains line starting with "# "
+    NOTE the ingredients and method. Write the note in italics between two asterisks: `*text*`.
+    APPEND drop-scones.md
+
+      ## Ingredients
+
+      - 300 ml milk
+      - 2 eggs
+      - 250 g self-raising flour
+
+      ## Method
+
+      1. Mix the ingredients.
+      2. Fry small rounds in a pan.
+
+    END
+  END
 END
 
-TASK Create **README.md** with links to both recipes and commit it. Try opening a link in the preview.
+TASK Create **README.md** with a heading and a link to the pancakes. The simulator adds the link to the drop scones. Commit it and try opening the link in the preview.
   HINT  # My cookbook
   HINT
-  HINT  Recipes I can cook.
-  HINT
   HINT  - [Pancakes](pancakes.md)
-  HINT  - [Drop scones](drop-scones.md)
   CHECK file README.md in HEAD contains "](pancakes.md)"
   CHECK file README.md in HEAD contains "](drop-scones.md)"
+  AUTO WHEN file README.md contains "](pancakes.md)"
+    NOTE the link to the drop scones. A link looks like `[text](file)`.
+    APPEND README.md
+      - [Drop scones](drop-scones.md)
+    END
+  END
 END
 
 TASK Look at the history in both ways.
@@ -98,12 +126,12 @@ TASK Bring back **pancakes.md** as it was in the first commit, then return to th
   CHECK command "git restore pancakes.md" was run after command "git restore --source..."
 END
 
-TASK Add the line `- 2 kg salt` to **drop-scones.md**, commit it as **Add mistake** and then revert the commit.
+TASK Add the line `- 2 kg salt` to **drop-scones.md**, commit it (for example with the message **Add mistake**) and then revert the commit.
   HINT     git commit -am "Add mistake"
   HINT     git log --oneline
   HINT     git revert --no-edit HASH
   QUESTION Did the commit “Add mistake” disappear from the history? Look at the graph.
-  CHECK    commit "mistake" is reverted
+  CHECK    commit adding "2 kg salt" is reverted
   CHECK    file drop-scones.md in HEAD does not contain "2 kg salt"
 END
 

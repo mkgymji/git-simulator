@@ -54,7 +54,7 @@
   //  Podmínky (CHECK) – slovník
   //  Každé pravidlo: re (bez předpony počítače), need ('repo' = potřebuje REPOSITORY), make(m, ctx) -> fn(c, id)
   // ------------------------------------------------------------------
-  var LOC = '(?:\\s+(in HEAD|in commit ' + Q + '|in branch (\\S+)|on github (\\S+?/\\S+)))?';
+  var LOC = '(?:\\s+(in HEAD|in any commit|in commit ' + Q + '|in branch (\\S+)|on github (\\S+?/\\S+)))?';
   var TEXTCOND = '(exists|does not exist|contains ' + Q + '|does not contain ' + Q + '|contains line starting with ' + Q + '|has no conflict markers)';
 
   function textTest(kind, val) {
@@ -96,6 +96,13 @@
     var t = c.world.trees[commit.tree];
     return t && t[name] ? c.world.blobs[t[name]] : null;
   }
+  function addsText(c, commit, txt) {
+    var t = c.world.trees[commit.tree], pt = commit.parents.length ? c.world.trees[c.world.commits[commit.parents[0]].tree] : {};
+    return Object.keys(t).some(function (p) {
+      var now = c.world.blobs[t[p]], before = pt[p] ? c.world.blobs[pt[p]] : '';
+      return now.indexOf(txt) >= 0 && before.indexOf(txt) < 0;
+    });
+  }
   function remoteOf(c, key) { return c.world.remotes[key.toLowerCase()] || null; }
 
   var RULES = [
@@ -114,6 +121,12 @@
           if (!loc) text = (name in rr.dir.files) ? rr.dir.files[name] : null;
           else if (loc === 'in HEAD') text = treeText(c, rr.repo.headHash() ? c.world.commits[rr.repo.headHash()] : null, name);
           else if (locBranch) { var bh = rr.repo.branches[locBranch]; text = bh ? treeText(c, c.world.commits[bh], name) : null; }
+          else if (loc === 'in any commit') {
+            return historyOf(c, rr.repo).some(function (k) {
+              var tx = treeText(c, k, name);
+              return cond.kind === 'exists' ? tx !== null : cond.kind === 'missing' ? tx === null : test(tx);
+            });
+          }
           else {
             var k = findCommit(c, rr.repo, locCommit);
             if (!k) return false;
@@ -137,6 +150,18 @@
         var low = msg.toLowerCase(), hist = historyOf(c, rr.repo);
         var bad = hist.filter(function (k) { return k.message.toLowerCase().indexOf(low) >= 0 && !isRevertMsg(k.message); });
         return bad.some(function (b) { return hist.some(function (k) { return k.message.indexOf('This reverts commit ' + b.hash) >= 0; }); });
+      };
+    } },
+    // commit, který přidal text (soubor v něm text má, v prvním předchůdci ne) – nezávisí na zprávě commitu
+    { re: new RegExp('^commit adding ' + Q + ' (exists|is reverted)$'), needsRepo: true, make: function (mm, ctx) {
+      var txt = qv(mm, 1), rev = mm[4] === 'is reverted';
+      return function (c, id) {
+        var rr = repoOf(c, id, ctx.repoPath);
+        if (!rr) return false;
+        var hist = historyOf(c, rr.repo);
+        var adds = hist.filter(function (k) { return !isRevertMsg(k.message) && addsText(c, k, txt); });
+        if (!rev) return adds.length > 0;
+        return adds.some(function (b) { return hist.some(function (k) { return k.message.indexOf('This reverts commit ' + b.hash) >= 0; }); });
       };
     } },
     { re: /^commit count is at least (\d+)$/, needsRepo: true, make: function (mm, ctx) {
@@ -212,7 +237,7 @@
       };
     }, needsRepo: function (mm) { return !!mm[5]; } }
   ];
-  var CHECK_STARTS = ['file', 'repository exists', 'commit', 'HEAD is a merge', 'merge is in progress', 'no merge is in progress',
+  var CHECK_STARTS = ['file', 'repository exists', 'commit', 'commit adding', 'HEAD is a merge', 'merge is in progress', 'no merge is in progress',
     'branch', 'on branch', 'branches', 'command', 'output of', 'config', 'vscode folder is', 'github'];
 
   // ------------------------------------------------------------------
@@ -363,46 +388,115 @@
     // TASK … END
     var ctx = { repoPath: sc.repoPath || [], githubRefs: [] };
     var machineIds = sc.machines.map(function (x) { return x.id; });
+
+    // podmínka CHECK (i za AUTO WHEN): [počítač:] text podmínky -> {fn, who} nebo null (chyba zapsaná)
+    function parseCheck(ln, text) {
+      var body2 = text, who = null, pref = /^([a-z][a-z0-9-]*):\s*(.*)$/.exec(body2);
+      if (pref) {
+        if (machineIds.indexOf(pref[1]) < 0) err(ln, tr('CHECK {0}: – takový počítač ve scénáři není.', pref[1]));
+        who = pref[1]; body2 = pref[2];
+      }
+      var rule = null, mm = null, r;
+      for (r = 0; r < RULES.length; r++) { mm = RULES[r].re.exec(body2.trim()); if (mm) { rule = RULES[r]; break; } }
+      if (!rule) {
+        var near = CHECK_STARTS.filter(function (s) { return body2.trim().indexOf(s.split(' ')[0]) === 0; });
+        err(ln, tr('Neznám podmínku „{0}“.', body2.trim()) + (near.length ? tr(' Podmínky začínající „{0}“ jsou popsané v docs/SCENARE.md.', near[0].split(' ')[0]) : tr(' Podmínka musí začínat jedním z: {0}.', CHECK_STARTS.join(', '))));
+        return null;
+      }
+      var needsRepo = typeof rule.needsRepo === 'function' ? rule.needsRepo(mm) : !!rule.needsRepo;
+      if (needsRepo && !sc.repoPath) err(ln, tr('Tahle podmínka se týká repozitáře – doplň do SETUP řádek REPOSITORY cesta/k/repozitari.'));
+      return { fn: rule.make(mm, ctx), who: who };
+    }
+
+    // obsah FILE/APPEND … END od řádku za i; posune i na řádek END. Vrací text nebo null (chybí END)
+    function readBody() {
+      var content = [];
+      i++;
+      while (i < lines.length) {
+        if (/^\s*END\s*$/.test(lines[i])) {
+          var ind = null;
+          content.forEach(function (l) { if (/\S/.test(l)) { var n = /^[ \t]*/.exec(l)[0].length; ind = ind === null ? n : Math.min(ind, n); } });
+          var body = content.map(function (l) { return l.slice(ind || 0).replace(/\s+$/, ''); });
+          while (body.length && body[body.length - 1] === '') body.pop();
+          return body.length ? body.join('\n') + '\n' : '';
+        }
+        content.push(lines[i]);
+        i++;
+      }
+      return null;
+    }
+
+    // AUTO [WHEN podmínka] … END: kroky, které simulátor udělá za studenta. i ukazuje na řádek AUTO,
+    // po návratu na jeho END (nebo za konec souboru)
+    function parseAuto(ln, rest) {
+      var auto = { when: null, steps: [], line: ln, who: null };
+      if (rest) {
+        var wm = /^WHEN\s+(.+)$/.exec(rest);
+        if (!wm) err(ln, tr('Za AUTO může být jen WHEN a podmínka, např. AUTO WHEN config user.name is set'));
+        else { auto.when = parseCheck(ln, wm[1]); if (auto.when) auto.who = auto.when.who; }
+      }
+      var closed = false;
+      i++;
+      while (i < lines.length) {
+        var l = lines[i];
+        if (isBlank(l) || isComment(l)) { i++; continue; }
+        var a = kw(l), at = i;
+        if (!a) { err(i, tr('Neznámý řádek v AUTO (povolené NOTE, AS, PS>, FILE, APPEND, END).')); i++; continue; }
+        if (a.k === 'END') { closed = true; break; }
+        if (a.k === 'TASK') break;
+        if (a.k === 'NOTE') {
+          if (!a.rest) err(i, tr('NOTE potřebuje text.'));
+          auto.steps.push({ op: 'note', text: a.rest });
+        } else if (a.k === 'AS') {
+          if (machineIds.indexOf(a.rest) < 0) err(i, tr('AS {0}: takový počítač není (chybí MACHINE {1}).', a.rest, a.rest));
+          auto.steps.push({ op: 'as', id: a.rest });
+        } else if (a.k === 'PS>') {
+          if (!a.rest) err(i, tr('PS> potřebuje příkaz.'));
+          auto.steps.push({ op: 'run', cmd: a.rest });
+        } else if (a.k === 'FILE' || a.k === 'APPEND') {
+          if (!a.rest || /[\\\/:*?"<>|]/.test(a.rest)) err(i, tr('{0} potřebuje název souboru bez lomítek, např. {0} recept.md', a.k));
+          var body = readBody();
+          if (body === null) { err(at, tr('{0} {1} není ukončený řádkem END.', a.k, a.rest)); return null; }
+          auto.steps.push({ op: a.k === 'FILE' ? 'file' : 'append', name: a.rest, content: body });
+        } else err(i, tr('Neznámé klíčové slovo {0} v AUTO. Povolené: NOTE, AS, PS>, FILE, APPEND, END.', a.k));
+        i++;
+      }
+      if (!closed) { err(ln, tr('AUTO není ukončený řádkem END.')); return null; }
+      if (!auto.steps.length) err(ln, tr('AUTO je prázdný – patří do něj NOTE, PS>, FILE nebo APPEND.'));
+      return auto;
+    }
     for (;;) {
       skip();
       if (i >= lines.length) break;
       var tk = kw(lines[i]);
       if (!tk || tk.k !== 'TASK') { err(i, tr('Za SETUP mohou být jen bloky TASK … END.')); i++; continue; }
       if (!tk.rest) err(i, tr('TASK potřebuje text úkolu.'));
-      var task = { text: tk.rest, hints: [], question: null, checks: [], line: i }, phase = 0, tclosed = false;
+      var task = { text: tk.rest, hints: [], question: null, checks: [], autos: [], line: i }, phase = 0, tclosed = false;
       i++;
       while (i < lines.length) {
         var tl = lines[i];
         if (isBlank(tl) || isComment(tl)) { i++; continue; }
         var tt = kw(tl);
-        if (!tt) { err(i, tr('Neznámý řádek v TASK (povolené HINT, NOTE, QUESTION, CHECK, END).')); i++; continue; }
+        if (!tt) { err(i, tr('Neznámý řádek v TASK (povolené HINT, NOTE, QUESTION, CHECK, AUTO, END).')); i++; continue; }
         if (tt.k === 'END') { tclosed = true; i++; break; }
         if (tt.k === 'TASK') break;
         if (tt.k === 'HINT' || tt.k === 'NOTE') {
-          if (phase > 0) err(i, tr('{0} patří před QUESTION a CHECK.', tt.k));
+          if (phase > 0) err(i, tr('{0} patří před QUESTION, CHECK a AUTO.', tt.k));
           task.hints.push({ code: tt.k === 'HINT', text: tt.rest });
         } else if (tt.k === 'QUESTION') {
-          if (phase > 1) err(i, tr('QUESTION patří před CHECK.'));
+          if (phase > 1) err(i, tr('QUESTION patří před CHECK a AUTO.'));
           if (task.question !== null) err(i, tr('TASK může mít jen jednu QUESTION.'));
           task.question = tt.rest; phase = 1;
         } else if (tt.k === 'CHECK') {
-          phase = 2;
-          var body2 = tt.rest, who = null, pref = /^([a-z][a-z0-9-]*):\s*(.*)$/.exec(body2);
-          if (pref) {
-            if (machineIds.indexOf(pref[1]) < 0) err(i, tr('CHECK {0}: – takový počítač ve scénáři není.', pref[1]));
-            who = pref[1]; body2 = pref[2];
-          }
-          var rule = null, mm = null, r;
-          for (r = 0; r < RULES.length; r++) { mm = RULES[r].re.exec(body2.trim()); if (mm) { rule = RULES[r]; break; } }
-          if (!rule) {
-            var near = CHECK_STARTS.filter(function (s) { return body2.trim().indexOf(s.split(' ')[0]) === 0; });
-            err(i, tr('Neznám podmínku „{0}“.', body2.trim()) + (near.length ? tr(' Podmínky začínající „{0}“ jsou popsané v docs/SCENARE.md.', near[0].split(' ')[0]) : tr(' Podmínka musí začínat jedním z: {0}.', CHECK_STARTS.join(', '))));
-          } else {
-            var needsRepo = typeof rule.needsRepo === 'function' ? rule.needsRepo(mm) : !!rule.needsRepo;
-            if (needsRepo && !sc.repoPath) err(i, tr('Tahle podmínka se týká repozitáře – doplň do SETUP řádek REPOSITORY cesta/k/repozitari.'));
-            task.checks.push({ fn: rule.make(mm, ctx), who: who });
-          }
-        } else err(i, tr('Neznámé klíčové slovo {0} v TASK. Povolené: HINT, NOTE, QUESTION, CHECK, END.', tt.k));
+          phase = Math.max(phase, 2);
+          var ck = parseCheck(i, tt.rest);
+          if (ck) task.checks.push(ck);
+        } else if (tt.k === 'AUTO') {
+          phase = 3;
+          var auto = parseAuto(i, tt.rest);
+          if (auto) task.autos.push(auto);
+          if (i >= lines.length) break;
+        } else err(i, tr('Neznámé klíčové slovo {0} v TASK. Povolené: HINT, NOTE, QUESTION, CHECK, AUTO, END.', tt.k));
         i++;
       }
       if (!tclosed) err(task.line, tr('TASK není ukončený řádkem END.'));
@@ -444,6 +538,7 @@
       short: sc.summary,
       intro: sc.intro.map(function (p) { return '<p>' + inline(p) + '</p>'; }).join(''),
       format: sc.format,
+      repoPath: sc.repoPath || null,
       // problémy z posledního spuštění přípravy: [{line, msg}] (příkazy, které skončily chybou)
       setupProblems: [],
       setup: function (api) {
@@ -473,7 +568,15 @@
           text: inline(t.text),
           hint: t.hints.length ? hintHtml(t.hints) : '',
           question: t.question || undefined,
-          check: function (c) { return t.checks.every(function (ch) { return ch.fn(c, ch.who || firstVisible); }); }
+          check: function (c) { return t.checks.every(function (ch) { return ch.fn(c, ch.who || firstVisible); }); },
+          // kroky za studenta: when(c) -> bool (null = až po splnění úkolu); machine = výchozí počítač
+          autos: t.autos.map(function (au) {
+            return {
+              when: au.when ? function (c) { return au.when.fn(c, au.when.who || firstVisible); } : null,
+              machine: au.who || firstVisible,
+              steps: au.steps.map(function (st) { return st.op === 'note' ? { op: 'note', text: st.text, html: inline(st.text) } : st; })
+            };
+          })
         };
       })
     };

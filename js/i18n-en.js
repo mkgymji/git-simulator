@@ -218,12 +218,6 @@ GitI18n.add('en', {
     "Only TASK … END blocks may follow SETUP.",
   "TASK potřebuje text úkolu.":
     "TASK needs the task text.",
-  "Neznámý řádek v TASK (povolené HINT, NOTE, QUESTION, CHECK, END).":
-    "Unknown line in TASK (allowed: HINT, NOTE, QUESTION, CHECK, END).",
-  "{0} patří před QUESTION a CHECK.":
-    "{0} belongs before QUESTION and CHECK.",
-  "QUESTION patří před CHECK.":
-    "QUESTION belongs before CHECK.",
   "TASK může mít jen jednu QUESTION.":
     "A TASK may have only one QUESTION.",
   "CHECK {0}: – takový počítač ve scénáři není.":
@@ -236,8 +230,6 @@ GitI18n.add('en', {
     " A condition must start with one of: {0}.",
   "Tahle podmínka se týká repozitáře – doplň do SETUP řádek REPOSITORY cesta/k/repozitari.":
     "This condition is about the repository – add a line REPOSITORY path/to/repository to SETUP.",
-  "Neznámé klíčové slovo {0} v TASK. Povolené: HINT, NOTE, QUESTION, CHECK, END.":
-    "Unknown keyword {0} in TASK. Allowed: HINT, NOTE, QUESTION, CHECK, END.",
   "TASK není ukončený řádkem END.":
     "TASK is not closed with END.",
   "TASK potřebuje aspoň jednu podmínku CHECK.":
@@ -697,5 +689,37 @@ GitI18n.add('en', {
   "O simulátoru a zdrojích":
     "About the simulator and sources",
   "zdrojový kód":
-    "source code"
+    "source code",
+  "Neznámý řádek v TASK (povolené HINT, NOTE, QUESTION, CHECK, AUTO, END).":
+    "Unknown line in TASK (allowed: HINT, NOTE, QUESTION, CHECK, AUTO, END).",
+  "{0} patří před QUESTION, CHECK a AUTO.":
+    "{0} belongs before QUESTION, CHECK and AUTO.",
+  "QUESTION patří před CHECK a AUTO.":
+    "QUESTION belongs before CHECK and AUTO.",
+  "Neznámé klíčové slovo {0} v TASK. Povolené: HINT, NOTE, QUESTION, CHECK, AUTO, END.":
+    "Unknown keyword {0} in TASK. Allowed: HINT, NOTE, QUESTION, CHECK, AUTO, END.",
+  "Za AUTO může být jen WHEN a podmínka, např. AUTO WHEN config user.name is set":
+    "AUTO may only be followed by WHEN and a condition, e.g. AUTO WHEN config user.name is set",
+  "Neznámý řádek v AUTO (povolené NOTE, AS, PS>, FILE, APPEND, END).":
+    "Unknown line in AUTO (allowed: NOTE, AS, PS>, FILE, APPEND, END).",
+  "NOTE potřebuje text.":
+    "NOTE needs text.",
+  "{0} potřebuje název souboru bez lomítek, např. {0} recept.md":
+    "{0} needs a file name without slashes, e.g. {0} recipe.md",
+  "{0} {1} není ukončený řádkem END.":
+    "{0} {1} is not closed with END.",
+  "Neznámé klíčové slovo {0} v AUTO. Povolené: NOTE, AS, PS>, FILE, APPEND, END.":
+    "Unknown keyword {0} in AUTO. Allowed: NOTE, AS, PS>, FILE, APPEND, END.",
+  "AUTO není ukončený řádkem END.":
+    "AUTO is not closed with END.",
+  "AUTO je prázdný – patří do něj NOTE, PS>, FILE nebo APPEND.":
+    "AUTO is empty – it should contain NOTE, PS>, FILE or APPEND.",
+  "← simulátor":
+    "← simulator",
+  "Simulátor: do souboru {0} doplnil text – podívej se do editoru.":
+    "Simulator: added text to the file {0} – have a look in the editor.",
+  "Doplnil simulátor:":
+    "Filled in by the simulator:",
+  "Doplnil simulátor: {0}":
+    "Filled in by the simulator: {0}"
 });

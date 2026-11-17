@@ -1,8 +1,8 @@
 // Git simulátor – Copyright (C) 2026 Michal Kočer
 // SPDX-License-Identifier: GPL-2.0-only
 //
-// Test anglických scénářů (scenarios/en/) proti českým (scenarios/): stejný počet úkolů
-// a podmínek, a když se obě verze řeší stejnými kroky (tests/solutions.js), odškrtávají
+// Test vestavěných scénářů: české (scenarios/) i anglické (scenarios/en/) jdou vyřešit (tests/solutions.js),
+// každý blok AUTO proběhne a anglická verze odpovídá české: stejný počet úkolů, a když se obě verze řeší stejnými kroky (tests/solutions.js), odškrtávají
 // se úkoly ve stejném okamžiku a nakonec jsou splněné všechny. Běží v angličtině.
 //
 // Spuštění: jsc js/i18n.js js/i18n-en.js tests/lang_en.js js/text.js js/world.js js/graph.js \
@@ -34,7 +34,19 @@ Object.keys(SOL.cs).forEach(function (id) {
     var da = JSON.stringify(a.done), db = JSON.stringify(b.done);
     if (da !== db) fail(id + ' po kroku ' + (i + 1) + ' (' + JSON.stringify(se[i]) + '): česky ' + da + ', anglicky ' + db);
   }
+  if (tc.length && !tc.every(function (t, k) { return a.done[k]; })) fail(id + ': české řešení nesplnilo všechny úkoly ' + JSON.stringify(a.done));
   if (te.length && !te.every(function (t, k) { return b.done[k]; })) fail(id + ': anglické řešení nesplnilo všechny úkoly ' + JSON.stringify(b.done));
+  // každý blok AUTO proběhl (v obou jazycích stejně)
+  [[a, tc, 'česky'], [b, te, 'anglicky']].forEach(function (x) {
+    var total = 0;
+    x[1].forEach(function (t) { total += (t.autos || []).length; });
+    if (Object.keys(x[0].autoFired).length !== total) fail(id + ' ' + x[2] + ': proběhlo AUTO ' + Object.keys(x[0].autoFired).length + ' z ' + total);
+  });
+  checks++;
+  if (id === 'pl1') [a, b].forEach(function (x) {
+    var cfg = x.world.machines.jana.config.map(function (e) { return e.key + '=' + e.value; }).join(';');
+    if (cfg.indexOf('user.email=novakovaj@jirovcovka.net') < 0 || cfg.indexOf('core.quotepath=false') < 0) fail('pl1: AUTO nenastavil config: ' + cfg);
+  });
   print(id + ': ' + se.length + ' kroků, úkoly ' + Object.keys(b.done).length + '/' + te.length);
 });
 print('EN KONTROL: ' + checks + ', ROZDÍLŮ: ' + failures);

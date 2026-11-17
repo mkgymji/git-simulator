@@ -91,13 +91,10 @@ TASK Propoj repozitář s GitHubem a pošli ho tam. Při přihlášení zvol **S
   CHECK github jana-novakova/kucharka has branch main
 END
 
-TASK Na GitHubu otevři **palacinky.md**, klikni na tužku a přidej na konec tabulku. Potvrď **Commit changes**.
-  HINT  ## Na kolik porcí
-  HINT
-  HINT  | Porce | Mléko  | Mouka |
-  HINT  |-------|--------|-------|
-  HINT  | 2     | 250 ml | 120 g |
-  HINT  | 4     | 500 ml | 240 g |
+TASK Na GitHubu otevři **palacinky.md**, klikni na tužku a přidej na konec malou tabulku. Potvrď **Commit changes**.
+  HINT  | Porce | Mléko  |
+  HINT  |-------|--------|
+  HINT  | 4     | 500 ml |
   CHECK file palacinky.md on github jana-novakova/kucharka contains "|"
 END
 
@@ -109,7 +106,7 @@ TASK Vrať se do VS Code a napiš `git status`. Pak změnu stáhni.
   CHECK    file palacinky.md contains "|"
 END
 
-TASK Přidej do **livance.md** tip, commitni a pošli na GitHub.
+TASK Přidej do **livance.md** jednu větu s tipem, commitni a pošli na GitHub.
   HINT  git add .
   HINT  git commit -m "Přidán tip k lívancům"
   HINT  git push

@@ -73,6 +73,9 @@ TASK text úkolu          libovolný počet úkolů
   HINT / NOTE …          nápověda (0× a víc)
   QUESTION …             otázka „Odpověz si“ (0–1×)
   CHECK …                podmínka (1× a víc; úkol je splněný, když platí všechny)
+  AUTO [WHEN podmínka]   co simulátor udělá za studenta (0× a víc)
+    …
+  END
 END
 ```
 
@@ -114,6 +117,55 @@ Výchozí postavy (není potřeba je definovat):
 
 Úkol se odškrtne sám, jakmile platí všechny jeho podmínky, a pak už zůstane splněný.
 
+## AUTO – co simulátor udělá za studenta
+
+V simulátoru jde o **kroky Gitu, ne o psaní**. Kde by student zbytečně opisoval (pět řádků
+nastavení, celý recept), udělá to simulátor za něj a řekne mu to. Blok `AUTO` proběhne jednou:
+
+- `AUTO WHEN podmínka` – jakmile platí podmínka (stejná jako u `CHECK`), i když úkol ještě není splněný;
+- `AUTO` bez `WHEN` – hned po splnění úkolu.
+
+| Řádek v AUTO | Význam |
+|---|---|
+| `NOTE text` | vysvětlivka, co simulátor udělal a proč. Ukáže se za „Doplnil simulátor:“ v terminálu a fialově u úkolu, takže ji piš jako pokračování věty. |
+| `AS id` | další řádky na počítači `id` (jinak počítač z podmínky `WHEN`, nebo první viditelný) |
+| `PS> příkaz` | příkaz, který simulátor „napíše“ za studenta. V terminálu je vidět i s výstupem a označením *doplnil simulátor*. Do kontrol `command … was run` se nepočítá. |
+| `FILE název` … `END` | přepíše soubor |
+| `APPEND název` … `END` | připíše text na konec souboru (prázdný první řádek = prázdný řádek před textem) |
+
+Soubory se zapisují do složky repozitáře z `REPOSITORY` (když na počítači je), jinak do aktuální složky.
+Pokud je soubor otevřený v editoru, změna se v něm hned ukáže.
+
+```text
+TASK Nastav své jméno. Zbytek nastavení doplní simulátor. Pak si nastavení vypiš.
+  HINT  git config --global user.name "Alice"
+  HINT  git config --global --list
+  CHECK config user.name is set
+  CHECK command "git config --global --list" was run after command "git config --global user.name..."
+  AUTO WHEN config user.name is set
+    NOTE e-mail a výchozí větev. Ve škole je napíšeš sám.
+    PS> git config --global user.email "alice@example.com"
+    PS> git config --global init.defaultBranch main
+  END
+END
+
+TASK Vytvoř recept.md s nadpisem `# Buchty` a ulož. Suroviny doplní simulátor.
+  CHECK file recept.md in HEAD contains line starting with "- "
+  AUTO WHEN file recept.md contains line starting with "# "
+    NOTE suroviny jako odrážky.
+    APPEND recept.md
+
+      - 500 g mouky
+      - 2 vejce
+    END
+  END
+END
+```
+
+**Tolerance:** student nemusí psát přesně tvoje texty. Zprávu commitu nekontroluj – podmínky
+`commit adding "T"` a `file X in any commit` se dívají na obsah, ne na zprávu. V `HINT` dej
+zprávu jen jako příklad.
+
 ## CHECK – slovník podmínek
 
 Podmínka se vztahuje k prvnímu viditelnému počítači. Jinému počítači ji přiřadíš předponou:
@@ -133,6 +185,7 @@ Za název souboru lze dát místo (jinak se myslí pracovní složka):
 | Místo | Význam |
 |---|---|
 | `file X in HEAD …` | soubor v posledním commitu |
+| `file X in any commit …` | aspoň v jednom commitu historie (nezávisí na zprávě) |
 | `file X in commit "zpráva" …` | v nejnovějším commitu, jehož zpráva obsahuje text (bez ohledu na velikost písmen; commity „Revert …“ se nepočítají, pokud je výslovně nehledáš) |
 | `file X in branch B …` | v posledním commitu větve |
 | `file X on github vlastník/název …` | na GitHubu (výchozí větev) |
@@ -144,6 +197,8 @@ Za název souboru lze dát místo (jinak se myslí pracovní složka):
 | `repository exists` | ve složce z `REPOSITORY` je repozitář |
 | `commit "zpráva" exists` | v historii je commit, jehož zpráva obsahuje text |
 | `commit "zpráva" is reverted` | takový commit existuje a v historii je i jeho revert |
+| `commit adding "T" exists` | v historii je commit, který text T přidal (v souboru je, v předchozí verzi nebyl) – **nezávisí na zprávě** |
+| `commit adding "T" is reverted` | takový commit existuje a je vrácený revertem |
 | `commit count is at least N` | na aktuální větvi je aspoň N commitů |
 | `HEAD is a merge` | poslední commit má dva předchůdce |
 | `merge is in progress` / `no merge is in progress` | rozdělaný merge (konflikt) je / není |

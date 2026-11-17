@@ -45,7 +45,7 @@ TASK Vytvoř větev **nove-recepty** a přepni se na ni.
   CHECK branch nove-recepty exists
 END
 
-TASK Na větvi vytvoř **livance.md** a commitni ho.
+TASK Na větvi vytvoř **livance.md** (stačí nadpis `# Lívance`) a commitni ho.
   HINT  git add livance.md
   HINT  git commit -m "Přidány lívance"
   CHECK file livance.md in branch nove-recepty exists
@@ -57,7 +57,7 @@ TASK Přepni se zpět na **main**. Co se stalo se souborem **livance.md**?
   CHECK command "git switch main" was run
 END
 
-TASK Na **main** uprav README a commitni. Historie se tím rozdvojí – podívej se do grafu.
+TASK Na **main** uprav v README jedno slovo a commitni. Historie se tím rozdvojí – podívej se do grafu.
   HINT  git commit -am "Upraven README"
   HINT  git log --oneline --graph --all
   CHECK branches main and nove-recepty have diverged

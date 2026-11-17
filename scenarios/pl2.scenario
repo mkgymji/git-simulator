@@ -43,12 +43,10 @@ SETUP
   VSCODE git/kucharka
 END
 
-TASK Přidej do **palacinky.md** postup jako číslovaný seznam (`1.`, `2.`…), ulož a **před commitem** spusť `git diff`. Pak commitni.
+TASK Přidej na konec **palacinky.md** podnadpis `## Postup` a první krok jako číslovaný seznam. Ulož – další kroky doplní simulátor. **Před commitem** spusť `git diff`, pak commitni.
   HINT     ## Postup
   HINT
   HINT     1. Všechno smíchej v míse.
-  HINT     2. Nech těsto **15 minut** odpočinout.
-  HINT     3. Smaž na rozpálené pánvi.
   HINT
   HINT     git diff
   HINT     git add palacinky.md
@@ -56,24 +54,54 @@ TASK Přidej do **palacinky.md** postup jako číslovaný seznam (`1.`, `2.`…)
   QUESTION Jak jsou ve výpisu označené řádky, které přibyly?
   CHECK    file palacinky.md in HEAD contains line starting with "1."
   CHECK    output of "git diff" contains line starting with "+"
+  AUTO WHEN file palacinky.md contains line starting with "1."
+    NOTE další dva kroky postupu. Číslovaný seznam: každý řádek začíná číslem s tečkou, `**tučně**` zvýrazní text.
+    APPEND palacinky.md
+      2. Nech těsto **15 minut** odpočinout.
+      3. Smaž na rozpálené pánvi.
+    END
+  END
 END
 
-TASK Vytvoř **livance.md** s nadpisy, odrážkami, číslovaným seznamem a poznámkou *kurzívou* (`*text*`). Commitni se zprávou **Přidány lívance**.
+TASK Vytvoř **livance.md** jen s nadpisem `# Lívance` a ulož – suroviny a postup doplní simulátor. Na konec pak připiš poznámku *kurzívou* a commitni.
+  HINT  # Lívance
+  HINT
+  HINT  *Nejlepší jsou teplé.*
+  HINT
   HINT  git add livance.md
   HINT  git commit -m "Přidány lívance"
-  CHECK file livance.md in HEAD exists
-  CHECK commit "lívance" exists
+  CHECK file livance.md in HEAD contains line starting with "*"
+  AUTO WHEN file livance.md contains line starting with "# "
+    NOTE suroviny a postup. Poznámku kurzívou napiš mezi dvě hvězdičky: `*text*`.
+    APPEND livance.md
+
+      ## Suroviny
+
+      - 300 ml mléka
+      - 2 vejce
+      - 250 g polohrubé mouky
+
+      ## Postup
+
+      1. Smíchej suroviny.
+      2. Smaž malé placky na pánvi.
+
+    END
+  END
 END
 
-TASK Vytvoř **README.md** s odkazy na oba recepty a commitni ho. Odkaz v náhledu zkus otevřít.
+TASK Vytvoř **README.md** s nadpisem a odkazem na palačinky. Odkaz na lívance doplní simulátor. Commitni a odkaz v náhledu zkus otevřít.
   HINT  # Moje kuchařka
   HINT
-  HINT  Recepty, které umím uvařit.
-  HINT
   HINT  - [Palačinky](palacinky.md)
-  HINT  - [Lívance](livance.md)
   CHECK file README.md in HEAD contains "](palacinky.md)"
   CHECK file README.md in HEAD contains "](livance.md)"
+  AUTO WHEN file README.md contains "](palacinky.md)"
+    NOTE odkaz na lívance. Odkaz má tvar `[text](soubor)`.
+    APPEND README.md
+      - [Lívance](livance.md)
+    END
+  END
 END
 
 TASK Prohlédni si historii oběma způsoby.
@@ -98,12 +126,12 @@ TASK Vytáhni si **palacinky.md** ve stavu z prvního commitu a pak se vrať k n
   CHECK command "git restore palacinky.md" was run after command "git restore --source..."
 END
 
-TASK Přidej do **livance.md** řádek `- 2 kg soli`, commitni ho jako **Přidána chyba** a pak commit vrať.
+TASK Přidej do **livance.md** řádek `- 2 kg soli`, commitni ho (třeba se zprávou **Přidána chyba**) a pak commit vrať.
   HINT     git commit -am "Přidána chyba"
   HINT     git log --oneline
   HINT     git revert --no-edit HASH
   QUESTION Zmizel commit „Přidána chyba“ z historie? Podívej se do grafu.
-  CHECK    commit "chyba" is reverted
+  CHECK    commit adding "2 kg soli" is reverted
   CHECK    file livance.md in HEAD does not contain "2 kg soli"
 END
 

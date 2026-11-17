@@ -45,7 +45,7 @@ TASK Create a branch **new-recipes** and switch to it.
   CHECK branch new-recipes exists
 END
 
-TASK On the branch, create **drop-scones.md** and commit it.
+TASK On the branch, create **drop-scones.md** (just the heading `# Drop scones` is enough) and commit it.
   HINT  git add drop-scones.md
   HINT  git commit -m "Add drop scones"
   CHECK file drop-scones.md in branch new-recipes exists
@@ -57,7 +57,7 @@ TASK Switch back to **main**. What happened to the file **drop-scones.md**?
   CHECK command "git switch main" was run
 END
 
-TASK On **main**, edit the README and commit. The history splits in two – look at the graph.
+TASK On **main**, change one word in the README and commit. The history splits in two – look at the graph.
   HINT  git commit -am "Update README"
   HINT  git log --oneline --graph --all
   CHECK branches main and new-recipes have diverged

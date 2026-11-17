@@ -73,6 +73,9 @@ TASK task text           any number of tasks
   HINT / NOTE …          hint lines (0 or more)
   QUESTION …             an "Answer for yourself" question (0–1)
   CHECK …                condition (1 or more; the task is complete when all of them hold)
+  AUTO [WHEN condition]  what the simulator does for the student (0 or more)
+    …
+  END
 END
 ```
 
@@ -114,6 +117,56 @@ Default characters (no need to define them):
 
 A task is ticked off automatically as soon as all its conditions hold, and then it stays complete.
 
+## AUTO – what the simulator does for the student
+
+In the simulator it is about **the Git steps, not about typing**. Where the student would copy text
+needlessly (five setup lines, a whole recipe), the simulator does it for them and says so. An `AUTO`
+block runs once:
+
+- `AUTO WHEN condition` – as soon as the condition holds (same as for `CHECK`), even before the task is complete;
+- `AUTO` without `WHEN` – right after the task is completed.
+
+| Line in AUTO | Meaning |
+|---|---|
+| `NOTE text` | an explanation of what the simulator did and why. It is shown after “Filled in by the simulator:” in the terminal and in violet under the task, so write it as the rest of that sentence. |
+| `AS id` | the following lines run on computer `id` (otherwise the computer of the `WHEN` condition, or the first visible one) |
+| `PS> command` | a command the simulator "types" for the student. It is visible in the terminal with its output and marked *filled in by the simulator*. It does not count for `command … was run`. |
+| `FILE name` … `END` | overwrites a file |
+| `APPEND name` … `END` | appends text to the end of a file (an empty first line = an empty line before the text) |
+
+Files are written to the repository folder from `REPOSITORY` (when it exists on the computer),
+otherwise to the current folder. If the file is open in the editor, the change shows there right away.
+
+```text
+TASK Set your name. The simulator fills in the rest of the setup. Then list the setup.
+  HINT  git config --global user.name "Alice"
+  HINT  git config --global --list
+  CHECK config user.name is set
+  CHECK command "git config --global --list" was run after command "git config --global user.name..."
+  AUTO WHEN config user.name is set
+    NOTE the e-mail and the default branch. At school you will type them yourself.
+    PS> git config --global user.email "alice@example.com"
+    PS> git config --global init.defaultBranch main
+  END
+END
+
+TASK Create recipe.md with the heading `# Buns` and save it. The simulator adds the ingredients.
+  CHECK file recipe.md in HEAD contains line starting with "- "
+  AUTO WHEN file recipe.md contains line starting with "# "
+    NOTE the ingredients as bullet points.
+    APPEND recipe.md
+
+      - 500 g flour
+      - 2 eggs
+    END
+  END
+END
+```
+
+**Tolerance:** students do not have to type exactly your texts. Do not check the commit message –
+the conditions `commit adding "T"` and `file X in any commit` look at the content, not the message.
+Give the message in a `HINT` only as an example.
+
 ## CHECK – condition vocabulary
 
 A condition refers to the first visible computer. Assign it to another computer with a prefix:
@@ -133,6 +186,7 @@ After the file name you can give a place (otherwise the working directory is mea
 | Place | Meaning |
 |---|---|
 | `file X in HEAD …` | the file in the last commit |
+| `file X in any commit …` | in at least one commit of the history (independent of the message) |
 | `file X in commit "message" …` | in the newest commit whose message contains the text (case-insensitive; "Revert …" commits do not count unless you search for them explicitly) |
 | `file X in branch B …` | in the last commit of the branch |
 | `file X on github owner/name …` | on GitHub (default branch) |
@@ -144,6 +198,8 @@ After the file name you can give a place (otherwise the working directory is mea
 | `repository exists` | there is a repository in the `REPOSITORY` folder |
 | `commit "message" exists` | the history has a commit whose message contains the text |
 | `commit "message" is reverted` | such a commit exists and the history also has its revert |
+| `commit adding "T" exists` | the history has a commit that added the text T (the file has it, the previous version did not) – **independent of the message** |
+| `commit adding "T" is reverted` | such a commit exists and has been reverted |
 | `commit count is at least N` | the current branch has at least N commits |
 | `HEAD is a merge` | the last commit has two parents |
 | `merge is in progress` / `no merge is in progress` | an unfinished merge (conflict) is / is not in progress |
