@@ -1,0 +1,70 @@
+FORMAT 1
+SCENARIO Společná kuchařka ve dvojici
+LABEL    Pracovní list 4
+SUMMARY  Anna a Petr: společný repozitář, pozvánka, klonování, odmítnutý push a pull.
+INTRO    Hraješ za oba: **Annu** (vlastní repozitář) i **Petra** (spolupracovník). Mezi jejich počítači a GitHubem přepínáš záložkami nahoře.
+
+SETUP
+  PERSON anna NAME "Anna Svobodová" EMAIL "svobodovaa@jirovcovka.net" LOGIN "anna-svobodova" LABEL "Počítač Anny"
+  PERSON petr NAME "Petr Dvořák" EMAIL "dvorakp@jirovcovka.net" LOGIN "petr-dvorak" LABEL "Počítač Petra"
+  MACHINE anna CONFIGURED
+  MACHINE petr CONFIGURED
+  SHOW GITHUB
+  REPOSITORY git/spolecna-kucharka
+  AS anna
+  PS> mkdir git
+  PS> cd git
+  AS petr
+  PS> mkdir git
+  PS> cd git
+END
+
+TASK **Anna** na GitHubu vytvoří repozitář **spolecna-kucharka**: Private a **zaškrtne** Add a README file.
+  NOTE  Přepni na **GitHub (Anna)** → New → název, Private, zaškrtnout **Add a README file** → Create repository.
+  CHECK github anna-svobodova/spolecna-kucharka has branch main
+END
+
+TASK **Anna** pozve Petra: Settings → Collaborators → Add people → **petr-dvorak**. **Petr** pozvánku přijme.
+  NOTE  Pozvánku Petr uvidí na GitHubu nahoře (záložka **GitHub (Petr)**).
+  CHECK github anna-svobodova/spolecna-kucharka has collaborator petr-dvorak
+END
+
+TASK Oba si repozitář naklonují do složky **git** a otevřou ho ve VS Code.
+  HINT  git clone https://github.com/anna-svobodova/spolecna-kucharka.git
+  HINT  cd spolecna-kucharka
+  HINT  code -r .
+  CHECK anna: repository exists
+  CHECK petr: repository exists
+END
+
+TASK Každý vytvoří **jiný** recept a commitne ho. **Anna** pushne první, **potom** Petr.
+  HINT     git add .
+  HINT     git commit -m "Přidána bramboračka"
+  HINT     git push
+  QUESTION Co se stalo při Petrově pushi?
+  CHECK    petr: output of "git push..." contains "[rejected]"
+END
+
+TASK **Petr** to vyřeší podle rady v hint: stáhne a pushne znovu. **Anna** si pak stáhne Petrův recept.
+  NOTE  Petr:
+  HINT  git pull
+  HINT  git push
+  NOTE  Anna:
+  HINT  git pull
+  CHECK anna: github anna-svobodova/spolecna-kucharka main equals HEAD
+  CHECK petr: github anna-svobodova/spolecna-kucharka main equals HEAD
+  CHECK github anna-svobodova/spolecna-kucharka main is a merge
+END
+
+TASK **Anna** doplní do README odkazy na oba recepty a citaci (`>`), commitne a pushne. **Petr** stáhne.
+  HINT     # spolecna-kucharka
+  HINT
+  HINT     > Kuchařka, kterou píšeme ve dvou.
+  HINT
+  HINT     - [Bramboračka](bramboracka.md)
+  HINT     - [Buchty](buchty.md)
+  QUESTION Kterými dvěma příkazy začínáš a končíš práci na společném projektu?
+  CHECK    file README.md on github anna-svobodova/spolecna-kucharka contains line starting with ">"
+  CHECK    file README.md on github anna-svobodova/spolecna-kucharka contains "]("
+  CHECK    petr: github anna-svobodova/spolecna-kucharka main equals HEAD
+END

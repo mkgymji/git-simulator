@@ -1,0 +1,91 @@
+FORMAT 1
+SCENARIO Můj první repozitář
+LABEL    Pracovní list 1
+SUMMARY  Nastavení Gitu, git init, add, commit – první verze receptu.
+INTRO    Jsi **Jana Nováková** na školním počítači. Postupuj podle úkolů; každý se odškrtne sám, až ho splníš.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Počítač Jany"
+  MACHINE jana
+  REPOSITORY git/kucharka
+END
+
+TASK Zjisti, ve které složce jsi a jakou verzi Gitu máš.
+  HINT  pwd
+  HINT  git --version
+  CHECK command "pwd" was run
+  CHECK command "git --version" was run
+END
+
+TASK Nastav své jméno a školní e-mail.
+  HINT  git config --global user.name "Jana Nováková"
+  HINT  git config --global user.email "novakovaj@jirovcovka.net"
+  CHECK config user.name is set
+  CHECK config user.email contains "@"
+END
+
+TASK Opiš zbylé čtyři řádky nastavení. Výsledek zkontroluj příkazem `git config --global --list`.
+  HINT  git config --global init.defaultBranch main
+  HINT  git config --global core.editor "code --wait"
+  HINT  git config --global pull.rebase false
+  HINT  git config --global core.quotepath false
+  CHECK config init.defaultBranch is "main"
+  CHECK config core.editor contains "code --wait"
+  CHECK config pull.rebase is "false"
+  CHECK config core.quotepath is "false"
+  CHECK command "git config --global --list" was run
+END
+
+TASK Vytvoř složku **git** a v ní **kucharka**. Otevři ji ve VS Code a udělej z ní repozitář.
+  HINT     cd ~
+  HINT     mkdir git
+  HINT     cd git
+  HINT     mkdir kucharka
+  HINT     cd kucharka
+  HINT     code -r .
+  HINT     git init
+  HINT     git status
+  QUESTION Co napsal git status na posledním řádku?
+  CHECK    repository exists
+  CHECK    vscode folder is git/kucharka
+  CHECK    command "git status" was run
+END
+
+TASK V Průzkumníku vytvoř soubor **palacinky.md** a napiš recept: nadpis `#`, podnadpis `##` a odrážky `-`. Ulož (**Ctrl+S**) a spusť `git status`.
+  NOTE     Klikni na ikonu **+** nad seznamem souborů. Recept může vypadat takhle:
+  HINT     # Palačinky
+  HINT
+  HINT     ## Suroviny
+  HINT
+  HINT     - 250 ml mléka
+  HINT     - 1 vejce
+  HINT     - 120 g hladké mouky
+  HINT     - špetka soli
+  QUESTION Jakou barvou je název souboru a pod jakým nadpisem je?
+  CHECK    file palacinky.md contains line starting with "# "
+  CHECK    file palacinky.md contains line starting with "## "
+  CHECK    file palacinky.md contains line starting with "- "
+  CHECK    output of "git status" contains "Untracked files"
+  CHECK    output of "git status" contains "palacinky.md"
+END
+
+TASK Udělej první commit.
+  HINT     git add palacinky.md
+  HINT     git status
+  HINT     git commit -m "Přidán recept na palačinky"
+  QUESTION Jakou barvou je soubor po git add? Co znamená -m?
+  CHECK    file palacinky.md in HEAD exists
+END
+
+TASK Přidej do receptu `## Tip` s jednou větou a udělej druhý commit se srozumitelnou zprávou.
+  HINT  git add palacinky.md
+  HINT  git commit -m "Přidán tip na plnění"
+  CHECK commit count is at least 2
+  CHECK file palacinky.md in HEAD contains line starting with "## Tip"
+END
+
+TASK Prohlédni si historii.
+  HINT  git log --oneline
+  CHECK command "git log..." was run
+  CHECK commit count is at least 2
+END

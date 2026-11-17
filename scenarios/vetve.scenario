@@ -1,0 +1,72 @@
+FORMAT 1
+SCENARIO Větve a sloučení
+LABEL    Bonus
+SUMMARY  git switch -c, práce na větvi, git merge a merge commit se dvěma předchůdci.
+INTRO    V kuchařce chceš zkusit nové recepty, aniž bys rozbila hlavní verzi. Na to jsou **větve**.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Počítač Jany"
+  MACHINE jana CONFIGURED
+  REPOSITORY git/kucharka
+  PS> mkdir git
+  PS> cd git
+  PS> mkdir kucharka
+  PS> cd kucharka
+  PS> git init
+  FILE palacinky.md
+    # Palačinky
+
+    ## Suroviny
+
+    - 250 ml mléka
+    - 1 vejce
+    - 120 g hladké mouky
+    - špetka soli
+
+    ## Tip
+
+    Plním je jahodovou marmeládou.
+  END
+  PS> git add .
+  PS> git commit -m "Přidán recept na palačinky"
+  FILE README.md
+    # Moje kuchařka
+
+    Moje nejoblíbenější recepty.
+  END
+  PS> git add .
+  PS> git commit -m "Přidán README"
+  VSCODE git/kucharka
+END
+
+TASK Vytvoř větev **nove-recepty** a přepni se na ni.
+  HINT  git switch -c nove-recepty
+  HINT  git branch
+  CHECK branch nove-recepty exists
+END
+
+TASK Na větvi vytvoř **livance.md** a commitni ho.
+  HINT  git add livance.md
+  HINT  git commit -m "Přidány lívance"
+  CHECK file livance.md in branch nove-recepty exists
+END
+
+TASK Přepni se zpět na **main**. Co se stalo se souborem **livance.md**?
+  HINT  git switch main
+  CHECK on branch main
+  CHECK command "git switch main" was run
+END
+
+TASK Na **main** uprav README a commitni. Historie se tím rozdvojí – podívej se do grafu.
+  HINT  git commit -am "Upraven README"
+  HINT  git log --oneline --graph --all
+  CHECK branches main and nove-recepty have diverged
+END
+
+TASK Slouč větev **nove-recepty** do **main**. Zprávu v MERGE_MSG nech, jak je.
+  HINT     git merge nove-recepty
+  HINT     git log --oneline --graph
+  QUESTION Kolik předchůdců má merge commit?
+  CHECK    on branch main
+  CHECK    HEAD is a merge
+END

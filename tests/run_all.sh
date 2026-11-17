@@ -4,6 +4,11 @@
 # Všechny testy simulátoru proti skutečnému Gitu (potřebuje git, python3 a jsc nebo node).
 set -e
 cd "$(dirname "$0")/.."
+JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc
+CORE="js/text.js js/world.js js/graph.js js/rename.js js/git.js js/shell.js js/session.js js/scenario-lang.js"
+python3 tools/build_scenarios.py --check
+$JSC $CORE js/scenarios-builtin.js tests/scenario_lang_test.js | tail -1
+$JSC $CORE tests/legacy_scenarios.js tests/scenario_equiv.js -- scenarios | tail -1
 python3 tests/fuzz_text.py 2000 1
 python3 tests/fuzz_cc.py 200 1
 python3 tests/test_git.py

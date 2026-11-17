@@ -1,0 +1,77 @@
+FORMAT 1
+SCENARIO Konflikt
+LABEL    Bonus
+SUMMARY  Dvě větve změnily stejný řádek README. Git neví, co platí – rozhodni ty.
+INTRO    Na větvi **main** i na větvi **uprava** se změnil stejný řádek v README. Při sloučení vznikne **konflikt**.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Počítač Jany"
+  MACHINE jana CONFIGURED
+  REPOSITORY git/kucharka
+  PS> mkdir git
+  PS> cd git
+  PS> mkdir kucharka
+  PS> cd kucharka
+  PS> git init
+  FILE README.md
+    # Moje kuchařka
+
+    Recepty, které umím uvařit.
+  END
+  FILE palacinky.md
+    # Palačinky
+
+    ## Suroviny
+
+    - 250 ml mléka
+    - 1 vejce
+    - 120 g hladké mouky
+    - špetka soli
+
+    ## Tip
+
+    Plním je jahodovou marmeládou.
+  END
+  PS> git add .
+  PS> git commit -m "Začátek kuchařky"
+  PS> git switch -c uprava
+  FILE README.md
+    # Moje kuchařka
+
+    Recepty, které umím uvařit i já.
+  END
+  PS> git commit -am "Úprava popisu"
+  PS> git switch main
+  FILE README.md
+    # Moje kuchařka
+
+    Moje nejoblíbenější recepty.
+  END
+  PS> git commit -am "Jiný popis"
+  VSCODE git/kucharka
+END
+
+TASK Slouč větev **uprava** do **main**.
+  HINT     git merge uprava
+  QUESTION Co Git vypsal? Které soubory jsou v konfliktu (git status)?
+  CHECK    output of "git merge..." contains "CONFLICT"
+END
+
+TASK Otevři **README.md**. Mezi `<<<<<<<` a `=======` je tvoje verze, pod ní ta druhá. Nech, co chceš, a **všechny značky smaž**. Ulož.
+  NOTE  Například:
+  HINT  # Moje kuchařka
+  HINT
+  HINT  Moje nejoblíbenější recepty.
+  HINT  Recepty, které umím uvařit i já.
+  CHECK file README.md has no conflict markers
+  CHECK output of "git merge..." contains "CONFLICT"
+END
+
+TASK Označ konflikt za vyřešený a dokonči merge commitem.
+  HINT  git add README.md
+  HINT  git commit -m "Vyřešen konflikt v README"
+  HINT  git log --oneline --graph
+  CHECK no merge is in progress
+  CHECK HEAD is a merge
+  CHECK file README.md in HEAD has no conflict markers
+END

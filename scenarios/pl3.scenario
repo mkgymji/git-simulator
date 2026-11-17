@@ -1,0 +1,118 @@
+FORMAT 1
+SCENARIO Kuchařka na GitHubu
+LABEL    Pracovní list 3
+SUMMARY  Prázdný repozitář na GitHubu, git push, úprava na webu a git pull.
+INTRO    Kuchařka má pět commitů. Na GitHubu jsi přihlášená jako **jana-novakova**. Záložka **GitHub** nahoře je prohlížeč.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Počítač Jany"
+  MACHINE jana CONFIGURED
+  SHOW GITHUB
+  REPOSITORY git/kucharka
+  PS> mkdir git
+  PS> cd git
+  PS> mkdir kucharka
+  PS> cd kucharka
+  PS> git init
+  FILE palacinky.md
+    # Palačinky
+
+    ## Suroviny
+
+    - 250 ml mléka
+    - 1 vejce
+    - 120 g hladké mouky
+    - špetka soli
+  END
+  PS> git add .
+  PS> git commit -m "Přidán recept na palačinky"
+  FILE palacinky.md
+    # Palačinky
+
+    ## Suroviny
+
+    - 250 ml mléka
+    - 1 vejce
+    - 120 g hladké mouky
+    - špetka soli
+
+    ## Tip
+
+    Plním je jahodovou marmeládou.
+  END
+  PS> git commit -am "Přidán tip na plnění"
+  FILE livance.md
+    # Lívance
+
+    ## Suroviny
+
+    - 300 ml mléka
+    - 2 vejce
+    - 250 g polohrubé mouky
+    - 1 lžička prášku do pečiva
+
+    ## Postup
+
+    1. Smíchej suroviny.
+    2. Smaž malé placky na pánvi.
+
+    *Nejlepší jsou teplé.*
+  END
+  PS> git add .
+  PS> git commit -m "Přidány lívance"
+  FILE README.md
+    # Moje kuchařka
+
+    Recepty, které umím uvařit.
+
+    - [Palačinky](palacinky.md)
+    - [Lívance](livance.md)
+  END
+  PS> git add .
+  PS> git commit -m "Přidán obsah kuchařky"
+  FILE .gitignore
+    poznamky-pro-me.md
+  END
+  PS> git add .
+  PS> git commit -m "Přidán .gitignore"
+  VSCODE git/kucharka
+END
+
+TASK Na GitHubu vytvoř repozitář **kucharka**: **Private** a **nic nezaškrtávej**.
+  NOTE     Záložka **GitHub** → tlačítko **New** → název `kucharka` → Private → Create repository.
+  QUESTION Proč tentokrát nezaškrtáváme Add a README file?
+  CHECK    github jana-novakova/kucharka exists
+END
+
+TASK Propoj repozitář s GitHubem a pošli ho tam. Při přihlášení zvol **Sign in with your browser**.
+  HINT  git remote add origin https://github.com/jana-novakova/kucharka.git
+  HINT  git branch -M main
+  HINT  git push -u origin main
+  CHECK github jana-novakova/kucharka has branch main
+END
+
+TASK Na GitHubu otevři **palacinky.md**, klikni na tužku a přidej na konec tabulku. Potvrď **Commit changes**.
+  HINT  ## Na kolik porcí
+  HINT
+  HINT  | Porce | Mléko  | Mouka |
+  HINT  |-------|--------|-------|
+  HINT  | 2     | 250 ml | 120 g |
+  HINT  | 4     | 500 ml | 240 g |
+  CHECK file palacinky.md on github jana-novakova/kucharka contains "|"
+END
+
+TASK Vrať se do VS Code a napiš `git status`. Pak změnu stáhni.
+  HINT     git status
+  HINT     git pull
+  QUESTION Ví Git v počítači o změně na GitHubu? Proč?
+  CHECK    command "git pull..." was run
+  CHECK    file palacinky.md contains "|"
+END
+
+TASK Přidej do **livance.md** tip, commitni a pošli na GitHub.
+  HINT  git add .
+  HINT  git commit -m "Přidán tip k lívancům"
+  HINT  git push
+  CHECK github jana-novakova/kucharka main equals HEAD
+  CHECK commit count is at least 7
+END

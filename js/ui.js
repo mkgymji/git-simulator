@@ -12,7 +12,8 @@
  * ===================================================================== */
 (function () {
   'use strict';
-  var GW = window.GitWorld, GS = window.GitSim, SH = window.GitShell, MD = window.GitMarkdown, SC = window.GitScenarios;
+  var GW = window.GitWorld, GS = window.GitSim, SH = window.GitShell, MD = window.GitMarkdown, SC = window.GitScenarios,
+    SS = window.GitSession, LANG = window.GitScenarioLang, STORE = window.GitStore;
   var esc = MD.esc;
 
   var app = null;
@@ -33,95 +34,20 @@
   var PENCIL = '<svg width="14" height="14" viewBox="0 0 16 16"><path d="M11 2l3 3-8 8H3v-3z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
 
   // ------------------------------------------------------------------
-  //  Scénář: vytvoření světa
+  //  Scénář: vytvoření světa (session.js)
   // ------------------------------------------------------------------
-  function makeApp(scen) {
-    var world = new GW.World();
-    var realNow = world.now;
-    var a = {
-      scen: scen, world: world, people: [], hidden: {}, github: false,
-      active: null, view: {}, term: {}, ide: {}, log: {}, done: {}, gh: {}, seen: null, cardState: {}, finished: false
-    };
-    function runAt(id, line, minutesAgo) {
-      var m = world.machines[id];
-      if (minutesAgo !== undefined) world.now = function () { return Math.floor(realNow() - minutesAgo * 60); };
-      var r = SH.run(m, line), guard = 0;
-      while (r.wait && guard++ < 5) {
-        r = r.wait.type === 'editor' ? r.wait.resume(r.wait.text) : r.wait.resume(true);
-      }
-      world.now = realNow;
-    }
-    var api = {
-      person: function (id, opts) {
-        opts = opts || {};
-        var p = SC.PEOPLE[id];
-        world.addAccount(p.login, p.name, p.email);
-        var m = world.addMachine(id, { login: p.login, home: id, label: p.label });
-        if (opts.configured) {
-          [['user.name', p.name], ['user.email', p.email], ['init.defaultBranch', 'main'], ['core.editor', 'code --wait'],
-            ['pull.rebase', 'false'], ['core.quotepath', 'false']].forEach(function (kv) { GW.configSet(m.config, kv[0], kv[1]); });
-        }
-        if (opts.hidden) a.hidden[id] = true;
-        else a.people.push(id);
-        a.term[id] = { lines: [], history: [], hpos: -1, wait: null };
-        a.ide[id] = { folder: null, file: null, buffer: '', dirty: false, preview: true, creating: false };
-        a.log[id] = [];
-        a.gh[id] = { page: 'home' };
-        a.view[id] = 'pc';
-      },
-      github: function (on) { a.github = on; },
-      mkdir: function (id, rel) { var m = world.machines[id]; m.mkdirp(m.home.concat(rel)); },
-      cd: function (id, rel) { var m = world.machines[id]; m.cwd = m.home.concat(rel); },
-      write: function (id, name, content) { world.machines[id].dir().files[name] = content; },
-      run: runAt,
-      open: function (id, rel) { var m = world.machines[id]; a.ide[id].folder = m.home.concat(rel); },
-      remote: function (owner, name, opts, minutesAgo) {
-        world.now = function () { return Math.floor(realNow() - (minutesAgo || 0) * 60); };
-        var r = world.createRemote(owner, name, { private: true, readme: !!(opts && opts.readme) });
-        r.collaborators = (opts && opts.collaborators) || [];
-        r.invites = [];
-        world.now = realNow;
-      }
-    };
-    scen.setup(api);
-    a.active = a.people[0];
-    for (var k in world.remotes) if (!world.remotes[k].invites) world.remotes[k].invites = [];
-    a.people.forEach(function (id) {
-      var m = world.machines[id], t = a.term[id];
-      t.lines.push({ s: [['Windows PowerShell', '']] });
-      t.lines.push({ s: [['Simulátor: napiš příkaz a stiskni Enter. Přehled příkazů ukáže help.', 'n']], k: 'note' });
-      t.lines.push({ s: [] });
-    });
-    return a;
-  }
+  function makeApp(scen) { return SS.create(scen); }
 
   function m() { return app.world.machines[app.active]; }
-  function person(id) { return SC.PEOPLE[id]; }
+  function person(id) { return app.persons[id]; }
 
   // ------------------------------------------------------------------
   //  Kontrola úkolů
   // ------------------------------------------------------------------
-  function checkCtx() {
-    return {
-      world: app.world,
-      m: function (id) { return app.world.machines[id]; },
-      log: function (id) { return app.log[id] || []; },
-      openFolder: function (id) { var f = app.ide[id] && app.ide[id].folder; return f ? f.join('/') : null; }
-    };
-  }
   function evaluate() {
-    var c = checkCtx(), tasks = app.scen.tasks, i, newly = false;
-    for (i = 0; i < tasks.length; i++) {
-      if (app.done[i]) continue;
-      var ok = false;
-      try { ok = !!tasks[i].check(c); } catch (e) { ok = false; }
-      if (ok) { app.done[i] = true; newly = true; }
-    }
-    if (tasks.length && !app.finished && tasks.every(function (t, k) { return app.done[k]; })) {
-      app.finished = true;
-      confetti();
-    }
-    return newly;
+    var r = SS.evaluate(app);
+    if (r.finishedNow) confetti();
+    return r.newly;
   }
 
   // ------------------------------------------------------------------
@@ -172,9 +98,9 @@
     var box = $('machines');
     box.innerHTML = '';
     var multi = app.people.length > 1;
-    app.people.forEach(function (id) {
+    app.people.forEach(function (id, idx) {
       var p = person(id);
-      var pc = el('button', { class: 'mtab ' + id + (app.active === id && app.view[id] === 'pc' ? ' active' : ''), type: 'button', role: 'tab' },
+      var pc = el('button', { class: 'mtab p' + idx + (app.active === id && app.view[id] === 'pc' ? ' active' : ''), type: 'button', role: 'tab' },
         '<span class="dot"></span>' + esc(multi ? p.label : 'Počítač (' + p.name + ')'));
       pc.addEventListener('click', function () { app.active = id; app.view[id] = 'pc'; renderAll(); focusTerm(); });
       box.appendChild(pc);
@@ -487,8 +413,7 @@
       r = { lines: [{ s: [['Simulátor: tady se něco pokazilo (' + err.message + '). Zkus scénář začít znovu.', 'n']], k: 'note' }] };
       if (window.console) console.error(err);
     }
-    var entry = { line: line, cwd: cwd, out: [] };
-    if (line.trim()) app.log[id].push(entry);
+    var entry = SS.logEntry(app, id, line, cwd);
     handleResult(id, r, entry);
   }
 
@@ -498,24 +423,11 @@
     pushLines(id, r.lines || []);
     if (entry) entry.out = entry.out.concat(r.lines || []);
     if (r.open) {
-      var ide = app.ide[id], mm = app.world.machines[id];
-      if (r.open.folder) {
-        var changed = !ide.folder || ide.folder.join('/') !== r.open.folder.join('/');
-        ide.folder = r.open.folder; ide.file = null; ide.dirty = false;
-        mm.cwd = r.open.folder.slice();
-        if (changed) {
-          t.lines = [];
-          pushLines(id, [{ s: [['(VS Code se přenačetl a terminál začíná znovu ve složce ' + r.open.folder[r.open.folder.length - 1] + ')', 'n']], k: 'note' }, { s: [] }]);
-        }
-      } else if (r.open.file) {
-        var folder = r.open.file.slice(0, -1), name = r.open.file[r.open.file.length - 1];
-        if (!ide.folder || ide.folder.join('/') !== folder.join('/')) {
-          if (!ide.folder) ide.folder = folder;
-          else { pushLines(id, [{ s: [['Simulátor: soubor je mimo otevřenou složku. Otevři nejdřív jeho složku: code -r .', 'n']], k: 'note' }]); finish(); return; }
-        }
-        var d = mm.dirAt(folder);
-        if (!(name in d.files)) d.files[name] = '';
-        ide.file = name; ide.buffer = d.files[name]; ide.dirty = false;
+      var res = SS.applyOpen(app, id, r.open);
+      if (res.error === 'outside') { pushLines(id, [{ s: [['Simulátor: soubor je mimo otevřenou složku. Otevři nejdřív jeho složku: code -r .', 'n']], k: 'note' }]); finish(); return; }
+      if (res.folderChanged) {
+        t.lines = [];
+        pushLines(id, [{ s: [['(VS Code se přenačetl a terminál začíná znovu ve složce ' + r.open.folder[r.open.folder.length - 1] + ')', 'n']], k: 'note' }, { s: [] }]);
       }
     }
     if (r.wait) { startWait(id, r.wait, entry); }
@@ -1103,16 +1015,99 @@
     setTimeout(function () { box.remove(); }, 4500);
   }
 
+  // ------------------------------------------------------------------
+  //  Výběr scénáře: vestavěné, moje (jen v tomto prohlížeči), nahrání
+  // ------------------------------------------------------------------
+  var DOCS_URL = 'https://github.com/mkgymji/git-simulator/blob/main/docs/SCENARE.md';
+
+  function download(name, text) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function fileName(title) { return LANG ? (title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'scenar') + '.scenario' : 'scenar.scenario'; }
+
+  function errorsHtml(errors, text) {
+    var lines = String(text || '').replace(/\r\n?/g, '\n').split('\n');
+    return '<div class="scen-errors"><b>Scénář má chyby, nejde spustit:</b><ul>' + errors.slice(0, 12).map(function (e) {
+      var src = lines[e.line - 1];
+      return '<li><span class="ln">ř. ' + e.line + '</span> ' + esc(e.msg) + (src !== undefined && src.trim() ? '<br><code>' + esc(src.trim()) + '</code>' : '') + '</li>';
+    }).join('') + '</ul>' + (errors.length > 12 ? '<p>… a dalších ' + (errors.length - 12) + ' chyb.</p>' : '') +
+      '<p class="small">Popis jazyka: <a href="' + DOCS_URL + '" target="_blank" rel="noopener">docs/SCENARE.md</a></p></div>';
+  }
+
+  // zkusí text přeložit; při úspěchu uloží do Mých scénářů a spustí
+  function loadText(text, source, onError) {
+    var r = LANG.compileAndTry(text);
+    if (r.errors) { onError(r.errors); return; }
+    STORE.save({ title: r.scenario.title, label: r.scenario.kicker, text: text, source: source || '' }).then(function (item) {
+      if (location.hash === '#' + item.id) start(item.id); else location.hash = item.id;
+      if (!STORE.persistent) toast('Prohlížeč nedovolil uložení – scénář zmizí po zavření stránky.');
+    });
+  }
+
   function scenarioDialog() {
-    var d = el('div', { class: 'dialog', role: 'dialog', 'aria-modal': 'true', style: 'max-width:820px' });
-    d.innerHTML = '<div class="dhead"><span class="grow">Vyber scénář</span></div><div class="dbody"><div class="scen-list"></div><p style="font-size:13px;color:#57606A;margin:12px 0 0">Každý scénář začíná načisto. Přímý odkaz na scénář: adresa stránky + <code>#nazev</code> (např. <code>#odmitnuty-push</code>).</p></div>';
-    var list = d.querySelector('.scen-list');
+    var d = el('div', { class: 'dialog', role: 'dialog', 'aria-modal': 'true', style: 'max-width:860px' });
+    d.innerHTML = '<div class="dhead"><span class="grow">Vyber scénář</span></div><div class="dbody">' +
+      '<h4 class="scen-h">Vestavěné scénáře</h4><div class="scen-list" id="sl-builtin"></div>' +
+      '<h4 class="scen-h">Moje scénáře <span class="small">– uložené jen v tomto prohlížeči</span></h4><div class="scen-list" id="sl-my"><p class="small">Načítám…</p></div>' +
+      '<h4 class="scen-h">Nahrát scénář</h4>' +
+      '<div class="upload"><div class="drop" id="sl-drop">Přetáhni sem soubor <code>.scenario</code>, nebo <label class="linkbtn">vyber soubor<input type="file" id="sl-file" accept=".scenario,.txt,text/plain" hidden></label>.</div>' +
+      '<details><summary>…nebo vlož text scénáře</summary><textarea id="sl-text" spellcheck="false" placeholder="FORMAT 1&#10;SCENARIO …"></textarea>' +
+      '<p><button class="dbtn primary" type="button" id="sl-go">Načíst a spustit</button></p></details>' +
+      '<div id="sl-err"></div>' +
+      '<p class="small">Jak scénář napsat: <a href="' + DOCS_URL + '" target="_blank" rel="noopener">popis jazyka scénářů</a>. Vestavěný scénář si můžeš stáhnout jako vzor. ' +
+      'Sdílet scénář jde odkazem: adresa simulátoru + <code>#load=</code> + adresa souboru (třeba na GitHubu).</p></div></div>';
     var ov = overlay(d);
-    SC.list.forEach(function (s) {
-      var b = el('button', { class: 'scen-item' + (s.id === app.scen.id ? ' active' : ''), type: 'button' },
-        '<small>' + esc(s.kicker) + '</small><b>' + esc(s.title) + '</b><span>' + esc(s.short) + '</span>');
-      b.addEventListener('click', function () { ov.close(); if (location.hash === '#' + s.id) start(s.id); else location.hash = s.id; });
-      list.appendChild(b);
+    function go(id) { ov.close(); if (location.hash === '#' + id) start(id); else location.hash = id; }
+    function card(s, my) {
+      var wrap = el('div', { class: 'scen-item' + (app && s.id === app.scen.id ? ' active' : '') });
+      var b = el('button', { class: 'scen-open', type: 'button' }, '<small>' + esc(s.kicker || s.label || 'Scénář') + '</small><b>' + esc(s.title) + '</b><span>' + esc(s.short || '') + '</span>');
+      b.addEventListener('click', function () { go(s.id); });
+      wrap.appendChild(b);
+      var tools = el('div', { class: 'scen-tools' });
+      var dl = el('button', { class: 'linkbtn', type: 'button' }, my ? 'Stáhnout' : 'Stáhnout jako vzor');
+      dl.addEventListener('click', function () { download(my ? fileName(s.title) : s.id + '.scenario', my ? s.text : SC.source(s.id)); });
+      tools.appendChild(dl);
+      if (my) {
+        var rm = el('button', { class: 'linkbtn', type: 'button' }, 'Odebrat');
+        rm.addEventListener('click', function () { STORE.remove(s.id).then(function () { wrap.remove(); toast('Scénář odebrán z tohoto prohlížeče.'); }); });
+        tools.appendChild(rm);
+      }
+      wrap.appendChild(tools);
+      return wrap;
+    }
+    SC.list.forEach(function (s) { d.querySelector('#sl-builtin').appendChild(card(s, false)); });
+    STORE.list().then(function (items) {
+      var box = d.querySelector('#sl-my');
+      box.innerHTML = '';
+      if (!items.length) box.innerHTML = '<p class="small">Zatím žádné. Nahraný scénář se sem uloží.</p>';
+      items.forEach(function (it) {
+        var r = LANG.compile(it.text, it.id);
+        box.appendChild(card({ id: it.id, title: it.title, kicker: it.label, short: r.scenario ? r.scenario.short : 'Scénář má chyby.', text: it.text }, true));
+      });
+    });
+    var errBox = d.querySelector('#sl-err');
+    function showErr(text) { return function (errors) { errBox.innerHTML = errorsHtml(errors, text); }; }
+    function readFile(f) {
+      if (!f) return;
+      var fr = new FileReader();
+      fr.onload = function () { errBox.innerHTML = ''; loadText(String(fr.result), f.name, function (e) { showErr(String(fr.result))(e); }); if (!errBox.innerHTML) ov.close(); };
+      fr.readAsText(f, 'utf-8');
+    }
+    d.querySelector('#sl-file').addEventListener('change', function (e) { readFile(e.target.files[0]); });
+    var drop = d.querySelector('#sl-drop');
+    ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+    ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('over'); }); });
+    drop.addEventListener('drop', function (e) { readFile(e.dataTransfer.files[0]); });
+    d.querySelector('#sl-go').addEventListener('click', function () {
+      var text = d.querySelector('#sl-text').value;
+      errBox.innerHTML = '';
+      loadText(text, 'vložený text', showErr(text));
+      if (!errBox.innerHTML) ov.close();
     });
     var f = el('div', { class: 'dfoot' });
     var x = el('button', { class: 'dbtn', type: 'button' }, 'Zavřít');
@@ -1217,8 +1212,7 @@
   // ------------------------------------------------------------------
   //  Start
   // ------------------------------------------------------------------
-  function start(id) {
-    var s = SC.list.filter(function (x) { return x.id === id; })[0] || SC.list[0];
+  function launch(s) {
     app = makeApp(s);
     app.seen = null;
     evaluate();
@@ -1226,6 +1220,43 @@
     app.seen = app.seen || {};
     document.title = 'Git simulátor – ' + s.title;
     setTimeout(focusTerm, 0);
+  }
+  function failDialog(title, html) {
+    var d = el('div', { class: 'dialog', role: 'dialog', 'aria-modal': 'true', style: 'max-width:640px' });
+    d.innerHTML = '<div class="dhead">' + esc(title) + '</div><div class="dbody">' + html + '</div>';
+    var f = el('div', { class: 'dfoot' });
+    var x = el('button', { class: 'dbtn primary', type: 'button' }, 'Vybrat jiný scénář');
+    f.appendChild(x); d.appendChild(f);
+    var ov = overlay(d);
+    x.addEventListener('click', function () { ov.close(); scenarioDialog(); });
+  }
+  // #id (vestavěný), #my-… (Moje scénáře), #load=adresa (stáhne, uloží a spustí)
+  function start(hash) {
+    hash = decodeURIComponent(hash || '');
+    if (hash.indexOf('load=') === 0) {
+      var url = hash.slice(5);
+      if (!app) launch(SC.list[0]);
+      fetch(url, { cache: 'no-store' }).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      }).then(function (text) {
+        loadText(text, url, function (errors) { failDialog('Scénář z odkazu nejde spustit', '<p>' + esc(url) + '</p>' + errorsHtml(errors, text)); });
+      }).catch(function (e) {
+        failDialog('Scénář se nepodařilo stáhnout', '<p>Adresa <code>' + esc(url) + '</code> nejde načíst (' + esc(e.message) + ').</p>' +
+          '<p class="small">Soubor musí být veřejně dostupný a server musí povolit stažení z jiné stránky (např. raw.githubusercontent.com to umí).</p>');
+      });
+      return;
+    }
+    if (hash.indexOf('my-') === 0) {
+      STORE.get(hash).then(function (item) {
+        if (!item) { if (!app) launch(SC.list[0]); failDialog('Scénář nenalezen', '<p>Tenhle scénář v tomto prohlížeči uložený není. Moje scénáře jsou vždy jen v prohlížeči, kde je nahraješ.</p>'); return; }
+        var r = LANG.compile(item.text, item.id);
+        if (r.errors) { if (!app) launch(SC.list[0]); failDialog('Scénář nejde spustit', errorsHtml(r.errors, item.text)); return; }
+        launch(r.scenario);
+      });
+      return;
+    }
+    launch(SC.list.filter(function (x) { return x.id === hash; })[0] || SC.list[0]);
   }
   window.addEventListener('hashchange', function () { start(location.hash.slice(1)); });
   window.addEventListener('keydown', function (e) {
@@ -1235,6 +1266,6 @@
   $('cheatBtn').addEventListener('click', cheatDialog);
   $('resetBtn').addEventListener('click', resetDialog);
   $('aboutBtn').addEventListener('click', aboutDialog);
-  start(location.hash.slice(1) || 'volne');
+  start(location.hash.slice(1) || SC.list[0].id);
   window.__gitsim = function () { return app; };
 })();

@@ -1,0 +1,117 @@
+FORMAT 1
+SCENARIO Historie a cestování v čase
+LABEL    Pracovní list 2
+SUMMARY  git diff, git log, git restore a git revert na kuchařce se dvěma commity.
+INTRO    Repozitář **kucharka** už má dva commity a je otevřený ve VS Code. Graf vpravo ukazuje historii.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Počítač Jany"
+  MACHINE jana CONFIGURED
+  REPOSITORY git/kucharka
+  PS> mkdir git
+  PS> cd git
+  PS> mkdir kucharka
+  PS> cd kucharka
+  PS> git init
+  FILE palacinky.md
+    # Palačinky
+
+    ## Suroviny
+
+    - 250 ml mléka
+    - 1 vejce
+    - 120 g hladké mouky
+    - špetka soli
+  END
+  PS> git add palacinky.md
+  PS> git commit -m "Přidán recept na palačinky"
+  FILE palacinky.md
+    # Palačinky
+
+    ## Suroviny
+
+    - 250 ml mléka
+    - 1 vejce
+    - 120 g hladké mouky
+    - špetka soli
+
+    ## Tip
+
+    Plním je jahodovou marmeládou.
+  END
+  PS> git commit -am "Přidán tip na plnění"
+  VSCODE git/kucharka
+END
+
+TASK Přidej do **palacinky.md** postup jako číslovaný seznam (`1.`, `2.`…), ulož a **před commitem** spusť `git diff`. Pak commitni.
+  HINT     ## Postup
+  HINT
+  HINT     1. Všechno smíchej v míse.
+  HINT     2. Nech těsto **15 minut** odpočinout.
+  HINT     3. Smaž na rozpálené pánvi.
+  HINT
+  HINT     git diff
+  HINT     git add palacinky.md
+  HINT     git commit -m "Přidán postup"
+  QUESTION Jak jsou ve výpisu označené řádky, které přibyly?
+  CHECK    file palacinky.md in HEAD contains line starting with "1."
+  CHECK    output of "git diff" contains line starting with "+"
+END
+
+TASK Vytvoř **livance.md** s nadpisy, odrážkami, číslovaným seznamem a poznámkou *kurzívou* (`*text*`). Commitni se zprávou **Přidány lívance**.
+  HINT  git add livance.md
+  HINT  git commit -m "Přidány lívance"
+  CHECK file livance.md in HEAD exists
+  CHECK commit "lívance" exists
+END
+
+TASK Vytvoř **README.md** s odkazy na oba recepty a commitni ho. Odkaz v náhledu zkus otevřít.
+  HINT  # Moje kuchařka
+  HINT
+  HINT  Recepty, které umím uvařit.
+  HINT
+  HINT  - [Palačinky](palacinky.md)
+  HINT  - [Lívance](livance.md)
+  CHECK file README.md in HEAD contains "](palacinky.md)"
+  CHECK file README.md in HEAD contains "](livance.md)"
+END
+
+TASK Prohlédni si historii oběma způsoby.
+  HINT     git log
+  HINT     git log --oneline
+  QUESTION Proč má soused jiné hashe, i když dělal totéž co ty?
+  CHECK    command "git log" was run
+  CHECK    command "git log --oneline" was run
+END
+
+TASK V **palacinky.md** smaž všechny suroviny a ulož. Podívej se na `git diff` a recept zachraň.
+  HINT  git diff
+  HINT  git restore palacinky.md
+  CHECK command "git restore palacinky.md" was run
+  CHECK file palacinky.md contains "mléka"
+END
+
+TASK Vytáhni si **palacinky.md** ve stavu z prvního commitu a pak se vrať k nejnovější verzi.
+  NOTE  Hash prvního commitu najdeš v `git log --oneline`.
+  HINT  git restore --source=HASH palacinky.md
+  HINT  git restore palacinky.md
+  CHECK command "git restore palacinky.md" was run after command "git restore --source..."
+END
+
+TASK Přidej do **livance.md** řádek `- 2 kg soli`, commitni ho jako **Přidána chyba** a pak commit vrať.
+  HINT     git commit -am "Přidána chyba"
+  HINT     git log --oneline
+  HINT     git revert --no-edit HASH
+  QUESTION Zmizel commit „Přidána chyba“ z historie? Podívej se do grafu.
+  CHECK    commit "chyba" is reverted
+  CHECK    file livance.md in HEAD does not contain "2 kg soli"
+END
+
+TASK Vytvoř soubor **poznamky-pro-me.md**, pak **.gitignore** s řádkem `poznamky-pro-me.md`. Porovnej `git status` před a po. Nakonec **.gitignore** commitni.
+  HINT     git status
+  HINT     git add .gitignore
+  HINT     git commit -m "Přidán .gitignore"
+  QUESTION Čím se liší git restore a git revert?
+  CHECK    file .gitignore in HEAD contains "poznamky-pro-me.md"
+  CHECK    file poznamky-pro-me.md in HEAD does not exist
+END

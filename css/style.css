@@ -177,7 +177,8 @@ kbd {
   font-size: 13.5px; display: inline-flex; align-items: center; gap: 7px;
 }
 .mtab .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--modra); }
-.mtab.petr .dot { background: var(--fialova); }
+.mtab.p1 .dot { background: var(--fialova); }
+.mtab.p2 .dot { background: var(--zluta); }
 .mtab.github .dot { background: var(--tmava); }
 .mtab.active { border-color: var(--tmava); background: var(--tmava); color: #fff; }
 .mtab .badge { background: var(--oranzova); color: #fff; border-radius: 999px; font-size: 11px; padding: 0 6px; font-weight: 600; }
@@ -423,6 +424,8 @@ kbd {
 .gcm .stack { display: flex; flex-direction: column; gap: 8px; max-width: 320px; margin: 14px auto 6px; }
 .gcm .stack .dbtn { padding: 9px; }
 .scen-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.scen-h { margin: 14px 0 6px; font-size: 14.5px; }
+.scen-h:first-child { margin-top: 0; }
 .scen-item { text-align: left; border: 1px solid var(--ramecek); border-radius: 8px; background: #fff; padding: 10px 12px; }
 .scen-item:hover { border-color: var(--oranzova); box-shadow: 0 2px 8px rgba(240,80,51,.15); }
 .scen-item.active { border-color: var(--oranzova); background: #FFF5F2; }
@@ -475,3 +478,20 @@ kbd {
   .arrow span { writing-mode: horizontal-tb; transform: none; }
   .terminal .tbody { height: 300px; font-size: 12.5px; }
 }
+
+/* výběr a nahrání scénáře */
+.scen-item { display: flex; flex-direction: column; padding: 0; }
+.scen-item .scen-open { text-align: left; border: none; background: none; padding: 10px 12px 4px; flex: 1; }
+.scen-item .scen-tools { display: flex; gap: 12px; padding: 0 12px 8px; font-size: 12px; }
+.linkbtn { border: none; background: none; padding: 0; color: var(--modra); cursor: pointer; font-size: inherit; text-decoration: underline; }
+.dialog .small, .scen-errors .small { font-size: 12.5px; color: var(--seda); }
+.upload .drop { border: 2px dashed var(--ramecek); border-radius: 8px; padding: 18px; text-align: center; color: var(--seda); font-size: 14px; }
+.upload .drop.over { border-color: var(--oranzova); background: #FFF5F2; }
+.upload details { margin-top: 10px; }
+.upload summary { cursor: pointer; font-size: 14px; color: var(--modra); }
+.upload textarea { width: 100%; min-height: 180px; margin-top: 6px; font-family: var(--mono); font-size: 12.5px; border: 1px solid var(--ramecek); border-radius: 6px; padding: 8px; }
+.scen-errors { margin-top: 10px; border: 1px solid #FFB8B0; background: #FFEBE9; border-radius: 8px; padding: 10px 12px; font-size: 13.5px; }
+.scen-errors ul { margin: 6px 0; padding-left: 1.2em; }
+.scen-errors li { margin: 4px 0; }
+.scen-errors .ln { font-weight: 700; color: var(--cervena); }
+.scen-errors code { font-size: 12px; background: #fff; padding: 1px 4px; border-radius: 4px; }

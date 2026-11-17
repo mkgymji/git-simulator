@@ -1,0 +1,84 @@
+FORMAT 1
+SCENARIO Historie jako graf
+LABEL    Pracovní list 2 · úkol 8
+SUMMARY  Commit s chybou a git revert – co se stane v grafu commitů.
+INTRO    Kuchařka má tři commity. Vpravo vidíš graf: každý kroužek je jeden commit, šipka vede k předchozímu. Nejnovější commit je vpravo.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Počítač Jany"
+  MACHINE jana CONFIGURED
+  REPOSITORY git/kucharka
+  PS> mkdir git
+  PS> cd git
+  PS> mkdir kucharka
+  PS> cd kucharka
+  PS> git init
+  FILE palacinky.md
+    # Palačinky
+
+    ## Suroviny
+
+    - 250 ml mléka
+    - 1 vejce
+    - 120 g hladké mouky
+    - špetka soli
+  END
+  PS> git add .
+  PS> git commit -m "Přidán recept na palačinky"
+  FILE palacinky.md
+    # Palačinky
+
+    ## Suroviny
+
+    - 250 ml mléka
+    - 1 vejce
+    - 120 g hladké mouky
+    - špetka soli
+
+    ## Tip
+
+    Plním je jahodovou marmeládou.
+  END
+  PS> git commit -am "Přidán tip na plnění"
+  FILE livance.md
+    # Lívance
+
+    ## Suroviny
+
+    - 300 ml mléka
+    - 2 vejce
+    - 250 g polohrubé mouky
+    - 1 lžička prášku do pečiva
+
+    ## Postup
+
+    1. Smíchej suroviny.
+    2. Smaž malé placky na pánvi.
+
+    *Nejlepší jsou teplé.*
+  END
+  PS> git add .
+  PS> git commit -m "Přidány lívance"
+  VSCODE git/kucharka
+END
+
+TASK Otevři **livance.md**, přidej řádek `- 2 kg soli` a ulož (**Ctrl+S**). Commitni se zprávou **Přidána chyba**.
+  HINT  git commit -am "Přidána chyba"
+  NOTE  `-a` přidá všechny změněné soubory, takže `git add` není potřeba.
+  CHECK file livance.md in commit "chyba" contains "2 kg soli"
+END
+
+TASK Najdi hash commitu **Přidána chyba** a commit vrať.
+  HINT     git log --oneline
+  HINT     git revert --no-edit HASH
+  NOTE     Místo `HASH` napiš hash z výpisu (7 znaků).
+  QUESTION Kolik kroužků je v grafu? Zmizel commit Přidána chyba?
+  CHECK    commit "chyba" is reverted
+  CHECK    file livance.md in HEAD does not contain "2 kg soli"
+END
+
+TASK Porovnej graf s výpisem `git log --oneline`.
+  HINT     git log --oneline
+  QUESTION Kde je nejnovější commit v grafu a kde ve výpisu?
+  CHECK    output of "git log..." contains "Revert"
+END

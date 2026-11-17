@@ -16,6 +16,11 @@ Spuštění: otevři `index.html` (stačí z disku) nebo stránku na GitHub Page
 
 ## Scénáře
 
+Scénáře jsou textové soubory v **jazyce scénářů** (`scenarios/*.scenario`, popis v
+[`docs/SCENARE.md`](docs/SCENARE.md)). Učitel si může napsat vlastní a nahrát ho v dialogu
+**Vybrat scénář → Nahrát scénář**; uloží se do „Mých scénářů“ jen v jeho prohlížeči.
+Sdílet ho jde odkazem `#load=adresa-souboru`.
+
 | Adresa | Scénář |
 |---|---|
 | `#volne` | volný režim – prázdný počítač |
@@ -53,19 +58,26 @@ Windows PowerShell 5.1; na českých Windows mohou vypadat jinak.
 ## Struktura
 
 ```
-index.html          stránka
-css/style.css       vzhled (barvy a písma z materiálů kurzu)
-js/text.js          UTF-8, SHA-1, diff (Myers, histogram), merge, kombinovaný diff
-js/world.js         objekty Gitu, počítače, GitHub
-js/rename.js        detekce přejmenování (diffcore-rename)
-js/graph.js         git log --graph
-js/git.js           příkazy Gitu
-js/shell.js         terminál (PowerShell)
-js/markdown.js      náhled Markdownu
-js/scenarios.js     scénáře a úkoly
-js/ui.js            rozhraní
-fonts/              Inter a DejaVu Sans Mono (podmnožina znaků, licence vedle)
-tests/              rozdílové testy proti skutečnému Gitu
+index.html              stránka
+css/style.css           vzhled (barvy a písma z materiálů kurzu)
+js/text.js              UTF-8, SHA-1, diff (Myers, histogram), merge, kombinovaný diff
+js/world.js             objekty Gitu, počítače, GitHub
+js/rename.js            detekce přejmenování (diffcore-rename)
+js/graph.js             git log --graph
+js/git.js               příkazy Gitu
+js/shell.js             terminál (PowerShell)
+js/markdown.js          náhled Markdownu
+js/session.js           běh scénáře: sestavení světa, záznam příkazů, vyhodnocení úkolů
+js/scenario-lang.js     jazyk scénářů: parser, podmínky CHECK, hlášení chyb
+js/scenarios-builtin.js vestavěné scénáře zabalené do JS (generuje tools/build_scenarios.py)
+js/scenarios.js         přeložení vestavěných scénářů
+js/store.js             Moje scénáře (IndexedDB v prohlížeči)
+js/ui.js                rozhraní
+scenarios/              vestavěné scénáře (*.scenario) a jejich pořadí (PORADI)
+docs/SCENARE.md         popis jazyka scénářů
+tools/                  build vestavěných scénářů
+fonts/                  Inter a DejaVu Sans Mono (podmnožina znaků, licence vedle)
+tests/                  rozdílové testy proti skutečnému Gitu, testy jazyka scénářů
 ```
 
 ## Licence a zdroje

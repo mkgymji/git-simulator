@@ -1,0 +1,13 @@
+FORMAT 1
+# Volný režim: prázdný počítač bez úkolů.
+SCENARIO Prázdný počítač
+LABEL    Volný režim
+SUMMARY  Vyzkoušej si cokoliv: terminál, Git i GitHub. Nic tu není připravené.
+INTRO    Prázdný školní počítač s Gitem a VS Code. Git ještě není nastavený. Na GitHubu máš účet **jana-novakova**.
+INTRO    Nevíš, kde začít? Napiš `help` nebo otevři **Tahák**.
+
+SETUP
+  PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Počítač Jany"
+  MACHINE jana
+  SHOW GITHUB
+END

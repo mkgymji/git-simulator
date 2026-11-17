@@ -1,0 +1,61 @@
+FORMAT 1
+SCENARIO Odmítnutý push
+LABEL    Pracovní list 4 · nanečisto
+SUMMARY  Někdo mezitím pushnul na GitHub. Co udělá git push a jak to vyřešit.
+INTRO    Jsi **Petr**. Se spolužačkou Annou máte společný repozitář **spolecna-kucharka** a máš ho naklonovaný. Anna právě pushnula svůj recept – ty o tom zatím nevíš.
+INTRO    Vpravo vidíš historii svého počítače a pod ní GitHub.
+
+SETUP
+  PERSON anna NAME "Anna Svobodová" EMAIL "svobodovaa@jirovcovka.net" LOGIN "anna-svobodova" LABEL "Počítač Anny"
+  PERSON petr NAME "Petr Dvořák" EMAIL "dvorakp@jirovcovka.net" LOGIN "petr-dvorak" LABEL "Počítač Petra"
+  MACHINE anna CONFIGURED HIDDEN
+  MACHINE petr CONFIGURED
+  REPOSITORY git/spolecna-kucharka
+  GITHUB anna-svobodova/spolecna-kucharka README COLLABORATOR petr-dvorak
+  AS petr
+  PS> mkdir git
+  PS> cd git
+  PS> git clone https://github.com/anna-svobodova/spolecna-kucharka.git
+  PS> cd spolecna-kucharka
+  AS anna
+  PS> mkdir git
+  PS> cd git
+  PS> git clone https://github.com/anna-svobodova/spolecna-kucharka.git
+  PS> cd spolecna-kucharka
+  FILE bramboracka.md
+    # Bramboračka
+
+    - 4 brambory
+    - 1 cibule
+    - majoránka
+  END
+  PS> git add .
+  PS> git commit -m "Přidána bramboračka"
+  PS> git push
+  AS petr
+  VSCODE git/spolecna-kucharka
+END
+
+TASK Vytvoř soubor **buchty.md** s receptem a commitni ho.
+  HINT  git add buchty.md
+  HINT  git commit -m "Přidány buchty"
+  CHECK file buchty.md in HEAD exists
+END
+
+TASK Zkus pushnout.
+  HINT     git push
+  QUESTION Co se stalo? Přečti si řádky hint.
+  CHECK    output of "git push..." contains "[rejected]"
+END
+
+TASK Stáhni Annin commit. Otevře se **MERGE_MSG** – nic neměň, jen ho zavři.
+  HINT     git pull
+  QUESTION Jaký nový commit se objevil v grafu a kolik má předchůdců?
+  CHECK    HEAD is a merge
+END
+
+TASK Pushni znovu.
+  HINT  git push
+  CHECK github anna-svobodova/spolecna-kucharka main equals HEAD
+  CHECK HEAD is a merge
+END
