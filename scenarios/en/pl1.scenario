@@ -86,7 +86,6 @@ TASK Add a subheading `## Tip` at the end of the recipe and save – the simulat
   HINT  git add pancakes.md
   HINT  git commit -m "Add filling tip"
   CHECK commit count is at least 2
-  CHECK file pancakes.md in HEAD contains line starting with "## Tip"
   AUTO WHEN file pancakes.md contains line starting with "## Tip"
     NOTE one sentence under the tip. Words between asterisks are shown in *italics* in the preview.
     APPEND pancakes.md

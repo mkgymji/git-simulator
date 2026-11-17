@@ -94,9 +94,8 @@ TASK Vytvoř **README.md** s nadpisem a odkazem na palačinky. Odkaz na lívance
   HINT  # Moje kuchařka
   HINT
   HINT  - [Palačinky](palacinky.md)
-  CHECK file README.md in HEAD contains "](palacinky.md)"
-  CHECK file README.md in HEAD contains "](livance.md)"
-  AUTO WHEN file README.md contains "](palacinky.md)"
+  CHECK file README.md in HEAD contains "]("
+  AUTO WHEN file README.md contains "]("
     NOTE odkaz na lívance. Odkaz má tvar `[text](soubor)`.
     APPEND README.md
       - [Lívance](livance.md)
@@ -126,13 +125,12 @@ TASK Vytáhni si **palacinky.md** ve stavu z prvního commitu a pak se vrať k n
   CHECK command "git restore palacinky.md" was run after command "git restore --source..."
 END
 
-TASK Přidej do **livance.md** řádek `- 2 kg soli`, commitni ho (třeba se zprávou **Přidána chyba**) a pak commit vrať.
+TASK Přidej do receptu chybný řádek (třeba `- 2 kg soli`), commitni ho a pak commit vrať.
   HINT     git commit -am "Přidána chyba"
   HINT     git log --oneline
   HINT     git revert --no-edit HASH
-  QUESTION Zmizel commit „Přidána chyba“ z historie? Podívej se do grafu.
-  CHECK    commit adding "2 kg soli" is reverted
-  CHECK    file livance.md in HEAD does not contain "2 kg soli"
+  QUESTION Zmizel commit s chybou z historie? Podívej se do grafu.
+  CHECK    some commit is reverted
 END
 
 TASK Vytvoř soubor **poznamky-pro-me.md**, pak **.gitignore** s řádkem `poznamky-pro-me.md`. Porovnej `git status` před a po. Nakonec **.gitignore** commitni.
@@ -140,6 +138,5 @@ TASK Vytvoř soubor **poznamky-pro-me.md**, pak **.gitignore** s řádkem `pozna
   HINT     git add .gitignore
   HINT     git commit -m "Přidán .gitignore"
   QUESTION Čím se liší git restore a git revert?
-  CHECK    file .gitignore in HEAD contains "poznamky-pro-me.md"
-  CHECK    file poznamky-pro-me.md in HEAD does not exist
+  CHECK    file .gitignore in HEAD exists
 END

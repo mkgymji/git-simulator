@@ -94,9 +94,8 @@ TASK Create **README.md** with a heading and a link to the pancakes. The simulat
   HINT  # My cookbook
   HINT
   HINT  - [Pancakes](pancakes.md)
-  CHECK file README.md in HEAD contains "](pancakes.md)"
-  CHECK file README.md in HEAD contains "](drop-scones.md)"
-  AUTO WHEN file README.md contains "](pancakes.md)"
+  CHECK file README.md in HEAD contains "]("
+  AUTO WHEN file README.md contains "]("
     NOTE the link to the drop scones. A link looks like `[text](file)`.
     APPEND README.md
       - [Drop scones](drop-scones.md)
@@ -126,13 +125,12 @@ TASK Bring back **pancakes.md** as it was in the first commit, then return to th
   CHECK command "git restore pancakes.md" was run after command "git restore --source..."
 END
 
-TASK Add the line `- 2 kg salt` to **drop-scones.md**, commit it (for example with the message **Add mistake**) and then revert the commit.
+TASK Add a wrong line to a recipe (for example `- 2 kg salt`), commit it and then revert the commit.
   HINT     git commit -am "Add mistake"
   HINT     git log --oneline
   HINT     git revert --no-edit HASH
-  QUESTION Did the commit “Add mistake” disappear from the history? Look at the graph.
-  CHECK    commit adding "2 kg salt" is reverted
-  CHECK    file drop-scones.md in HEAD does not contain "2 kg salt"
+  QUESTION Did the commit with the mistake disappear from the history? Look at the graph.
+  CHECK    some commit is reverted
 END
 
 TASK Create a file **notes-for-me.md**, then **.gitignore** with the line `notes-for-me.md`. Compare `git status` before and after. Finally commit **.gitignore**.
@@ -140,6 +138,5 @@ TASK Create a file **notes-for-me.md**, then **.gitignore** with the line `notes
   HINT     git add .gitignore
   HINT     git commit -m "Add .gitignore"
   QUESTION What is the difference between git restore and git revert?
-  CHECK    file .gitignore in HEAD contains "notes-for-me.md"
-  CHECK    file notes-for-me.md in HEAD does not exist
+  CHECK    file .gitignore in HEAD exists
 END

@@ -164,6 +164,16 @@
         return adds.some(function (b) { return hist.some(function (k) { return k.message.indexOf('This reverts commit ' + b.hash) >= 0; }); });
       };
     } },
+    // některý commit historie je vrácený revertem – nezáleží na textu ani souboru
+    { re: /^some commit is reverted$/, needsRepo: true, make: function (mm, ctx) {
+      return function (c, id) {
+        var rr = repoOf(c, id, ctx.repoPath);
+        if (!rr) return false;
+        var hist = historyOf(c, rr.repo), hashes = {};
+        hist.forEach(function (k) { hashes[k.hash] = true; });
+        return hist.some(function (k) { var m = /This reverts commit ([0-9a-f]{40})/.exec(k.message); return !!m && hashes[m[1]]; });
+      };
+    } },
     { re: /^commit count is at least (\d+)$/, needsRepo: true, make: function (mm, ctx) {
       var n = parseInt(mm[1], 10);
       return function (c, id) { var rr = repoOf(c, id, ctx.repoPath); return !!rr && historyOf(c, rr.repo).length >= n; };
@@ -237,7 +247,7 @@
       };
     }, needsRepo: function (mm) { return !!mm[5]; } }
   ];
-  var CHECK_STARTS = ['file', 'repository exists', 'commit', 'commit adding', 'HEAD is a merge', 'merge is in progress', 'no merge is in progress',
+  var CHECK_STARTS = ['file', 'repository exists', 'commit', 'commit adding', 'some commit is reverted', 'HEAD is a merge', 'merge is in progress', 'no merge is in progress',
     'branch', 'on branch', 'branches', 'command', 'output of', 'config', 'vscode folder is', 'github'];
 
   // ------------------------------------------------------------------

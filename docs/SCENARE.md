@@ -162,9 +162,10 @@ TASK Vytvoř recept.md s nadpisem `# Buchty` a ulož. Suroviny doplní simuláto
 END
 ```
 
-**Tolerance:** student nemusí psát přesně tvoje texty. Zprávu commitu nekontroluj – podmínky
-`commit adding "T"` a `file X in any commit` se dívají na obsah, ne na zprávu. V `HINT` dej
-zprávu jen jako příklad.
+**Tolerance:** student nemusí psát přesně tvoje texty. Kontroluj kroky Gitu, ne text: zprávu commitu
+vůbec, obsah souboru jen tam, kde je smyslem úkolu (nadpis, odkaz, kurzíva). Pomůžou podmínky
+`some commit is reverted`, `commit count is at least N`, `commit adding "T"` a `file X in any commit`.
+V `HINT` dej texty jen jako příklad.
 
 ## CHECK – slovník podmínek
 
@@ -199,6 +200,7 @@ Za název souboru lze dát místo (jinak se myslí pracovní složka):
 | `commit "zpráva" is reverted` | takový commit existuje a v historii je i jeho revert |
 | `commit adding "T" exists` | v historii je commit, který text T přidal (v souboru je, v předchozí verzi nebyl) – **nezávisí na zprávě** |
 | `commit adding "T" is reverted` | takový commit existuje a je vrácený revertem |
+| `some commit is reverted` | některý commit historie je vrácený revertem – nezáleží na textu, souboru ani zprávě |
 | `commit count is at least N` | na aktuální větvi je aspoň N commitů |
 | `HEAD is a merge` | poslední commit má dva předchůdce |
 | `merge is in progress` / `no merge is in progress` | rozdělaný merge (konflikt) je / není |

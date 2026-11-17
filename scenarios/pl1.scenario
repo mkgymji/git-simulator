@@ -86,7 +86,6 @@ TASK Přidej na konec receptu podnadpis `## Tip` a ulož – větu pod něj dopl
   HINT  git add palacinky.md
   HINT  git commit -m "Přidán tip na plnění"
   CHECK commit count is at least 2
-  CHECK file palacinky.md in HEAD contains line starting with "## Tip"
   AUTO WHEN file palacinky.md contains line starting with "## Tip"
     NOTE jednu větu pod tip. Slova mezi hvězdičkami budou v náhledu *kurzívou*.
     APPEND palacinky.md

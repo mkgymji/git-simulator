@@ -127,6 +127,15 @@ if (!ra.errors) {
   ok(aa.done[2] === true, 'commit adding … is reverted');
 }
 
+// --- some commit is reverted: nezáleží na textu, souboru ani zprávě ---
+var rs = L.compile(HEAD + SETUP + 'TASK T\n  CHECK some commit is reverted\nEND\n', 'rs');
+var ar = S.create(rs.scenario), adr = ar.world.machines.alice.dir();
+adr.files['a.md'] = 'x\n'; S.exec(ar, 'alice', 'git add .'); S.exec(ar, 'alice', 'git commit -m "a"');
+adr.files['b.md'] = '2kg soli\n'; S.exec(ar, 'alice', 'git add .'); S.exec(ar, 'alice', 'git commit -m "Pridana chyba"'); S.evaluate(ar);
+ok(!ar.done[0], 'some commit is reverted: bez revertu neplatí');
+S.exec(ar, 'alice', 'git revert --no-edit HEAD'); S.evaluate(ar);
+ok(ar.done[0] === true, 'some commit is reverted: po revertu platí');
+
 (typeof GitBuiltinScenarios !== 'undefined' ? GitBuiltinScenarios : []).forEach(function (it) {
   var rr = L.compileAndTry(it.text, it.id);
   ok(!rr.errors, 'vestavěný scénář ' + it.file + ' bez chyb: ' + JSON.stringify(rr.errors));

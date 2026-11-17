@@ -163,9 +163,10 @@ TASK Create recipe.md with the heading `# Buns` and save it. The simulator adds 
 END
 ```
 
-**Tolerance:** students do not have to type exactly your texts. Do not check the commit message –
-the conditions `commit adding "T"` and `file X in any commit` look at the content, not the message.
-Give the message in a `HINT` only as an example.
+**Tolerance:** students do not have to type exactly your texts. Check the Git steps, not the text:
+never the commit message, and file content only where it is the point of the task (a heading, a link,
+italics). Useful conditions: `some commit is reverted`, `commit count is at least N`, `commit adding "T"`
+and `file X in any commit`. Give texts in a `HINT` only as examples.
 
 ## CHECK – condition vocabulary
 
@@ -200,6 +201,7 @@ After the file name you can give a place (otherwise the working directory is mea
 | `commit "message" is reverted` | such a commit exists and the history also has its revert |
 | `commit adding "T" exists` | the history has a commit that added the text T (the file has it, the previous version did not) – **independent of the message** |
 | `commit adding "T" is reverted` | such a commit exists and has been reverted |
+| `some commit is reverted` | some commit in the history has been reverted – regardless of the text, file or message |
 | `commit count is at least N` | the current branch has at least N commits |
 | `HEAD is a merge` | the last commit has two parents |
 | `merge is in progress` / `no merge is in progress` | an unfinished merge (conflict) is / is not in progress |
