@@ -1,3 +1,12 @@
+/*
+ * Git simulátor – https://github.com/mkgymji/git-simulator
+ * Copyright (C) 2026 Michal Kočer
+ * SPDX-License-Identifier: GPL-2.0-only
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 (see LICENSE).
+ * Zdroje a autorská práva: ZDROJE.md
+ */
 /* =====================================================================
  *  ui.js – rozhraní simulátoru
  * ===================================================================== */
@@ -1156,6 +1165,42 @@
     var ov = overlay(d);
     x.addEventListener('click', function () { ov.close(); });
   }
+  // O simulátoru: autorská práva, licence a použité zdroje (podrobně v ZDROJE.md)
+  function aboutDialog() {
+    var GITSRC = 'https://github.com/git/git/blob/v2.47.1/';
+    function src(f) { return '<a href="' + GITSRC + f + '" target="_blank" rel="noopener"><code>' + f + '</code></a>'; }
+    var d = el('div', { class: 'dialog about', role: 'dialog', 'aria-modal': 'true', style: 'max-width:720px' });
+    d.innerHTML = '<div class="dhead"><span class="grow">O simulátoru</span></div><div class="dbody">' +
+      '<p style="margin-top:0"><b>Git simulátor</b> pro kurz Git a GitHub – rychlý úvod<br>Copyright © 2026 Michal Kočer</p>' +
+      '<p>Simulátor je svobodný software pod licencí <a href="https://github.com/mkgymji/git-simulator/blob/main/LICENSE" target="_blank" rel="noopener">GNU General Public License verze 2</a>, ' +
+      'stejně jako Git. Smíš ho používat, upravovat a šířit; upravenou verzi ale jen pod stejnou licencí a se zdrojovým kódem. ' +
+      'Je poskytován bez jakékoli záruky.</p>' +
+      '<h4>Převzato z Gitu 2.47.1</h4>' +
+      '<p class="small" style="margin:0 0 4px">Algoritmy jsou převedené do JavaScriptu, hlášky Gitu převzaté doslova. Git: © Linus Torvalds, Junio C Hamano a přispěvatelé, GPL-2.0.</p>' +
+      '<ul>' +
+      '<li>diff a merge: ' + src('xdiff/xdiffi.c') + ', ' + src('xdiff/xprepare.c') + ', ' + src('xdiff/xemit.c') + ', ' + src('xdiff/xutils.c') + ', ' + src('xdiff/xmerge.c') +
+      ' <span class="small">(© Davide Libenzi, Johannes E. Schindelin, LGPL-2.1+)</span></li>' +
+      '<li>histogramový diff: ' + src('xdiff/xhistogram.c') + ' <span class="small">(© 2010 Google Inc., Eclipse Distribution License 1.0)</span></li>' +
+      '<li>diff souboru v konfliktu: ' + src('combine-diff.c') + '</li>' +
+      '<li><code>git log --graph</code>: ' + src('graph.c') + ', ' + src('commit.c') + '</li>' +
+      '<li>přejmenování: ' + src('diffcore-rename.c') + ', ' + src('diffcore-delta.c') + '</li>' +
+      '<li>přepínání větví a místní změny: ' + src('unpack-trees.c') + '; slučování: ' + src('merge-ort.c') + '; revert: ' + src('sequencer.c') + '</li>' +
+      '<li>výpisy: ' + src('wt-status.c') + ', ' + src('diff.c') + ', ' + src('ws.c') + ', ' + src('remote.c') + ', ' + src('help.c') + ', ' + src('advice.c') + ', ' + src('transport.c') + ' a <code>builtin/*.c</code></li>' +
+      '</ul>' +
+      '<h4>Písma</h4><ul>' +
+      '<li><a href="https://github.com/rsms/inter" target="_blank" rel="noopener">Inter</a> – © The Inter Project Authors, SIL Open Font License 1.1</li>' +
+      '<li><a href="https://dejavu-fonts.github.io/" target="_blank" rel="noopener">DejaVu Sans Mono</a> – © Bitstream, Inc. (Bitstream Vera) a DejaVu, licence Bitstream Vera</li></ul>' +
+      '<h4>Ochranné známky</h4><p class="small" style="margin:0">Git je ochranná známka Software Freedom Conservancy, GitHub ochranná známka GitHub, Inc., ' +
+      'PowerShell, Windows a Visual Studio Code ochranné známky společnosti Microsoft. Simulátor s nimi není spojen, jejich vzhled a texty napodobuje jen pro výuku.</p>' +
+      '<p class="small">Úplný přehled: <a href="https://github.com/mkgymji/git-simulator/blob/main/ZDROJE.md" target="_blank" rel="noopener">ZDROJE.md</a></p></div>';
+    var f = el('div', { class: 'dfoot' });
+    var x = el('button', { class: 'dbtn primary', type: 'button' }, 'Zavřít');
+    f.appendChild(x); d.appendChild(f);
+    var ov = overlay(d);
+    x.addEventListener('click', function () { ov.close(); });
+    setTimeout(function () { x.focus(); }, 0);
+  }
+
   function resetDialog() {
     var d = el('div', { class: 'dialog', role: 'dialog', 'aria-modal': 'true', style: 'max-width:440px' });
     d.innerHTML = '<div class="dhead">Začít scénář znovu?</div><div class="dbody">Všechno, co jsi v tomhle scénáři udělal(a), zmizí.</div>';
@@ -1189,6 +1234,7 @@
   $('scenBtn').addEventListener('click', scenarioDialog);
   $('cheatBtn').addEventListener('click', cheatDialog);
   $('resetBtn').addEventListener('click', resetDialog);
+  $('aboutBtn').addEventListener('click', aboutDialog);
   start(location.hash.slice(1) || 'volne');
   window.__gitsim = function () { return app; };
 })();

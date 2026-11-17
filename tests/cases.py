@@ -1,3 +1,5 @@
+# Git simulátor – Copyright (C) 2026 Michal Kočer
+# SPDX-License-Identifier: GPL-2.0-only
 """Případy pro rozdílový test (skutečný Git × simulátor)."""
 from difftest import Case
 

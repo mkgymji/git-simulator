@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Git simulátor – Copyright (C) 2026 Michal Kočer
+# SPDX-License-Identifier: GPL-2.0-only
 """Přejmenování souborů na větvích a slučování / revert: simulátor × Git.
 Použití: python3 tests/fuzz_rename.py [počet] [semínko]"""
 import os, random, sys

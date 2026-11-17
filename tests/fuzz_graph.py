@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Git simulátor – Copyright (C) 2026 Michal Kočer
+# SPDX-License-Identifier: GPL-2.0-only
 """Náhodné historie s větvemi a slučováním: git log (--graph, --oneline, --all) simulátor × Git.
 Použití: python3 tests/fuzz_graph.py [počet historií] [semínko]"""
 import os, random, sys

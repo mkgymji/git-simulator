@@ -1,3 +1,5 @@
+# Git simulátor – Copyright (C) 2026 Michal Kočer
+# SPDX-License-Identifier: GPL-2.0-only
 """Rozdílový test: stejné kroky ve skutečném Gitu a v simulátoru, výstupy se musí shodovat."""
 import json, os, subprocess, sys, tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

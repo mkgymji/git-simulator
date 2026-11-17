@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Git simulátor – Copyright (C) 2026 Michal Kočer
+# SPDX-License-Identifier: GPL-2.0-only
 """Porovná diff a merge simulátoru se skutečným Gitem na náhodných souborech.
 
 Použití: python3 tests/fuzz_text.py [počet] [semínko]

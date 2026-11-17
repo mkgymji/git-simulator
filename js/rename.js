@@ -1,3 +1,16 @@
+/*
+ * Git simulátor – https://github.com/mkgymji/git-simulator
+ * Copyright (C) 2026 Michal Kočer
+ * SPDX-License-Identifier: GPL-2.0-only
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 (see LICENSE).
+ *
+ * Obsahuje kód převzatý z Gitu 2.47.1 (https://github.com/git/git), GPL-2.0:
+ *   diffcore-rename.c – Copyright (C) 2005 Junio C Hamano a přispěvatelé Gitu
+ *   diffcore-delta.c – přispěvatelé Gitu
+ * Zdroje a autorská práva: ZDROJE.md
+ */
 /* =====================================================================
  *  rename.js – detekce přejmenovaných souborů
  *

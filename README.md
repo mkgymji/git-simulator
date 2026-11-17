@@ -68,7 +68,11 @@ fonts/              Inter a DejaVu Sans Mono (podmnožina znaků, licence vedle)
 tests/              rozdílové testy proti skutečnému Gitu
 ```
 
-## Licence
+## Licence a zdroje
 
-Licence simulátoru zatím není určena. Písma: Inter (SIL Open Font License 1.1),
-DejaVu Sans Mono (licence Bitstream Vera / DejaVu) – viz `fonts/`.
+Copyright (C) 2026 Michal Kočer. Simulátor je svobodný software pod licencí
+**GNU General Public License verze 2** (`GPL-2.0-only`, soubor `LICENSE`), stejně jako Git,
+z jehož zdrojového kódu (verze 2.47.1) přebírá algoritmy a texty hlášek. Přehled převzatých
+souborů, jejich autorů a licencí (xdiff LGPL-2.1+, histogramový diff Eclipse Distribution
+License 1.0) a licence písem je v souboru `ZDROJE.md`; na stránce v patičce pod odkazem
+**O simulátoru a zdrojích**.

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Git simulátor – Copyright (C) 2026 Michal Kočer
+# SPDX-License-Identifier: GPL-2.0-only
 """Dvojice přes GitHub: náhodné commity, push, pull, fetch, status, log – simulátor × Git.
 Použití: python3 tests/fuzz_remote.py [počet] [semínko] [kroků]"""
 import os, random, sys

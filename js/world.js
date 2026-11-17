@@ -1,3 +1,14 @@
+/*
+ * Git simulátor – https://github.com/mkgymji/git-simulator
+ * Copyright (C) 2026 Michal Kočer
+ * SPDX-License-Identifier: GPL-2.0-only
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 (see LICENSE).
+ *
+ * Formát objektů a hashe odpovídají Gitu (https://github.com/git/git), GPL-2.0.
+ * Zdroje a autorská práva: ZDROJE.md
+ */
 /* =====================================================================
  *  world.js – svět simulátoru
  *

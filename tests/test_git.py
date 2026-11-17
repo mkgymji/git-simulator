@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Git simulátor – Copyright (C) 2026 Michal Kočer
+# SPDX-License-Identifier: GPL-2.0-only
 """Spustí všechny rozdílové testy: python3 tests/test_git.py [filtr]"""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

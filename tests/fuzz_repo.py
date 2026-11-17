@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Git simulátor – Copyright (C) 2026 Michal Kočer
+# SPDX-License-Identifier: GPL-2.0-only
 """Náhodná práce s repozitářem (soubory, add, commit, restore, rm, větve, merge s konflikty,
 revert, diff, status, log) – každý výstup se porovná se skutečným Gitem.
 Použití: python3 tests/fuzz_repo.py [počet běhů] [semínko] [kroků]"""

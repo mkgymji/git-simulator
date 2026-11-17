@@ -1,3 +1,5 @@
+# Git simulátor – Copyright (C) 2026 Michal Kočer
+# SPDX-License-Identifier: GPL-2.0-only
 """Spouštění skutečného Gitu v pseudoterminálu (stejné výstupy a barvy jako v opravdovém terminálu)."""
 import os, pty, re, select, shutil, subprocess, tempfile
 

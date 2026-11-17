@@ -1,3 +1,5 @@
+// Git simulátor – Copyright (C) 2026 Michal Kočer
+// SPDX-License-Identifier: GPL-2.0-only
 // jsc js/text.js js/world.js js/graph.js js/git.js tests/sim_driver.js -- kroky.json
 var steps = JSON.parse(readFile(arguments[0]));
 var now = 0;

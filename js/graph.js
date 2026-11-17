@@ -1,3 +1,15 @@
+/*
+ * Git simulátor – https://github.com/mkgymji/git-simulator
+ * Copyright (C) 2026 Michal Kočer
+ * SPDX-License-Identifier: GPL-2.0-only
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 (see LICENSE).
+ *
+ * Obsahuje kód převzatý z Gitu 2.47.1 (https://github.com/git/git), GPL-2.0:
+ *   graph.c, commit.c (sort_in_topological_order) – přispěvatelé Gitu
+ * Zdroje a autorská práva: ZDROJE.md
+ */
 /* =====================================================================
  *  graph.js – git log --graph
  *

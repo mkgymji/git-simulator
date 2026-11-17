@@ -1,4 +1,6 @@
 #!/bin/sh
+# Git simulátor – Copyright (C) 2026 Michal Kočer
+# SPDX-License-Identifier: GPL-2.0-only
 # Všechny testy simulátoru proti skutečnému Gitu (potřebuje git, python3 a jsc nebo node).
 set -e
 cd "$(dirname "$0")/.."

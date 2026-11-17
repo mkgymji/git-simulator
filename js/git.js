@@ -1,3 +1,18 @@
+/*
+ * Git simulátor – https://github.com/mkgymji/git-simulator
+ * Copyright (C) 2026 Michal Kočer
+ * SPDX-License-Identifier: GPL-2.0-only
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 (see LICENSE).
+ *
+ * Obsahuje kód převzatý z Gitu 2.47.1 (https://github.com/git/git), GPL-2.0:
+ *   unpack-trees.c, merge-ort.c, sequencer.c, wt-status.c, remote.c, help.c,
+ *   levenshtein.c, advice.c, transport.c, builtin/*.c – přispěvatelé Gitu
+ *   diff.c – Copyright (C) 2005 Junio C Hamano; ws.c – Copyright (C) 2007 Junio C Hamano
+ *   Texty hlášek Gitu jsou převzaté doslova.
+ * Zdroje a autorská práva: ZDROJE.md
+ */
 /* =====================================================================
  *  git.js – příkazy Gitu
  *

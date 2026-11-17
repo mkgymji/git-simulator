@@ -1,3 +1,5 @@
+// Git simulátor – Copyright (C) 2026 Michal Kočer
+// SPDX-License-Identifier: GPL-2.0-only
 // Spouští se přes jsc: jsc js/text.js tests/fuzz_text.js -- pripady.json
 var T = globalThis.GitText;
 var cases = JSON.parse(readFile(arguments[0]));
