@@ -1,0 +1,8 @@
+# Konce řádků v repozitáři i v pracovní složce vždy LF – bez ohledu na core.autocrlf
+# (Git for Windows ho má často zapnutý kvůli jiným projektům). Kontrola: git ls-files --eol
+* text=auto eol=lf
+*.jpg binary
+*.png binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

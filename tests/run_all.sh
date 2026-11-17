@@ -6,6 +6,13 @@ set -e
 cd "$(dirname "$0")/.."
 JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc
 CORE="js/i18n.js js/text.js js/world.js js/graph.js js/rename.js js/git.js js/shell.js js/session.js js/scenario-lang.js"
+# konce řádků: všechny textové soubory v pracovní složce LF (viz .gitattributes)
+if git ls-files --eol | grep -q "w/crlf"; then
+  echo "CHYBA: soubory s konci řádků CRLF (spusť: git add --renormalize . a git checkout -- .):"
+  git ls-files --eol | grep "w/crlf"
+  exit 1
+fi
+echo "konce řádků: LF"
 python3 tools/build_scenarios.py --check
 $JSC $CORE js/scenarios-builtin.js tests/scenario_lang_test.js | tail -1
 $JSC js/i18n.js js/i18n-en.js tests/lang_en.js ${CORE#js/i18n.js } tests/solutions.js tests/scenario_en_test.js -- scenarios | tail -1

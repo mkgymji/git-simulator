@@ -43,5 +43,5 @@ if __name__ == "__main__":
             sys.exit("js/scenarios-builtin.js není aktuální – spusť python3 tools/build_scenarios.py")
         print("js/scenarios-builtin.js je aktuální")
     else:
-        open(OUT, "w", encoding="utf-8").write(text)
+        open(OUT, "w", encoding="utf-8", newline="\n").write(text)
         print("vygenerováno: js/scenarios-builtin.js (%d scénářů)" % (text.count('"file":') // 2))
