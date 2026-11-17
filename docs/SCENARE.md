@@ -35,18 +35,17 @@ SETUP
   VSCODE kucharka
 END
 
-TASK Do livance.md přidej řádek `- 2 kg soli` a commitni ho jako **Přidána chyba**.
+TASK Do livance.md přidej chybný řádek (třeba `- 2 kg soli`) a commitni ho.
   HINT  git commit -am "Přidána chyba"
-  CHECK file livance.md in commit "Přidána chyba" contains "2 kg soli"
+  CHECK commit count is at least 2
 END
 
-TASK Najdi hash commitu **Přidána chyba** a commit vrať.
+TASK Najdi hash commitu s chybou a commit vrať.
   HINT     git log --oneline
   HINT     git revert --no-edit HASH
   NOTE     Místo `HASH` napiš hash z výpisu.
   QUESTION Kolik kroužků je v grafu?
-  CHECK    commit "Přidána chyba" is reverted
-  CHECK    file livance.md in HEAD does not contain "2 kg soli"
+  CHECK    some commit is reverted
 END
 ```
 

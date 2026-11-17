@@ -35,18 +35,17 @@ SETUP
   VSCODE cookbook
 END
 
-TASK Add the line `- 2 kg salt` to drop-scones.md and commit it as **Add mistake**.
+TASK Add a wrong line (for example `- 2 kg salt`) to drop-scones.md and commit it.
   HINT  git commit -am "Add mistake"
-  CHECK file drop-scones.md in commit "Add mistake" contains "2 kg salt"
+  CHECK commit count is at least 2
 END
 
-TASK Find the hash of the commit **Add mistake** and revert it.
+TASK Find the hash of the commit with the mistake and revert it.
   HINT     git log --oneline
   HINT     git revert --no-edit HASH
   NOTE     Replace `HASH` with the hash from the output.
   QUESTION How many circles are in the graph?
-  CHECK    commit "Add mistake" is reverted
-  CHECK    file drop-scones.md in HEAD does not contain "2 kg salt"
+  CHECK    some commit is reverted
 END
 ```
 
