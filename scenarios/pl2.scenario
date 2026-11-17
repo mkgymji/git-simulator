@@ -61,6 +61,16 @@ TASK Přidej na konec **palacinky.md** podnadpis `## Postup` a první krok jako 
       3. Smaž na rozpálené pánvi.
     END
   END
+  SOLVE
+    APPEND palacinky.md
+
+      ## Postup
+
+      1. Všechno smíchej v míse.
+    END
+    PS> git diff
+    PS> git commit -am "Přidán postup"
+  END
 END
 
 TASK Vytvoř **livance.md** jen s nadpisem `# Lívance` a ulož – suroviny a postup doplní simulátor. Na konec pak připiš poznámku *kurzívou* a commitni.
@@ -88,6 +98,16 @@ TASK Vytvoř **livance.md** jen s nadpisem `# Lívance` a ulož – suroviny a p
 
     END
   END
+  SOLVE
+    FILE livance.md
+      # Lívance
+    END
+    APPEND livance.md
+      *Nejlepší jsou teplé.*
+    END
+    PS> git add livance.md
+    PS> git commit -m "Přidány lívance"
+  END
 END
 
 TASK Vytvoř **README.md** s nadpisem a odkazem na palačinky. Odkaz na lívance doplní simulátor. Commitni a odkaz v náhledu zkus otevřít.
@@ -101,6 +121,15 @@ TASK Vytvoř **README.md** s nadpisem a odkazem na palačinky. Odkaz na lívance
       - [Lívance](livance.md)
     END
   END
+  SOLVE
+    FILE README.md
+      # Moje kuchařka
+
+      - [Palačinky](palacinky.md)
+    END
+    PS> git add README.md
+    PS> git commit -m "Přidán obsah kuchařky"
+  END
 END
 
 TASK Prohlédni si historii oběma způsoby.
@@ -109,6 +138,10 @@ TASK Prohlédni si historii oběma způsoby.
   QUESTION Proč má soused jiné hashe, i když dělal totéž co ty?
   CHECK    command "git log" was run
   CHECK    command "git log --oneline" was run
+  SOLVE
+    PS> git log
+    PS> git log --oneline
+  END
 END
 
 TASK V **palacinky.md** smaž všechny suroviny a ulož. Podívej se na `git diff` a recept zachraň.
@@ -116,6 +149,10 @@ TASK V **palacinky.md** smaž všechny suroviny a ulož. Podívej se na `git dif
   HINT  git restore palacinky.md
   CHECK command "git restore palacinky.md" was run
   CHECK file palacinky.md contains "mléka"
+  SOLVE
+    PS> git diff
+    PS> git restore palacinky.md
+  END
 END
 
 TASK Vytáhni si **palacinky.md** ve stavu z prvního commitu a pak se vrať k nejnovější verzi.
@@ -123,14 +160,20 @@ TASK Vytáhni si **palacinky.md** ve stavu z prvního commitu a pak se vrať k n
   HINT  git restore --source=HASH palacinky.md
   HINT  git restore palacinky.md
   CHECK command "git restore palacinky.md" was run after command "git restore --source..."
+  SOLVE
+    PS> git restore --source=HEAD~4 palacinky.md
+    PS> git restore palacinky.md
+  END
 END
 
 TASK Přidej do receptu chybný řádek (třeba `- 2 kg soli`), commitni ho a pak commit vrať.
+  NOTE     V grafu vpravo je každý kroužek jeden commit, šipka vede k předchozímu.
   HINT     git commit -am "Přidána chyba"
   HINT     git log --oneline
   HINT     git revert --no-edit HASH
   QUESTION Zmizel commit s chybou z historie? Podívej se do grafu.
   CHECK    some commit is reverted
+  JUMP     revert
 END
 
 TASK Vytvoř soubor **poznamky-pro-me.md**, pak **.gitignore** s řádkem `poznamky-pro-me.md`. Porovnej `git status` před a po. Nakonec **.gitignore** commitni.

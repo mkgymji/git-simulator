@@ -212,6 +212,54 @@
     a.snapshots[i] = copyState(a, {});
   }
   function canRestart(a, i) { return !!a.snapshots[i]; }
+
+  // ------------------------------------------------------------------
+  //  Skok na úkol se štítkem JUMP: předchozí úkoly vyřeší simulátor
+  //  (bloky SOLVE: příkazy jako od studenta, zápis souborů), pak začíná
+  //  student. Vrací {task} nebo {error, task}.
+  // ------------------------------------------------------------------
+  function findJump(scen, label) {
+    for (var i = 0; i < scen.tasks.length; i++) if (scen.tasks[i].jump === label) return i;
+    return -1;
+  }
+  function jump(a, label) {
+    var target = findJump(a.scen, label), i;
+    if (target < 0) return { error: 'label', task: -1 };
+    evaluate(a);
+    for (i = 0; i < target; i++) {
+      if (a.done[i]) continue;
+      var sv = a.scen.tasks[i].solve;
+      if (!sv) return { error: 'solve', task: i };
+      var cur = sv.machine;
+      sv.steps.forEach(function (st) {
+        if (st.op === 'as') { cur = st.id; return; }
+        var m = a.world.machines[cur];
+        if (!m) return;
+        if (st.op === 'run') exec(a, cur, st.cmd);
+        else if (st.op === 'file' || st.op === 'append') {
+          var f = autoFolder(a, m), old = f.dir.files[st.name];
+          f.dir.files[st.name] = st.op === 'file' || !old ? st.content : (/\n$/.test(old) ? old : old + '\n') + st.content;
+        }
+        a.active = cur;
+        evaluate(a);
+      });
+      if (!a.done[i]) return { error: 'unsolved', task: i };
+    }
+    // terminály začínají načisto s poznámkou, editor bez rozpracovaného souboru
+    a.people.forEach(function (id) {
+      var t = a.term[id];
+      t.lines = [{ s: [['Windows PowerShell', '']] },
+        { s: [[target === 1 ? tr('Simulátor: úkol 1 udělal za tebe, začínáš úkolem 2.') : tr('Simulátor: úkoly 1–{0} udělal za tebe, začínáš úkolem {1}.', target, target + 1), 'n']], k: 'note' },
+        { s: [] }];
+      t.history = []; t.hpos = -1;
+      if (a.ide[id]) { a.ide[id].file = null; a.ide[id].dirty = false; }
+    });
+    a.active = a.people[0];
+    a.jumped = target;
+    for (var k in a.snapshots) if (+k !== target) delete a.snapshots[k];
+    a.snapshots[target] = copyState(a, {});
+    return { task: target };
+  }
   // vrátí stav na začátek úkolu i; uložené začátky pozdějších úkolů zahodí
   function restartTask(a, i) {
     var snap = a.snapshots[i], k;
@@ -261,6 +309,6 @@
   root.GitSession = {
     create: create, evaluate: evaluate, checkCtx: checkCtx, logEntry: logEntry, applyOpen: applyOpen,
     exec: exec, runAuto: runAuto, DEFAULT_PEOPLE: DEFAULT_PEOPLE,
-    currentTask: currentTask, canRestart: canRestart, restartTask: restartTask
+    currentTask: currentTask, canRestart: canRestart, restartTask: restartTask, jump: jump, findJump: findJump
   };
 })(typeof window !== 'undefined' ? window : globalThis);

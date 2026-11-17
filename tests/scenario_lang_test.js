@@ -136,6 +136,23 @@ ok(!ar.done[0], 'some commit is reverted: bez revertu neplatí');
 S.exec(ar, 'alice', 'git revert --no-edit HEAD'); S.evaluate(ar);
 ok(ar.done[0] === true, 'some commit is reverted: po revertu platí');
 
+// --- JUMP a SOLVE ---
+var T1 = 'TASK A\n  CHECK file a.md exists\n';
+hasErr(HEAD + SETUP + T1 + 'END\nTASK B\n  CHECK repository exists\n  JUMP b\nEND\n', 10, 'potřebuje blok SOLVE', 'JUMP bez SOLVE předchozího úkolu');
+hasErr(HEAD + SETUP + T1 + '  JUMP Velke\nEND\n', 12, 'JUMP potřebuje štítek', 'špatný štítek JUMP');
+hasErr(HEAD + SETUP + T1 + '  JUMP x\nEND\nTASK B\n  CHECK repository exists\n  JUMP x\nEND\n', 16, 'už je v úkolu', 'dvojí štítek JUMP');
+hasErr(HEAD + SETUP + T1 + '  SOLVE\n    NOTE ne\n  END\nEND\n', 13, 'v SOLVE', 'NOTE v SOLVE');
+var jt = L.compileAndTry(HEAD + SETUP + T1 + '  SOLVE\n    FILE b.md\n      x\n    END\n  END\nEND\nTASK B\n  CHECK repository exists\n  JUMP b\nEND\n', 'j');
+ok(jt.errors && jt.errors[0].line === 10 && jt.errors[0].msg.indexOf('se blokem SOLVE nesplnil') >= 0, 'SOLVE, který úkol nesplní: ' + JSON.stringify(jt.errors));
+var jg = L.compileAndTry(HEAD + SETUP + T1 + '  SOLVE\n    FILE a.md\n      x\n    END\n    PS> git add a.md\n  END\nEND\nTASK B\n  CHECK file a.md in HEAD exists\n  JUMP b\nEND\n', 'j2');
+ok(!jg.errors, 'platný skok: ' + JSON.stringify(jg.errors));
+if (!jg.errors) {
+  var aj = S.create(jg.scenario), rj = S.jump(aj, 'b');
+  ok(rj.task === 1 && aj.done[0] && !aj.done[1], 'skok: úkol 1 splněný, začíná úkol 2');
+  ok(aj.log.alice.some(function (e) { return e.line === 'git add a.md'; }), 'příkazy SOLVE jsou v záznamu jako od studenta');
+  ok(S.jump(S.create(jg.scenario), 'nic').error === 'label', 'neznámý štítek');
+}
+
 (typeof GitBuiltinScenarios !== 'undefined' ? GitBuiltinScenarios : []).forEach(function (it) {
   var rr = L.compileAndTry(it.text, it.id);
   ok(!rr.errors, 'vestavěný scénář ' + it.file + ' bez chyb: ' + JSON.stringify(rr.errors));

@@ -398,6 +398,7 @@
     // TASK … END
     var ctx = { repoPath: sc.repoPath || [], githubRefs: [] };
     var machineIds = sc.machines.map(function (x) { return x.id; });
+    var jumpLabels = {};
 
     // podmínka CHECK (i za AUTO WHEN): [počítač:] text podmínky -> {fn, who} nebo null (chyba zapsaná)
     function parseCheck(ln, text) {
@@ -438,9 +439,11 @@
 
     // AUTO [WHEN podmínka] … END: kroky, které simulátor udělá za studenta. i ukazuje na řádek AUTO,
     // po návratu na jeho END (nebo za konec souboru)
-    function parseAuto(ln, rest) {
+    function parseAuto(ln, rest, solve) {
+      var kwName = solve ? 'SOLVE' : 'AUTO';
       var auto = { when: null, steps: [], line: ln, who: null };
-      if (rest) {
+      if (rest && solve) err(ln, tr('Za SOLVE nic nepatří – kroky napiš na další řádky.'));
+      else if (rest) {
         var wm = /^WHEN\s+(.+)$/.exec(rest);
         if (!wm) err(ln, tr('Za AUTO může být jen WHEN a podmínka, např. AUTO WHEN config user.name is set'));
         else { auto.when = parseCheck(ln, wm[1]); if (auto.when) auto.who = auto.when.who; }
@@ -451,10 +454,10 @@
         var l = lines[i];
         if (isBlank(l) || isComment(l)) { i++; continue; }
         var a = kw(l), at = i;
-        if (!a) { err(i, tr('Neznámý řádek v AUTO (povolené NOTE, AS, PS>, FILE, APPEND, END).')); i++; continue; }
+        if (!a) { err(i, solve ? tr('Neznámý řádek v SOLVE (povolené AS, PS>, FILE, APPEND, END).') : tr('Neznámý řádek v AUTO (povolené NOTE, AS, PS>, FILE, APPEND, END).')); i++; continue; }
         if (a.k === 'END') { closed = true; break; }
         if (a.k === 'TASK') break;
-        if (a.k === 'NOTE') {
+        if (a.k === 'NOTE' && !solve) {
           if (!a.rest) err(i, tr('NOTE potřebuje text.'));
           auto.steps.push({ op: 'note', text: a.rest });
         } else if (a.k === 'AS') {
@@ -468,11 +471,11 @@
           var body = readBody();
           if (body === null) { err(at, tr('{0} {1} není ukončený řádkem END.', a.k, a.rest)); return null; }
           auto.steps.push({ op: a.k === 'FILE' ? 'file' : 'append', name: a.rest, content: body });
-        } else err(i, tr('Neznámé klíčové slovo {0} v AUTO. Povolené: NOTE, AS, PS>, FILE, APPEND, END.', a.k));
+        } else err(i, solve ? tr('Neznámé klíčové slovo {0} v SOLVE. Povolené: AS, PS>, FILE, APPEND, END.', a.k) : tr('Neznámé klíčové slovo {0} v AUTO. Povolené: NOTE, AS, PS>, FILE, APPEND, END.', a.k));
         i++;
       }
-      if (!closed) { err(ln, tr('AUTO není ukončený řádkem END.')); return null; }
-      if (!auto.steps.length) err(ln, tr('AUTO je prázdný – patří do něj NOTE, PS>, FILE nebo APPEND.'));
+      if (!closed) { err(ln, tr('{0} není ukončený řádkem END.', kwName)); return null; }
+      if (!auto.steps.length) err(ln, solve ? tr('SOLVE je prázdný – patří do něj PS>, FILE nebo APPEND.') : tr('AUTO je prázdný – patří do něj NOTE, PS>, FILE nebo APPEND.'));
       return auto;
     }
     for (;;) {
@@ -481,13 +484,13 @@
       var tk = kw(lines[i]);
       if (!tk || tk.k !== 'TASK') { err(i, tr('Za SETUP mohou být jen bloky TASK … END.')); i++; continue; }
       if (!tk.rest) err(i, tr('TASK potřebuje text úkolu.'));
-      var task = { text: tk.rest, hints: [], question: null, checks: [], autos: [], line: i }, phase = 0, tclosed = false;
+      var task = { text: tk.rest, hints: [], question: null, checks: [], autos: [], solve: null, jump: null, line: i }, phase = 0, tclosed = false;
       i++;
       while (i < lines.length) {
         var tl = lines[i];
         if (isBlank(tl) || isComment(tl)) { i++; continue; }
         var tt = kw(tl);
-        if (!tt) { err(i, tr('Neznámý řádek v TASK (povolené HINT, NOTE, QUESTION, CHECK, AUTO, END).')); i++; continue; }
+        if (!tt) { err(i, tr('Neznámý řádek v TASK (povolené HINT, NOTE, QUESTION, CHECK, AUTO, SOLVE, JUMP, END).')); i++; continue; }
         if (tt.k === 'END') { tclosed = true; i++; break; }
         if (tt.k === 'TASK') break;
         if (tt.k === 'HINT' || tt.k === 'NOTE') {
@@ -501,18 +504,29 @@
           phase = Math.max(phase, 2);
           var ck = parseCheck(i, tt.rest);
           if (ck) task.checks.push(ck);
-        } else if (tt.k === 'AUTO') {
+        } else if (tt.k === 'AUTO' || tt.k === 'SOLVE') {
           phase = 3;
-          var auto = parseAuto(i, tt.rest);
-          if (auto) task.autos.push(auto);
+          if (tt.k === 'SOLVE' && task.solve) err(i, tr('TASK může mít jen jeden SOLVE.'));
+          var auto = parseAuto(i, tt.rest, tt.k === 'SOLVE');
+          if (auto && tt.k === 'AUTO') task.autos.push(auto);
+          if (auto && tt.k === 'SOLVE') task.solve = auto;
           if (i >= lines.length) break;
-        } else err(i, tr('Neznámé klíčové slovo {0} v TASK. Povolené: HINT, NOTE, QUESTION, CHECK, AUTO, END.', tt.k));
+        } else if (tt.k === 'JUMP') {
+          if (!/^[a-z0-9][a-z0-9-]*$/.test(tt.rest)) err(i, tr('JUMP potřebuje štítek z malých písmen, číslic a pomlček, např. JUMP revert'));
+          else if (jumpLabels[tt.rest]) err(i, tr('Štítek JUMP {0} už je v úkolu na řádku {1}.', tt.rest, jumpLabels[tt.rest]));
+          else { jumpLabels[tt.rest] = i + 1; task.jump = tt.rest; }
+        } else err(i, tr('Neznámé klíčové slovo {0} v TASK. Povolené: HINT, NOTE, QUESTION, CHECK, AUTO, SOLVE, JUMP, END.', tt.k));
         i++;
       }
       if (!tclosed) err(task.line, tr('TASK není ukončený řádkem END.'));
       if (!task.checks.length) err(task.line, tr('TASK potřebuje aspoň jednu podmínku CHECK.'));
       sc.tasks.push(task);
     }
+    // na úkol se značkou JUMP jde skočit jen tehdy, když všechny předchozí úkoly mají SOLVE
+    sc.tasks.forEach(function (t, k) {
+      if (!t.jump) return;
+      for (var j = 0; j < k; j++) if (!sc.tasks[j].solve) err(sc.tasks[j].line, tr('Na úkol se štítkem JUMP {0} se skáče přes tento úkol – potřebuje blok SOLVE (jak ho simulátor vyřeší).', t.jump));
+    });
     if (errors.length) return { errors: errors.sort(function (x, y) { return x.line - y.line; }) };
     return { scenario: build(sc, known, idHint) };
   }
@@ -579,6 +593,10 @@
           hint: t.hints.length ? hintHtml(t.hints) : '',
           question: t.question || undefined,
           check: function (c) { return t.checks.every(function (ch) { return ch.fn(c, ch.who || firstVisible); }); },
+          line: t.line + 1,
+          jump: t.jump || null,
+          // kroky, kterými simulátor úkol vyřeší při skoku (JUMP) na pozdější úkol
+          solve: t.solve ? { machine: firstVisible, steps: t.solve.steps } : null,
           // kroky za studenta: when(c) -> bool (null = až po splnění úkolu); machine = výchozí počítač
           autos: t.autos.map(function (au) {
             return {
@@ -599,6 +617,17 @@
     try { root.GitSession.create(r.scenario); }
     catch (e) { return { errors: [{ line: 1, msg: tr('Přípravu scénáře nejde provést: {0}', e.message) }] }; }
     if (r.scenario.setupProblems.length) return { errors: r.scenario.setupProblems.slice() };
+    // každý skok zkusit: předchozí úkoly se musí bloky SOLVE splnit
+    var jumpErrors = [];
+    r.scenario.tasks.forEach(function (t) {
+      if (!t.jump) return;
+      var a = root.GitSession.create(r.scenario), res = root.GitSession.jump(a, t.jump);
+      if (res.error) {
+        var bad = r.scenario.tasks[res.task];
+        jumpErrors.push({ line: bad ? bad.line : t.line, msg: tr('Skok na JUMP {0}: úkol {1} se blokem SOLVE nesplnil.', t.jump, res.task + 1) });
+      }
+    });
+    if (jumpErrors.length) return { errors: jumpErrors };
     return r;
   }
 

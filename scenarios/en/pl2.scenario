@@ -61,6 +61,16 @@ TASK At the end of **pancakes.md**, add a subheading `## Method` and the first s
       3. Fry in a hot pan.
     END
   END
+  SOLVE
+    APPEND pancakes.md
+
+      ## Method
+
+      1. Mix everything in a bowl.
+    END
+    PS> git diff
+    PS> git commit -am "Add method"
+  END
 END
 
 TASK Create **drop-scones.md** with just the heading `# Drop scones` and save â€“ the simulator adds the ingredients and method. Then add a note in *italics* at the end and commit.
@@ -88,6 +98,16 @@ TASK Create **drop-scones.md** with just the heading `# Drop scones` and save â€
 
     END
   END
+  SOLVE
+    FILE drop-scones.md
+      # Drop scones
+    END
+    APPEND drop-scones.md
+      *Best eaten warm.*
+    END
+    PS> git add drop-scones.md
+    PS> git commit -m "Add drop scones"
+  END
 END
 
 TASK Create **README.md** with a heading and a link to the pancakes. The simulator adds the link to the drop scones. Commit it and try opening the link in the preview.
@@ -101,6 +121,15 @@ TASK Create **README.md** with a heading and a link to the pancakes. The simulat
       - [Drop scones](drop-scones.md)
     END
   END
+  SOLVE
+    FILE README.md
+      # My cookbook
+
+      - [Pancakes](pancakes.md)
+    END
+    PS> git add README.md
+    PS> git commit -m "Add cookbook contents"
+  END
 END
 
 TASK Look at the history in both ways.
@@ -109,6 +138,10 @@ TASK Look at the history in both ways.
   QUESTION Why does your neighbour have different hashes even though they did the same as you?
   CHECK    command "git log" was run
   CHECK    command "git log --oneline" was run
+  SOLVE
+    PS> git log
+    PS> git log --oneline
+  END
 END
 
 TASK In **pancakes.md**, delete all the ingredients and save. Look at `git diff` and rescue the recipe.
@@ -116,6 +149,10 @@ TASK In **pancakes.md**, delete all the ingredients and save. Look at `git diff`
   HINT  git restore pancakes.md
   CHECK command "git restore pancakes.md" was run
   CHECK file pancakes.md contains "milk"
+  SOLVE
+    PS> git diff
+    PS> git restore pancakes.md
+  END
 END
 
 TASK Bring back **pancakes.md** as it was in the first commit, then return to the latest version.
@@ -123,14 +160,20 @@ TASK Bring back **pancakes.md** as it was in the first commit, then return to th
   HINT  git restore --source=HASH pancakes.md
   HINT  git restore pancakes.md
   CHECK command "git restore pancakes.md" was run after command "git restore --source..."
+  SOLVE
+    PS> git restore --source=HEAD~4 pancakes.md
+    PS> git restore pancakes.md
+  END
 END
 
 TASK Add a wrong line to a recipe (for example `- 2 kg salt`), commit it and then revert the commit.
+  NOTE     In the graph on the right, each circle is one commit and the arrow points to the previous one.
   HINT     git commit -am "Add mistake"
   HINT     git log --oneline
   HINT     git revert --no-edit HASH
   QUESTION Did the commit with the mistake disappear from the history? Look at the graph.
   CHECK    some commit is reverted
+  JUMP     revert
 END
 
 TASK Create a file **notes-for-me.md**, then **.gitignore** with the line `notes-for-me.md`. Compare `git status` before and after. Finally commit **.gitignore**.

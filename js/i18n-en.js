@@ -690,14 +690,10 @@ GitI18n.add('en', {
     "About the simulator and sources",
   "zdrojový kód":
     "source code",
-  "Neznámý řádek v TASK (povolené HINT, NOTE, QUESTION, CHECK, AUTO, END).":
-    "Unknown line in TASK (allowed: HINT, NOTE, QUESTION, CHECK, AUTO, END).",
   "{0} patří před QUESTION, CHECK a AUTO.":
     "{0} belongs before QUESTION, CHECK and AUTO.",
   "QUESTION patří před CHECK a AUTO.":
     "QUESTION belongs before CHECK and AUTO.",
-  "Neznámé klíčové slovo {0} v TASK. Povolené: HINT, NOTE, QUESTION, CHECK, AUTO, END.":
-    "Unknown keyword {0} in TASK. Allowed: HINT, NOTE, QUESTION, CHECK, AUTO, END.",
   "Za AUTO může být jen WHEN a podmínka, např. AUTO WHEN config user.name is set":
     "AUTO may only be followed by WHEN and a condition, e.g. AUTO WHEN config user.name is set",
   "Neznámý řádek v AUTO (povolené NOTE, AS, PS>, FILE, APPEND, END).":
@@ -710,8 +706,6 @@ GitI18n.add('en', {
     "{0} {1} is not closed with END.",
   "Neznámé klíčové slovo {0} v AUTO. Povolené: NOTE, AS, PS>, FILE, APPEND, END.":
     "Unknown keyword {0} in AUTO. Allowed: NOTE, AS, PS>, FILE, APPEND, END.",
-  "AUTO není ukončený řádkem END.":
-    "AUTO is not closed with END.",
   "AUTO je prázdný – patří do něj NOTE, PS>, FILE nebo APPEND.":
     "AUTO is empty – it should contain NOTE, PS>, FILE or APPEND.",
   "← simulátor":
@@ -739,5 +733,43 @@ GitI18n.add('en', {
   "Vrátí se stav ze začátku tohoto úkolu: soubory, repozitáře, GitHub i terminál. Splněné úkoly zůstanou splněné.":
     "Everything returns to how it was at the start of this task: files, repositories, GitHub and the terminal. Completed tasks stay completed.",
   "Úkol {0} začíná znovu.":
-    "Task {0} starts again."
+    "Task {0} starts again.",
+  "Simulátor: úkol 1 udělal za tebe, začínáš úkolem 2.":
+    "Simulator: task 1 was done for you, you start with task 2.",
+  "Simulátor: úkoly 1–{0} udělal za tebe, začínáš úkolem {1}.":
+    "Simulator: tasks 1–{0} were done for you, you start with task {1}.",
+  "Za SOLVE nic nepatří – kroky napiš na další řádky.":
+    "Nothing may follow SOLVE – write the steps on the next lines.",
+  "Neznámý řádek v SOLVE (povolené AS, PS>, FILE, APPEND, END).":
+    "Unknown line in SOLVE (allowed: AS, PS>, FILE, APPEND, END).",
+  "Neznámé klíčové slovo {0} v SOLVE. Povolené: AS, PS>, FILE, APPEND, END.":
+    "Unknown keyword {0} in SOLVE. Allowed: AS, PS>, FILE, APPEND, END.",
+  "{0} není ukončený řádkem END.":
+    "{0} is not closed with END.",
+  "SOLVE je prázdný – patří do něj PS>, FILE nebo APPEND.":
+    "SOLVE is empty – it should contain PS>, FILE or APPEND.",
+  "Neznámý řádek v TASK (povolené HINT, NOTE, QUESTION, CHECK, AUTO, SOLVE, JUMP, END).":
+    "Unknown line in TASK (allowed: HINT, NOTE, QUESTION, CHECK, AUTO, SOLVE, JUMP, END).",
+  "TASK může mít jen jeden SOLVE.":
+    "A TASK may have only one SOLVE.",
+  "JUMP potřebuje štítek z malých písmen, číslic a pomlček, např. JUMP revert":
+    "JUMP needs a label of lowercase letters, digits and hyphens, e.g. JUMP revert",
+  "Štítek JUMP {0} už je v úkolu na řádku {1}.":
+    "The JUMP label {0} is already used in the task on line {1}.",
+  "Neznámé klíčové slovo {0} v TASK. Povolené: HINT, NOTE, QUESTION, CHECK, AUTO, SOLVE, JUMP, END.":
+    "Unknown keyword {0} in TASK. Allowed: HINT, NOTE, QUESTION, CHECK, AUTO, SOLVE, JUMP, END.",
+  "Na úkol se štítkem JUMP {0} se skáče přes tento úkol – potřebuje blok SOLVE (jak ho simulátor vyřeší).":
+    "A jump to the task labelled JUMP {0} skips this task – it needs a SOLVE block (how the simulator solves it).",
+  "Skok na JUMP {0}: úkol {1} se blokem SOLVE nesplnil.":
+    "Jump to JUMP {0}: task {1} was not completed by its SOLVE block.",
+  "Na úkol „{0}“ se v tomto scénáři skočit nedá.":
+    "You cannot jump to the task “{0}” in this scenario.",
+  "Úkol 1 udělal simulátor, začínáš úkolem 2.":
+    "Task 1 was done by the simulator, you start with task 2.",
+  "Úkoly 1–{0} udělal simulátor, začínáš úkolem {1}.":
+    "Tasks 1–{0} were done by the simulator, you start with task {1}.",
+  "Úkol 1 udělal simulátor za tebe – jeho commity vidíš v grafu. Pokračuj úkolem 2.":
+    "Task 1 was done for you by the simulator – you can see its commits in the graph. Continue with task 2.",
+  "Úkoly 1–{0} udělal simulátor za tebe – jejich commity vidíš v grafu. Pokračuj úkolem {1}.":
+    "Tasks 1–{0} were done for you by the simulator – you can see their commits in the graph. Continue with task {1}."
 });

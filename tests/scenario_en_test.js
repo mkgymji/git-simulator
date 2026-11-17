@@ -92,4 +92,25 @@ function stamp(a) {
   });
 });
 
+// --- skok na úkol (JUMP): předchozí úkoly vyřeší SOLVE, zbytek řešení pak doběhne ---
+[['cs', ''], ['en', 'en/']].forEach(function (lg) {
+  Object.keys(SOL.cs).forEach(function (id) {
+    var sc = L.compile(readFile(DIR + '/' + lg[1] + id + '.scenario'), id).scenario, steps = SOL[lg[0]][id];
+    sc.tasks.forEach(function (t, target) {
+      if (!t.jump) return;
+      checks++;
+      // od kterého kroku řešení se dělá úkol target
+      var ref = S.create(sc), from = 0, k;
+      S.evaluate(ref);
+      for (k = 0; k < steps.length && S.currentTask(ref) < target; k++) { SOL.step(ref, steps[k]); S.evaluate(ref); from = k + 1; }
+      var a = S.create(sc), res = S.jump(a, t.jump);
+      if (res.error) { fail(lg[0] + ' ' + id + ': skok ' + t.jump + ' – ' + res.error + ' v úkolu ' + (res.task + 1)); return; }
+      if (S.currentTask(a) !== target) { fail(lg[0] + ' ' + id + ': po skoku je aktuální úkol ' + (S.currentTask(a) + 1) + ', ne ' + (target + 1)); return; }
+      for (k = from; k < steps.length; k++) { SOL.step(a, steps[k]); S.evaluate(a); }
+      if (!sc.tasks.every(function (x, j) { return a.done[j]; })) fail(lg[0] + ' ' + id + ': po skoku ' + t.jump + ' řešení nedoběhlo ' + JSON.stringify(a.done));
+      if (!S.canRestart(a, target)) fail(lg[0] + ' ' + id + ': po skoku nejde začít úkol znovu');
+    });
+  });
+});
+
 print('EN KONTROL: ' + checks + ', ROZDÍLŮ: ' + failures);

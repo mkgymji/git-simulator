@@ -48,7 +48,8 @@
   function evaluate() {
     var r = SS.evaluate(app);
     r.auto.forEach(showAuto);
-    if (r.finishedNow) { confetti(); STORE.markDone(app.scen.id); showDone(); }
+    // fajfku dostane jen scénář prošlý od začátku, ne po skoku na pozdější úkol
+    if (r.finishedNow) { confetti(); if (app.jumped == null) { STORE.markDone(app.scen.id); showDone(); } }
     return r.newly;
   }
 
@@ -102,7 +103,7 @@
     tasks.some(function (t, i) { if (!app.done[i]) { current = i; return true; } return false; });
     var html = '<div class="card-head"><span class="grow">' + esc(s.kicker) + ': ' + esc(s.title) + '</span>' +
       (tasks.length ? '<span class="sub">' + done + ' / ' + tasks.length + '</span>' : '') + '</div>';
-    html += '<div class="intro">' + s.intro + '</div>';
+    html += '<div class="intro">' + (app.jumped != null ? '<p>' + (app.jumped === 1 ? tr('Úkol 1 udělal simulátor za tebe – jeho commity vidíš v grafu. Pokračuj úkolem 2.') : tr('Úkoly 1–{0} udělal simulátor za tebe – jejich commity vidíš v grafu. Pokračuj úkolem {1}.', app.jumped, app.jumped + 1)) + '</p>' : s.intro) + '</div>';
     if (tasks.length) {
       html += '<div class="progress"><i style="width:' + Math.round(done / tasks.length * 100) + '%"></i></div>';
       html += '<ol class="task-list">';
@@ -1309,14 +1310,24 @@
   // ------------------------------------------------------------------
   //  Start
   // ------------------------------------------------------------------
-  function launch(s) {
+  function launch(s, label) {
     app = makeApp(s);
+    if (label) {
+      var jr = SS.jump(app, label);
+      if (jr.error) { app = makeApp(s); toast(tr('Na úkol „{0}“ se v tomto scénáři skočit nedá.', label)); }
+      else toast(jr.task === 1 ? tr('Úkol 1 udělal simulátor, začínáš úkolem 2.') : tr('Úkoly 1–{0} udělal simulátor, začínáš úkolem {1}.', jr.task, jr.task + 1));
+    }
     app.seen = null;
     evaluate();
     renderAll();
     app.seen = app.seen || {};
     document.title = tr('Git simulátor – {0}', s.title);
     showDone();
+    // po skoku posunout jen seznam úkolů (ne stránku) k aktuálnímu úkolu
+    if (app.jumped != null) setTimeout(function () {
+      var box = $('tasks'), c = box.querySelector('.task.current');
+      if (c) box.scrollTop = Math.max(0, c.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - box.clientHeight / 3);
+    }, 0);
     setTimeout(focusTerm, 0);
   }
   function failDialog(title, html) {
@@ -1328,9 +1339,12 @@
     var ov = overlay(d);
     x.addEventListener('click', function () { ov.close(); scenarioDialog(); });
   }
-  // #id (vestavěný), #my-… (Moje scénáře), #load=adresa (stáhne, uloží a spustí)
+  // #id (vestavěný), #my-… (Moje scénáře), #load=adresa (stáhne, uloží a spustí);
+  // #id/štítek skočí na úkol se značkou JUMP, samotný #štítek ho hledá ve vestavěných scénářích
   function start(hash) {
     hash = decodeURIComponent(hash || '');
+    var label = null, slash = hash.indexOf('/');
+    if (hash.indexOf('load=') !== 0 && slash > 0) { label = hash.slice(slash + 1); hash = hash.slice(0, slash); }
     if (hash.indexOf('load=') === 0) {
       var url = hash.slice(5);
       if (!app) launch(SC.list[0]);
@@ -1350,11 +1364,17 @@
         if (!item) { if (!app) launch(SC.list[0]); failDialog(tr('Scénář nenalezen'), tr('<p>Tenhle scénář v tomto prohlížeči uložený není. Moje scénáře jsou vždy jen v prohlížeči, kde je nahraješ.</p>')); return; }
         var r = LANG.compile(item.text, item.id);
         if (r.errors) { if (!app) launch(SC.list[0]); failDialog(tr('Scénář nejde spustit'), errorsHtml(r.errors, item.text)); return; }
-        launch(r.scenario);
+        launch(r.scenario, label);
       });
       return;
     }
-    launch(SC.list.filter(function (x) { return x.id === hash; })[0] || SC.list[0]);
+    var s = SC.list.filter(function (x) { return x.id === hash; })[0];
+    if (!s && !label) {
+      // #štítek: úkol se značkou JUMP v některém vestavěném scénáři (např. #revert -> PL2, úkol 7)
+      s = SC.list.filter(function (x) { return SS.findJump(x, hash) >= 0; })[0];
+      if (s) label = hash;
+    }
+    launch(s || SC.list[0], s ? label : null);
   }
   window.addEventListener('hashchange', function () { start(location.hash.slice(1)); });
   window.addEventListener('keydown', function (e) {

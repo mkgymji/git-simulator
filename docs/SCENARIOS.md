@@ -76,6 +76,10 @@ TASK task text           any number of tasks
   AUTO [WHEN condition]  what the simulator does for the student (0 or more)
     …
   END
+  SOLVE                  how the simulator solves the task when jumping to a later task (0–1)
+    …
+  END
+  JUMP label             this task can be opened directly with a link (0–1)
 END
 ```
 
@@ -162,6 +166,28 @@ TASK Create recipe.md with the heading `# Buns` and save it. The simulator adds 
   END
 END
 ```
+
+## JUMP and SOLVE – jumping straight to a task
+
+A link can open a scenario directly at a later task (e.g. from a QR code next to one task of a
+worksheet). Jumping is **not allowed** unless the task permits it with a line `JUMP label`. All
+earlier tasks then need a `SOLVE … END` block: the steps the simulator uses to solve them when
+jumping (`AS`, `PS>`, `FILE`, `APPEND` as in `AUTO`; the commands count as if the student typed them,
+and `AUTO` blocks run along the way). When uploading, the simulator tries the jump and reports any
+task that its `SOLVE` does not complete.
+
+```text
+TASK Add a wrong line to a recipe, commit it and revert the commit.
+  HINT  git revert --no-edit HASH
+  CHECK some commit is reverted
+  JUMP  revert
+END
+```
+
+Addresses: `#pl2/revert` (scenario and label); for built-in scenarios `#revert` is enough – the
+simulator finds the task with this label. For My scenarios `#my-…/label`. After a jump the earlier
+tasks are complete, the terminal starts afresh, and a scenario finished after a jump does not get a
+checkmark in the menu.
 
 **Tolerance:** students do not have to type exactly your texts. Check the Git steps, not the text:
 never the commit message, and file content only where it is the point of the task (a heading, a link,

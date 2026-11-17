@@ -45,7 +45,7 @@ nemá úkoly, a proto ani fajfku.
 | `#volne` | volný režim – prázdný počítač |
 | `#pl1` | Pracovní list 1: nastavení Gitu, první repozitář a commity |
 | `#pl2` | Pracovní list 2: diff, log, restore, revert, .gitignore |
-| `#revert` | Pracovní list 2, úkol 8: commit s chybou a revert v grafu |
+| `#revert` | Pracovní list 2 rovnou od úkolu 7: commit s chybou a revert v grafu (předchozí úkoly udělá simulátor) |
 | `#pl3` | Pracovní list 3: repozitář na GitHubu, push, úprava na webu, pull |
 | `#odmitnuty-push` | Pracovní list 4 nanečisto: odmítnutý push, pull s merge commitem |
 | `#spoluprace` | Pracovní list 4: Anna a Petr, pozvánka, klonování, spolupráce |
@@ -54,6 +54,7 @@ nemá úkoly, a proto ani fajfku.
 
 Adresu scénáře stačí připsat za adresu simulátoru, např.
 `https://mkgymji.github.io/git-simulator/#vetve` (tak vedou i QR kódy v materiálech kurzu).
+Na úkol označený ve scénáři štítkem jde skočit rovnou (`#revert`); předchozí úkoly pak udělá simulátor.
 
 Po obnovení stránky (F5) nebo tlačítkem **Začít znovu** začíná celý scénář znovu.
 

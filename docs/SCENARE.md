@@ -76,6 +76,10 @@ TASK text úkolu          libovolný počet úkolů
   AUTO [WHEN podmínka]   co simulátor udělá za studenta (0× a víc)
     …
   END
+  SOLVE                  jak úkol vyřeší simulátor při skoku na pozdější úkol (0–1×)
+    …
+  END
+  JUMP štítek            na tento úkol jde skočit odkazem (0–1×)
 END
 ```
 
@@ -161,6 +165,26 @@ TASK Vytvoř recept.md s nadpisem `# Buchty` a ulož. Suroviny doplní simuláto
   END
 END
 ```
+
+## JUMP a SOLVE – skok rovnou na úkol
+
+Odkazem jde otevřít scénář rovnou na pozdějším úkolu (např. z QR kódu u jednoho úkolu pracovního
+listu). Skok je **zakázaný**, dokud ho úkol nepovolí řádkem `JUMP štítek`. Všechny předchozí úkoly
+pak musí mít blok `SOLVE … END`: kroky, kterými je simulátor při skoku vyřeší (`AS`, `PS>`, `FILE`,
+`APPEND` jako v `AUTO`; příkazy se počítají, jako by je napsal student, a bloky `AUTO` přitom
+proběhnou). Simulátor při nahrání skok vyzkouší a ohlásí úkol, který se svým `SOLVE` nesplní.
+
+```text
+TASK Přidej do receptu chybný řádek, commitni ho a commit vrať.
+  HINT  git revert --no-edit HASH
+  CHECK some commit is reverted
+  JUMP  revert
+END
+```
+
+Adresy: `#pl2/revert` (scénář a štítek), u vestavěných scénářů stačí `#revert` – simulátor najde
+úkol s tímto štítkem. U Mých scénářů `#my-…/štítek`. Po skoku jsou předchozí úkoly splněné,
+terminál začíná načisto a scénář prošlý od skoku nedostane v nabídce fajfku.
 
 **Tolerance:** student nemusí psát přesně tvoje texty. Kontroluj kroky Gitu, ne text: zprávu commitu
 vůbec, obsah souboru jen tam, kde je smyslem úkolu (nadpis, odkaz, kurzíva). Pomůžou podmínky

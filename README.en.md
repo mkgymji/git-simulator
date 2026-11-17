@@ -46,7 +46,7 @@ no tasks, so it never gets a checkmark.
 | `#volne` | free mode – an empty computer |
 | `#pl1` | Worksheet 1: Git setup, the first repository and commits |
 | `#pl2` | Worksheet 2: diff, log, restore, revert, .gitignore |
-| `#revert` | Worksheet 2, task 8: a commit with a mistake and revert in the graph |
+| `#revert` | Worksheet 2 starting at task 7: a commit with a mistake and revert in the graph (the simulator does the earlier tasks) |
 | `#pl3` | Worksheet 3: a repository on GitHub, push, an edit on the web, pull |
 | `#odmitnuty-push` | Worksheet 4 dry run: a rejected push, pull with a merge commit |
 | `#spoluprace` | Worksheet 4: Anna and Petr, invitation, cloning, collaboration |
@@ -54,7 +54,8 @@ no tasks, so it never gets a checkmark.
 | `#konflikt` | bonus: a conflict and how to resolve it |
 
 Add the scenario address to the simulator address, e.g.
-`https://mkgymji.github.io/git-simulator/#vetve`.
+`https://mkgymji.github.io/git-simulator/#vetve`. A task marked with a label in the scenario can be
+opened directly (`#revert`); the simulator then does the earlier tasks.
 
 Reloading the page (F5) or the **Start over** button restarts the whole scenario.
 
