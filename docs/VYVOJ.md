@@ -29,10 +29,9 @@ python3 tests/fuzz_repo.py 25 7   # náhodná práce s repozitářem, semínko 7
 
 - `tools/build_scenarios.py --check` – `js/scenarios-builtin.js` odpovídá souborům `scenarios/`;
 - `tests/scenario_lang_test.js` – jazyk scénářů (chyby s čísly řádků, podmínky, příprava);
-- `tests/scenario_equiv.js` – vestavěné scénáře dávají stejný svět a odškrtávají úkoly ve stejném
-  okamžiku jako původní scénáře v JavaScriptu (`tests/legacy_scenarios.js`);
-- `tests/scenario_en_test.js` – anglické scénáře se řeší stejnými kroky jako české a odškrtávají
-  úkoly ve stejném okamžiku (řešení obou verzí jsou v `tests/solutions.js`);
+- `tests/scenario_en_test.js` – vestavěné scénáře jdou vyřešit (řešení v `tests/solutions.js`, se
+  zprávami commitů jinými než v nápovědě), každý blok `AUTO` proběhne a anglická verze se řeší stejnými
+  kroky jako česká a odškrtává úkoly ve stejném okamžiku;
 - `tools/i18n_check.py` – každý text rozhraní má anglický překlad.
 
 ## Překlady
