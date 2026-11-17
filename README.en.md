@@ -96,3 +96,7 @@ Copyright (C) 2026 Michal Kočer. The simulator is free software under the
 from whose source code (version 2.47.1) it takes algorithms and message texts. The files taken,
 their authors and licences, and the font licences are listed in [`ZDROJE.md`](ZDROJE.md) (in Czech);
 on the page under **About the simulator and sources**.
+
+The simulator is meant for teaching. It imitates the look of GitHub, Visual Studio Code and
+PowerShell for educational purposes only and is not affiliated with their owners. Trademarks:
+[`OCHRANNE-ZNAMKY.md`](OCHRANNE-ZNAMKY.md).

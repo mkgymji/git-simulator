@@ -682,8 +682,8 @@ GitI18n.add('en', {
     "What happens in Git",
   "verze souborů, historie, GitHub":
     "file versions, history, GitHub",
-  "Simulátor odpovídá Gitu 2.47 (Git for Windows). Hlášky Gitu jsou skutečné, poznámky simulátoru jsou česky a šedě. Po obnovení stránky začíná scénář znovu.":
-    "The simulator matches Git 2.47 (Git for Windows). Git's messages are real, the simulator's own notes are grey. Reloading the page restarts the scenario.",
+  "Výukový simulátor, odpovídá Gitu 2.47 (Git for Windows). Vzhled GitHubu a VS Code napodobuje jen pro výuku – <a href=\"{0}\">ochranné známky</a>.":
+    "An educational simulator matching Git 2.47 (Git for Windows). It imitates the look of GitHub and VS Code for teaching only – <a href=\"{0}\">trademarks</a>.",
   "licence <a href=\"{0}\">GNU GPL v2</a> · obsahuje kód převzatý z <a href=\"{1}\">Gitu 2.47.1</a>":
     "licence <a href=\"{0}\">GNU GPL v2</a> · contains code taken from <a href=\"{1}\">Git 2.47.1</a>",
   "O simulátoru a zdrojích":

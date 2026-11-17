@@ -52,7 +52,5 @@ Písma jsou zmenšená na potřebné znaky (fontTools), jinak se nemění.
 
 - SHA-1 podle normy FIPS 180-4, náhled Markdownu a rozhraní jsou vlastní implementace.
 - Výpisy terminálu napodobují Windows PowerShell 5.1.
-- Git je ochranná známka organizace Software Freedom Conservancy, GitHub je ochranná známka
-  společnosti GitHub, Inc., PowerShell, Windows a Visual Studio Code jsou ochranné známky
-  společnosti Microsoft. Simulátor s nimi není nijak spojen; jejich vzhled a texty napodobuje
-  jen pro výuku.
+- Ochranné známky (Git, GitHub, Visual Studio Code, PowerShell, Windows) a účel jejich
+  napodobení: [`OCHRANNE-ZNAMKY.md`](OCHRANNE-ZNAMKY.md).

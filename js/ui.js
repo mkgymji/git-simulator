@@ -1263,7 +1263,7 @@
       '<li><a href="https://dejavu-fonts.github.io/" target="_blank" rel="noopener">DejaVu Sans Mono</a> – ' + tr('© Bitstream, Inc. (Bitstream Vera) a DejaVu, licence Bitstream Vera') + '</li></ul>' +
       tr('<h4>Ochranné známky</h4><p class="small" style="margin:0">Git je ochranná známka Software Freedom Conservancy, GitHub ochranná známka GitHub, Inc., ') +
       tr('PowerShell, Windows a Visual Studio Code ochranné známky společnosti Microsoft. Simulátor s nimi není spojen, jejich vzhled a texty napodobuje jen pro výuku.</p>') +
-      tr('<p class="small">Úplný přehled: <a href="https://github.com/mkgymji/git-simulator/blob/main/ZDROJE.md" target="_blank" rel="noopener">ZDROJE.md</a></p></div>');
+      tr('<p class="small">Úplný přehled: <a href="https://github.com/mkgymji/git-simulator/blob/main/ZDROJE.md" target="_blank" rel="noopener">ZDROJE.md</a></p></div>').replace('</p></div>', ' · <a href="' + REPO_URL + '/blob/main/OCHRANNE-ZNAMKY.md" target="_blank" rel="noopener">OCHRANNE-ZNAMKY.md</a></p></div>');
     var f = el('div', { class: 'dfoot' });
     var x = el('button', { class: 'dbtn primary', type: 'button' }, tr('Zavřít'));
     f.appendChild(x); d.appendChild(f);
@@ -1398,7 +1398,7 @@
     $('zt3').textContent = tr('Co se děje v Gitu');
     $('zs3').textContent = tr('verze souborů, historie, GitHub');
     $('machines').setAttribute('aria-label', tr('Počítač'));
-    $('footNote').textContent = tr('Simulátor odpovídá Gitu 2.47 (Git for Windows). Hlášky Gitu jsou skutečné, poznámky simulátoru jsou česky a šedě. Po obnovení stránky začíná scénář znovu.');
+    $('footNote').innerHTML = tr('Výukový simulátor, odpovídá Gitu 2.47 (Git for Windows). Vzhled GitHubu a VS Code napodobuje jen pro výuku – <a href="{0}">ochranné známky</a>.', REPO_URL + '/blob/main/OCHRANNE-ZNAMKY.md');
     $('footLicence').innerHTML = tr('licence <a href="{0}">GNU GPL v2</a> · obsahuje kód převzatý z <a href="{1}">Gitu 2.47.1</a>', REPO_URL + '/blob/main/LICENSE', 'https://github.com/git/git/tree/v2.47.1');
     $('aboutBtn').textContent = tr('O simulátoru a zdrojích');
     $('srcLink').textContent = tr('zdrojový kód');

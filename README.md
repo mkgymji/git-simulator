@@ -94,3 +94,6 @@ Copyright (C) 2026 Michal Kočer. Simulátor je svobodný software pod licencí
 z jehož zdrojového kódu (verze 2.47.1) přebírá algoritmy a texty hlášek. Převzaté soubory, jejich
 autoři a licence a licence písem jsou v [`ZDROJE.md`](ZDROJE.md); na stránce pod odkazem
 **O simulátoru a zdrojích**.
+
+Simulátor je určen k výuce. Vzhled GitHubu, Visual Studio Code a PowerShellu napodobuje jen pro
+výukové účely; s jejich vlastníky není spojen. Ochranné známky: [`OCHRANNE-ZNAMKY.md`](OCHRANNE-ZNAMKY.md).
