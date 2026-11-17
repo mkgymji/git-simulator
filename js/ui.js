@@ -52,6 +52,27 @@
     return r.newly;
   }
 
+  // tlačítko Kopírovat u adresy repozitáře (adresa se pak vloží do terminálu Ctrl+V)
+  function copyBtn(text) { return '<button class="gbtn copy" type="button" data-copy="' + esc(text) + '">' + tr('Kopírovat') + '</button>'; }
+  function bindCopy(box) {
+    Array.prototype.forEach.call(box.querySelectorAll('[data-copy]'), function (b) {
+      b.addEventListener('click', function () {
+        var text = b.getAttribute('data-copy');
+        function done() { toast(tr('Adresa je zkopírovaná. V terminálu ji vložíš Ctrl+V.')); }
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+          else fallback();
+        } catch (e) { fallback(); }
+        function fallback() {
+          var ta = el('textarea', { style: 'position:fixed;left:-9999px' });
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); done(); } catch (e2) { /* nic */ }
+          ta.remove();
+        }
+      });
+    });
+  }
+
   // co udělal simulátor za studenta (AUTO): do terminálu daného počítače, soubor i do otevřeného editoru
   function showAuto(ev) {
     var hasNote = ev.items.some(function (it) { return it.note !== undefined; });
@@ -747,7 +768,7 @@
       var html5 = title;
       if (!head) {
         html5 += '<div class="box"><div class="bhead">Quick setup</div><div style="padding:10px;font-size:13.5px">' +
-          '<p style="margin:0 0 6px">HTTPS adresa: <code>' + esc(r.url) + '</code></p>' +
+          '<p style="margin:0 0 6px">' + tr('HTTPS adresa:') + ' <code>' + esc(r.url) + '</code> ' + copyBtn(r.url) + '</p>' +
           '<p style="margin:10px 0 4px"><b>…or push an existing repository from the command line</b></p>' +
           '<pre style="background:#F6F8FA;border:1px solid #D0D7DE;border-radius:6px;padding:8px;margin:0;white-space:pre-wrap">git remote add origin ' + esc(r.url) + '\ngit branch -M main\ngit push -u origin main</pre></div></div>';
       } else {
@@ -761,9 +782,10 @@
         html5 += '</div>';
         var readme = Object.keys(tree2).filter(function (f) { return /^readme\.md$/i.test(f); })[0];
         if (readme) html5 += '<div class="box readme"><div class="bhead">README</div><div class="md">' + MD.render(w.blobs[tree2[readme]]) + '</div></div>';
-        html5 += '<p class="muted" style="margin-top:10px">Naklonovat: <code>' + esc(r.url) + '</code></p>';
+        html5 += '<p class="muted" style="margin-top:10px">' + tr('Naklonovat:') + ' <code>' + esc(r.url) + '</code> ' + copyBtn(r.url) + '</p>';
       }
       page.innerHTML = html5;
+      bindCopy(page);
       page.querySelectorAll('[data-f]').forEach(function (b) { b.addEventListener('click', function () { go({ page: 'file', repo: r.key, file: b.getAttribute('data-f') }); }); });
       var cb = page.querySelector('#gh-commits');
       if (cb) cb.addEventListener('click', function () { go({ page: 'commits', repo: r.key }); });

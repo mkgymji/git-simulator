@@ -3,7 +3,7 @@ SCENARIO Můj první repozitář
 LABEL    Pracovní list 1
 SUMMARY  Nastavení Gitu, git init, add, commit – první verze receptu.
 INTRO    Jsi **Jana Nováková** na školním počítači. Postupuj podle úkolů; každý se odškrtne sám, až ho splníš.
-INTRO    Jde o kroky, ne o psaní: kde by se hodně psalo, část doplní simulátor a řekne ti to (fialově).
+INTRO    Co doplní simulátor, je označené fialově.
 
 SETUP
   PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Počítač Jany"

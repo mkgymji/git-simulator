@@ -30,6 +30,7 @@ TASK **Anna** invites Petr: Settings → Collaborators → Add people → **petr
 END
 
 TASK Both clone the repository into the **git** folder and open it in VS Code.
+  NOTE  Copy the address on GitHub (**Copy**) and paste it in the terminal with **Ctrl+V**.
   HINT  git clone https://github.com/anna-svobodova/shared-cookbook.git
   HINT  cd shared-cookbook
   HINT  code -r .
@@ -56,12 +57,9 @@ TASK **Petr** fixes it as the hint suggests: he pulls and pushes again. **Anna**
   CHECK github anna-svobodova/shared-cookbook main is a merge
 END
 
-TASK **Anna** adds a quote (`>`) and a link to one recipe to the README, commits and pushes. **Petr** pulls.
+TASK **Anna** adds a quote (`>`) to the README, commits and pushes. **Petr** pulls.
   HINT     > A cookbook we write together.
-  HINT
-  HINT     - [Buns](buns.md)
   QUESTION Which two commands start and end your work on a shared project?
   CHECK    file README.md on github anna-svobodova/shared-cookbook contains line starting with ">"
-  CHECK    file README.md on github anna-svobodova/shared-cookbook contains "]("
   CHECK    petr: github anna-svobodova/shared-cookbook main equals HEAD
 END

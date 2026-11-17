@@ -721,5 +721,13 @@ GitI18n.add('en', {
   "Doplnil simulátor:":
     "Filled in by the simulator:",
   "Doplnil simulátor: {0}":
-    "Filled in by the simulator: {0}"
+    "Filled in by the simulator: {0}",
+  "HTTPS adresa:":
+    "HTTPS address:",
+  "Naklonovat:":
+    "Clone:",
+  "Kopírovat":
+    "Copy",
+  "Adresa je zkopírovaná. V terminálu ji vložíš Ctrl+V.":
+    "The address has been copied. Paste it in the terminal with Ctrl+V."
 });

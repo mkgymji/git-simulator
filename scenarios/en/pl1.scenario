@@ -3,7 +3,7 @@ SCENARIO My first repository
 LABEL    Worksheet 1
 SUMMARY  Git setup, git init, add, commit – the first version of a recipe.
 INTRO    You are **Jana Nováková** at a school computer. Follow the tasks; each one is ticked off automatically once you complete it.
-INTRO    It is about the steps, not about typing: where there would be a lot to type, the simulator fills in part of it and tells you (in violet).
+INTRO    What the simulator fills in is marked in violet.
 
 SETUP
   PERSON jana NAME "Jana Nováková" EMAIL "novakovaj@jirovcovka.net" LOGIN "jana-novakova" LABEL "Jana's computer"

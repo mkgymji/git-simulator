@@ -337,7 +337,7 @@ kbd {
   border: 1px solid var(--ramecek); border-radius: 5px;
   padding: 3px 5px; font-size: 12.5px; transition: transform .25s ease, box-shadow .25s ease, opacity .25s;
 }
-.fcard .doc { width: 12px; height: 14px; flex: none; }
+.doc, .fcard .doc { width: 12px; height: 14px; flex: none; }
 .fcard .n { min-width: 0; overflow-wrap: anywhere; font-family: var(--mono); font-size: 11.5px; }
 .fcard .tag { grid-column: 2; justify-self: start; }
 .fcard .tag { font-size: 10.5px; font-weight: 600; border-radius: 4px; padding: 0 5px; white-space: nowrap; }
@@ -555,3 +555,4 @@ a.tbtn { text-decoration: none; display: inline-flex; align-items: center; }
   border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.45; color: #3B2A63;
 }
 .tasks .auto-note code { font-size: 12px; }
+.gh .gbtn.copy { padding: 1px 8px; font-size: 12px; margin-left: 4px; }

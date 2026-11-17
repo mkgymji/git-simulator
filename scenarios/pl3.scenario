@@ -85,6 +85,7 @@ TASK Na GitHubu vytvoř repozitář **kucharka**: **Private** a **nic nezaškrt�
 END
 
 TASK Propoj repozitář s GitHubem a pošli ho tam. Při přihlášení zvol **Sign in with your browser**.
+  NOTE  Adresu zkopíruj na GitHubu (**Kopírovat**) a v terminálu vlož **Ctrl+V**.
   HINT  git remote add origin https://github.com/jana-novakova/kucharka.git
   HINT  git branch -M main
   HINT  git push -u origin main
@@ -106,7 +107,7 @@ TASK Vrať se do VS Code a napiš `git status`. Pak změnu stáhni.
   CHECK    file palacinky.md contains "|"
 END
 
-TASK Přidej do **livance.md** jednu větu s tipem, commitni a pošli na GitHub.
+TASK Připiš do **livance.md** jeden řádek s tipem, commitni a pošli na GitHub.
   HINT  git add .
   HINT  git commit -m "Přidán tip k lívancům"
   HINT  git push

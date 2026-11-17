@@ -30,6 +30,7 @@ TASK **Anna** pozve Petra: Settings → Collaborators → Add people → **petr-
 END
 
 TASK Oba si repozitář naklonují do složky **git** a otevřou ho ve VS Code.
+  NOTE  Adresu zkopíruj na GitHubu (**Kopírovat**) a v terminálu vlož **Ctrl+V**.
   HINT  git clone https://github.com/anna-svobodova/spolecna-kucharka.git
   HINT  cd spolecna-kucharka
   HINT  code -r .
@@ -56,12 +57,9 @@ TASK **Petr** to vyřeší podle rady v hint: stáhne a pushne znovu. **Anna** s
   CHECK github anna-svobodova/spolecna-kucharka main is a merge
 END
 
-TASK **Anna** doplní do README citaci (`>`) a odkaz na jeden recept, commitne a pushne. **Petr** stáhne.
+TASK **Anna** doplní do README citaci (`>`), commitne a pushne. **Petr** stáhne.
   HINT     > Kuchařka, kterou píšeme ve dvou.
-  HINT
-  HINT     - [Buchty](buchty.md)
   QUESTION Kterými dvěma příkazy začínáš a končíš práci na společném projektu?
   CHECK    file README.md on github anna-svobodova/spolecna-kucharka contains line starting with ">"
-  CHECK    file README.md on github anna-svobodova/spolecna-kucharka contains "]("
   CHECK    petr: github anna-svobodova/spolecna-kucharka main equals HEAD
 END

@@ -85,6 +85,7 @@ TASK On GitHub, create a repository **cookbook**: **Private** and **tick nothing
 END
 
 TASK Link the repository to GitHub and send it there. When signing in, choose **Sign in with your browser**.
+  NOTE  Copy the address on GitHub (**Copy**) and paste it in the terminal with **Ctrl+V**.
   HINT  git remote add origin https://github.com/jana-novakova/cookbook.git
   HINT  git branch -M main
   HINT  git push -u origin main
@@ -106,7 +107,7 @@ TASK Go back to VS Code and type `git status`. Then download the change.
   CHECK    file pancakes.md contains "|"
 END
 
-TASK Add one sentence with a tip to **drop-scones.md**, commit it and send it to GitHub.
+TASK Add one line with a tip to **drop-scones.md**, commit it and send it to GitHub.
   HINT  git add .
   HINT  git commit -m "Add drop scones tip"
   HINT  git push
