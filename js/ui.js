@@ -985,7 +985,7 @@
     hashes.forEach(function (h, i) { pos[h] = { x: X0 + i * DX, y: Y0 + lane[h] * DY }; });
     var labels = {};
     refs.forEach(function (r) { (labels[r.hash] = labels[r.hash] || []).push(r); });
-    var width = X0 * 2 + Math.max(0, hashes.length - 1) * DX, height = Y0 + maxLane * DY + 46;
+    var width = X0 * 2 + 30 + Math.max(0, hashes.length - 1) * DX, height = Y0 + maxLane * DY + 46;
     var seenKey = kind + ':';
     var svg = '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Graf commitů">';
     svg += '<defs><marker id="arr-' + kind + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8C959F"/></marker></defs>';
