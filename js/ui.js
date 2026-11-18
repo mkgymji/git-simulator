@@ -1398,7 +1398,7 @@
     $('zt3').textContent = tr('Co se děje v Gitu');
     $('zs3').textContent = tr('verze souborů, historie, GitHub');
     $('machines').setAttribute('aria-label', tr('Počítač'));
-    $('footNote').innerHTML = tr('Výukový simulátor, odpovídá Gitu 2.47 (Git for Windows). Vzhled GitHubu a VS Code napodobuje jen pro výuku – <a href="{0}">ochranné známky</a>.', REPO_URL + '/blob/main/OCHRANNE-ZNAMKY.md');
+    $('footNote').innerHTML = tr('Výukový simulátor, odpovídá Gitu 2.47 (Git for Windows). Vzhled GitHubu, VS Code a PowerShellu napodobuje jen pro výuku – <a href="{0}">ochranné známky</a>.', REPO_URL + '/blob/main/OCHRANNE-ZNAMKY.md');
     $('footLicence').innerHTML = tr('licence <a href="{0}">GNU GPL v2</a> · obsahuje kód převzatý z <a href="{1}">Gitu 2.47.1</a>', REPO_URL + '/blob/main/LICENSE', 'https://github.com/git/git/tree/v2.47.1');
     $('aboutBtn').textContent = tr('O simulátoru a zdrojích');
     $('srcLink').textContent = tr('zdrojový kód');

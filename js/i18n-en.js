@@ -682,8 +682,8 @@ GitI18n.add('en', {
     "What happens in Git",
   "verze souborů, historie, GitHub":
     "file versions, history, GitHub",
-  "Výukový simulátor, odpovídá Gitu 2.47 (Git for Windows). Vzhled GitHubu a VS Code napodobuje jen pro výuku – <a href=\"{0}\">ochranné známky</a>.":
-    "An educational simulator matching Git 2.47 (Git for Windows). It imitates the look of GitHub and VS Code for teaching only – <a href=\"{0}\">trademarks</a>.",
+  "Výukový simulátor, odpovídá Gitu 2.47 (Git for Windows). Vzhled GitHubu, VS Code a PowerShellu napodobuje jen pro výuku – <a href=\"{0}\">ochranné známky</a>.":
+    "An educational simulator matching Git 2.47 (Git for Windows). It imitates the look of GitHub, VS Code and PowerShell for teaching only – <a href=\"{0}\">trademarks</a>.",
   "licence <a href=\"{0}\">GNU GPL v2</a> · obsahuje kód převzatý z <a href=\"{1}\">Gitu 2.47.1</a>":
     "licence <a href=\"{0}\">GNU GPL v2</a> · contains code taken from <a href=\"{1}\">Git 2.47.1</a>",
   "O simulátoru a zdrojích":
